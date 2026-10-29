@@ -1,5 +1,5 @@
 {
-  "usdt_balance": 9499.029480240177,
+  "usdt_balance": 9497.702963672828,
   "positions": {
     "BTC/USDT": {
       "symbol": "BTC/USDT",
@@ -7,7 +7,7 @@
       "quantity": 0.001222,
       "cost_usdt": 100.0,
       "entry_time": 1793289733782,
-      "highest_price": 81726.773,
+      "highest_price": 81897.64,
       "stop_loss_price": 80934.175,
       "take_profit_price": 83189.44,
       "reason": "[\ud83c\udf10 FLEET ALERT] Pullback Dip Buy: Tested EMA 9 support in bull trend (RSI: 48.9)"
@@ -18,21 +18,10 @@
       "quantity": 0.042212,
       "cost_usdt": 100.0,
       "entry_time": 1793289733797,
-      "highest_price": 2369.31,
+      "highest_price": 2375.97,
       "stop_loss_price": 2339.415,
       "take_profit_price": 2417.52,
       "reason": "[\ud83c\udf10 FLEET ALERT] Pullback Dip Buy: Tested EMA 9 support in bull trend (RSI: 48.1)"
-    },
-    "SUI/USDT": {
-      "symbol": "SUI/USDT",
-      "entry_price": 0.952,
-      "quantity": 104.939648,
-      "cost_usdt": 100.0,
-      "entry_time": 1793289734007,
-      "highest_price": 0.9582,
-      "stop_loss_price": 0.9417,
-      "take_profit_price": 0.9715,
-      "reason": "[\ud83c\udf10 FLEET ALERT] Pullback Dip Buy: Tested EMA 9 support in bull trend (RSI: 49.0)"
     },
     "DOGE/USDT": {
       "symbol": "DOGE/USDT",
@@ -40,7 +29,7 @@
       "quantity": 1240.219537,
       "cost_usdt": 100.0,
       "entry_time": 1793289734333,
-      "highest_price": 0.08094,
+      "highest_price": 0.08135,
       "stop_loss_price": 0.0798,
       "take_profit_price": 0.1005,
       "reason": "[\ud83c\udf10 FLEET ALERT] Pullback Dip Buy: Tested EMA 9 support in bull trend (RSI: 56.2)"
@@ -50,29 +39,66 @@
       "entry_price": 749.4946,
       "quantity": 0.13329,
       "cost_usdt": 100.0,
-      "entry_time": 1793291885902,
-      "highest_price": 749.4946,
+      "entry_time": 1793291885905,
+      "highest_price": 750.53,
       "stop_loss_price": 741.51,
       "take_profit_price": 764.35,
       "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Reclaimed 20 Moving Average ($749.0)"
+    },
+    "SOL/USDT": {
+      "symbol": "SOL/USDT",
+      "entry_price": 101.7709,
+      "quantity": 0.981617,
+      "cost_usdt": 100.0,
+      "entry_time": 1793294478550,
+      "highest_price": 101.7709,
+      "stop_loss_price": 100.7,
+      "take_profit_price": 103.76,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Reclaimed 20 Moving Average ($101.7)"
     }
   },
   "active_position": {
-    "symbol": "BTC/USDT",
-    "entry_price": 81726.773,
-    "quantity": 0.001222,
+    "symbol": "BNB/USDT",
+    "entry_price": 749.4946,
+    "quantity": 0.13329,
     "cost_usdt": 100.0,
-    "entry_time": 1793289733782,
-    "highest_price": 81726.773,
-    "stop_loss_price": 80934.175,
-    "take_profit_price": 83189.44,
-    "reason": "[\ud83c\udf10 FLEET ALERT] Pullback Dip Buy: Tested EMA 9 support in bull trend (RSI: 48.9)"
+    "entry_time": 1793291885905,
+    "highest_price": 750.53,
+    "stop_loss_price": 741.51,
+    "take_profit_price": 764.35,
+    "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Reclaimed 20 Moving Average ($749.0)"
   },
-  "asset_balance": 0.001222,
+  "asset_balance": 0.13329,
   "trades_history": [
     {
-      "id": "TRD-1793291885902",
-      "timestamp": 1793291885902,
+      "id": "TRD-1793294478550",
+      "timestamp": 1793294478550,
+      "symbol": "SOL/USDT",
+      "side": "BUY",
+      "price": 101.7709,
+      "quantity": 0.981617,
+      "cost_usdt": 100.0,
+      "fee_usdt": 0.1,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Reclaimed 20 Moving Average ($101.7)"
+    },
+    {
+      "id": "TRD-1793294099996",
+      "timestamp": 1793294099996,
+      "symbol": "SUI/USDT",
+      "side": "SELL",
+      "price": 0.9412,
+      "quantity": 104.939648,
+      "cost_usdt": 100.0,
+      "proceeds_usdt": 98.67,
+      "fee_usdt": 0.0988,
+      "realized_pnl": -1.33,
+      "realized_pnl_pct": -1.33,
+      "hold_duration_sec": 4365,
+      "reason": "Bracket Stop Exit ($0.94)"
+    },
+    {
+      "id": "TRD-1793291885905",
+      "timestamp": 1793291885905,
       "symbol": "BNB/USDT",
       "side": "BUY",
       "price": 749.4946,
@@ -82,8 +108,8 @@
       "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Reclaimed 20 Moving Average ($749.0)"
     },
     {
-      "id": "TRD-1793291624075",
-      "timestamp": 1793291624075,
+      "id": "TRD-1793291624077",
+      "timestamp": 1793291624077,
       "symbol": "XRP/USDT",
       "side": "SELL",
       "price": 1.2984,
@@ -152,6 +178,6 @@
       "reason": "[\ud83c\udf10 FLEET ALERT] Pullback Dip Buy: Tested EMA 9 support in bull trend (RSI: 48.9)"
     }
   ],
-  "peak_equity": 10000.8438676549,
-  "max_drawdown_pct": 0.051780246989364745
+  "peak_equity": 10002.46232663255,
+  "max_drawdown_pct": 0.07877366011760985
 }

@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "last_updated": 1793291624080,
-  "total_trades_analyzed": 1,
+  "last_updated": 1793294099997,
+  "total_trades_analyzed": 2,
   "overall_win_rate_pct": 0.0,
   "overall_profit_factor": 0.0,
   "setups": {
@@ -75,23 +75,34 @@
     },
     "ema_rsi": {
       "name": "EMA 9/21 Trend",
-      "trades": 1,
+      "trades": 2,
       "wins": 0,
-      "losses": 1,
+      "losses": 2,
       "win_rate_pct": 0.0,
-      "total_pnl": -0.97,
+      "total_pnl": -2.3,
       "gross_profit": 0.0,
-      "gross_loss": 0.97,
+      "gross_loss": 2.3,
       "profit_factor": 0.0,
       "avg_win_usd": 0.0,
-      "avg_loss_usd": 0.97,
+      "avg_loss_usd": 1.15,
       "consecutive_wins": 0,
-      "consecutive_losses": 1,
-      "learned_weight": 0.92,
-      "status": "NORMAL"
+      "consecutive_losses": 2,
+      "learned_weight": 0.79,
+      "status": "DEFENSIVE"
     }
   },
   "recent_trade_memories": [
+    {
+      "timestamp": 1793294099996,
+      "setup_key": "ema_rsi",
+      "setup_name": "EMA 9/21 Trend",
+      "pnl": -1.33,
+      "pnl_pct": -1.33,
+      "is_win": false,
+      "hold_duration_sec": 4365,
+      "new_weight": 0.79,
+      "market_context": {}
+    },
     {
       "timestamp": 1793291624077,
       "setup_key": "ema_rsi",

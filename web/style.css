@@ -55,6 +55,13 @@
   padding: 0;
 }
 
+html {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
 body {
   background-color: var(--bg-dark);
   background-image: 
@@ -69,7 +76,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
   overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Typography Helpers */
@@ -87,6 +97,8 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .glass-card:hover {
@@ -103,29 +115,104 @@ body {
   padding: 14px 20px;
   gap: 16px;
   max-width: 1720px;
+  width: 100%;
+  box-sizing: border-box;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 /* ==========================================================================
    TOP NAVIGATION BAR
    ========================================================================== */
+/* ==========================================================================
+   TOP NAVIGATION BAR (INSTITUTIONAL TWO-TIER ARCHITECTURE)
+   ========================================================================== */
 .top-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 20px;
+  padding: 14px 20px;
   background: var(--bg-card);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.nav-center {
+  order: 3;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Institutional Developer Attribution Badge */
+.dev-author-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(0, 245, 212, 0.08);
+  border: 1px solid rgba(0, 245, 212, 0.28);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.12);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.dev-author-badge:hover {
+  background: rgba(0, 245, 212, 0.16);
+  border-color: rgba(0, 245, 212, 0.5);
+  box-shadow: 0 0 18px rgba(0, 245, 212, 0.25);
+}
+
+.dev-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00f5d4;
+  box-shadow: 0 0 6px #00f5d4;
+  animation: pulse-ring 2s infinite;
+}
+
+.dev-badge-txt {
+  color: var(--text-muted);
+}
+
+.dev-badge-txt strong {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .brand-radar {
@@ -184,12 +271,6 @@ body {
   color: var(--text-muted);
 }
 
-.nav-center {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
 
 .selector-group {
   display: flex;
@@ -397,17 +478,23 @@ body {
    ========================================================================== */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .metric-card {
-  padding: 18px 20px;
+  padding: 16px 18px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   position: relative;
   overflow: hidden;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .metric-card::before {
@@ -558,15 +645,33 @@ body {
    ========================================================================== */
 .main-layout {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: minmax(0, 1fr) 360px;
   gap: 16px;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
-@media (max-width: 1200px) {
-  .main-layout {
-    grid-template-columns: 1fr;
-  }
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ==========================================================================
@@ -575,11 +680,15 @@ body {
 .chart-section {
   display: flex;
   flex-direction: column;
-  min-height: 680px;
+  min-height: 560px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow: hidden;
   position: relative;
   border: 1px solid var(--border-subtle);
   background: var(--bg-card);
+  box-sizing: border-box;
 }
 
 /* Fleet Market / Trade Tab Bar on Graph */
@@ -1002,8 +1111,28 @@ body {
 
 .chart-canvas {
   flex: 1;
-  width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
   min-height: 480px;
+  overflow: hidden !important;
+  position: relative;
+  box-sizing: border-box;
+}
+
+#tv-chart-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  position: relative;
+  box-sizing: border-box;
+}
+
+#tv-chart-container canvas,
+#tv-chart-container table,
+#tv-chart-container div {
+  max-width: 100% !important;
 }
 
 /* ==========================================================================
@@ -1520,6 +1649,80 @@ body {
 }
 
 /* ==========================================================================
+   DEVELOPER SIGNATURE & INSTITUTIONAL AUDIT FOOTER
+   ========================================================================== */
+.glow-text {
+  color: #00f5d4;
+  text-shadow: 0 0 10px rgba(0, 245, 212, 0.45);
+  font-weight: 700;
+}
+
+.modal-dev-badge {
+  display: inline-block;
+  margin-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  letter-spacing: 0.05em;
+}
+
+.app-institutional-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: rgba(10, 14, 23, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.app-institutional-footer .footer-left,
+.app-institutional-footer .footer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.app-institutional-footer .footer-brand {
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.08em;
+}
+
+.app-institutional-footer .footer-sep {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.footer-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent-emerald);
+  font-weight: 700;
+}
+
+.badge-dot-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 6px var(--accent-emerald);
+  animation: pulse-ring 1.8s infinite;
+}
+
+/* ==========================================================================
    MODAL
    ========================================================================== */
 .modal-overlay {
@@ -1738,6 +1941,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .hud-tag.neptune {
@@ -1749,8 +1956,12 @@ body {
 /* Day Trader Grid Below Chart */
 .day-trader-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 @media (max-width: 900px) {
@@ -3279,22 +3490,23 @@ body {
     justify-content: flex-start;
   }
   .metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* 2. Laptops & Small Desktops (max-width: 1200px) */
-@media (max-width: 1200px) {
+/* 2. Laptops & Small Desktops (max-width: 1320px) */
+@media (max-width: 1320px) {
   .main-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .sidebar-section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 16px;
+    width: 100%;
   }
   .chart-section {
-    min-height: 540px;
+    min-height: 520px;
   }
 }
 
@@ -3522,6 +3734,23 @@ body {
   .basket-grid {
     grid-template-columns: 1fr;
   }
+
+  .dev-author-badge {
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+
+  .app-institutional-footer {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+
+  .app-institutional-footer .footer-left,
+  .app-institutional-footer .footer-right {
+    justify-content: center;
+  }
 }
 
 /* 5. Compact Smartphones (max-width: 480px) */
@@ -3537,6 +3766,10 @@ body {
 
   .brand-tag {
     font-size: 9px;
+  }
+
+  .dev-author-badge {
+    display: none; /* Shown in brand-tag directly above */
   }
 
   .btn {

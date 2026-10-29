@@ -101,9 +101,16 @@ function initChart() {
 
   container.innerHTML = ''; // Clear container
 
+  const getContainerWidth = () => {
+    return Math.max(280, container.clientWidth || (container.parentElement ? container.parentElement.clientWidth : 0) || 600);
+  };
+  const getContainerHeight = () => {
+    return Math.max(260, container.clientHeight || 520);
+  };
+
   chart = LightweightCharts.createChart(container, {
-    width: container.clientWidth,
-    height: container.clientHeight || 520,
+    width: getContainerWidth(),
+    height: getContainerHeight(),
     layout: {
       background: { type: 'solid', color: '#090d16' },
       textColor: '#94a3b8',
@@ -172,25 +179,39 @@ function initChart() {
     crosshairMarkerVisible: false
   });
 
-  // Responsive Resize Observer
+  // Responsive Resize Observer with requestAnimationFrame Debouncing
+  let resizeRaf = null;
+  let lastChartW = 0;
+  let lastChartH = 0;
+
+  const performChartResize = (targetW, targetH) => {
+    if (!chart || !container) return;
+    const parentW = container.parentElement ? container.parentElement.clientWidth : 0;
+    const w = Math.floor(targetW || container.clientWidth || parentW || 300);
+    const h = Math.floor(targetH || container.clientHeight || 440);
+    if (w > 0 && h > 0 && (Math.abs(w - lastChartW) > 1 || Math.abs(h - lastChartH) > 1)) {
+      lastChartW = w;
+      lastChartH = h;
+      chart.applyOptions({ width: w, height: h });
+    }
+  };
+
   const resizeObserver = new ResizeObserver(entries => {
     if (!entries || entries.length === 0) return;
     const { width, height } = entries[0].contentRect;
-    if (chart && width > 0 && height > 0) {
-      chart.applyOptions({ width, height });
-    }
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(() => {
+      performChartResize(width, height);
+    });
   });
   resizeObserver.observe(container);
 
-  // Fallback Window Resize Listener for instantaneous layout sync
+  // Fallback Window Resize Listener with RAF debouncing
   window.addEventListener('resize', () => {
-    if (chart && container) {
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      if (w > 0 && h > 0) {
-        chart.applyOptions({ width: w, height: h });
-      }
-    }
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(() => {
+      performChartResize();
+    });
   });
 }
 
@@ -1787,19 +1808,27 @@ function initTimeMachineCanvas() {
   if (!tmCanvas) return;
   tmCtx = tmCanvas.getContext('2d');
 
+  let tmResizeRaf = null;
   function resizeCanvas() {
     if (!tmCanvas || !tmCanvas.parentElement) return;
     const rect = tmCanvas.parentElement.getBoundingClientRect();
     if (rect.width > 0) {
       const dpr = window.devicePixelRatio || 1;
-      tmCanvas.width = rect.width * dpr;
-      tmCanvas.height = 230 * dpr;
-      tmCanvas.style.width = `${rect.width}px`;
-      tmCanvas.style.height = `230px`;
+      const newW = Math.floor(rect.width * dpr);
+      const newH = Math.floor(230 * dpr);
+      if (tmCanvas.width !== newW || tmCanvas.height !== newH) {
+        tmCanvas.width = newW;
+        tmCanvas.height = newH;
+      }
+      tmCanvas.style.width = '100%';
+      tmCanvas.style.height = '230px';
     }
   }
 
-  window.addEventListener('resize', resizeCanvas);
+  window.addEventListener('resize', () => {
+    if (tmResizeRaf) cancelAnimationFrame(tmResizeRaf);
+    tmResizeRaf = requestAnimationFrame(resizeCanvas);
+  });
   resizeCanvas();
 
   // 60 FPS Continuous Render Loop
