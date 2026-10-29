@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔱 Neptune Bot | Quantitative Day Trader & Multi-Bot Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <!-- TradingView Lightweight Charts Library -->
+  <script src="/static/js/lightweight-charts.js"></script>
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- TOP NAVIGATION BAR -->
+    <header class="top-nav">
+      <div class="nav-brand">
+        <div class="brand-radar">
+          <span class="radar-ping"></span>
+          <span class="radar-trident">🔱</span>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">NEPTUNE<span class="brand-accent">.BOT</span></span>
+          <span class="brand-tag">AUTONOMOUS DAY TRADING SUITE</span>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <!-- Market Pair Selector -->
+        <div class="selector-group">
+          <label for="pair-select">PAIR</label>
+          <select id="pair-select" class="custom-select">
+            <option value="BTC/USDT" selected>BTC/USDT</option>
+            <option value="ETH/USDT">ETH/USDT</option>
+            <option value="SOL/USDT">SOL/USDT</option>
+            <option value="BNB/USDT">BNB/USDT</option>
+            <option value="DOGE/USDT">DOGE/USDT</option>
+          </select>
+        </div>
+
+        <!-- Timeframe Selector -->
+        <div class="timeframe-pills">
+          <button class="tf-btn active" data-tf="1m">1m</button>
+          <button class="tf-btn" data-tf="3m">3m</button>
+          <button class="tf-btn" data-tf="5m">5m</button>
+          <button class="tf-btn" data-tf="15m">15m</button>
+        </div>
+
+        <!-- Real-Time Telemetry Cadence Badge -->
+        <div class="telemetry-cadence-pill" title="Live stream: 1s ticks | Radar scan: 15s pulse">
+          <span class="telemetry-dot"></span>
+          <span>1s LIVE / 15s RADAR</span>
+        </div>
+
+        <!-- Mode Badge -->
+        <div id="mode-badge" class="mode-badge paper">
+          <span class="mode-pulse"></span>
+          <span id="mode-text">PAPER SIMULATOR</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Audio Sound Toggle -->
+        <button id="btn-sound-toggle" class="icon-btn active" title="Toggle Trade Sound Alerts">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+        </button>
+
+        <!-- Quick Test Buy Button -->
+        <button id="btn-test-buy" class="btn btn-test-buy" title="Execute an immediate test trade to verify execution pipeline">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>TEST BUY</span>
+        </button>
+
+        <!-- Bot Run/Pause Toggle Button -->
+        <button id="btn-bot-toggle" class="btn btn-start">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span id="bot-toggle-text">START BOT</span>
+        </button>
+
+        <!-- Panic Button -->
+        <button id="btn-panic" class="btn btn-panic" title="Emergency Liquidate all positions and pause">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>PANIC EXIT</span>
+        </button>
+
+        <!-- Settings Button -->
+        <button id="btn-open-settings" class="icon-btn" title="Bot Configuration & API Keys">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- HERO METRICS RIBBON (4 TELEMETRY CARDS) -->
+    <section class="metrics-grid">
+      <!-- Card 1: Total Portfolio Equity -->
+      <div class="glass-card metric-card">
+        <div class="metric-header">
+          <span class="metric-title">TOTAL EQUITY</span>
+          <span class="metric-badge-sub" id="equity-initial-sub">BASE: $10,000.00</span>
+        </div>
+        <div class="metric-value-wrap">
+          <span class="currency-symbol">$</span>
+          <span id="metric-total-equity" class="metric-value mono">10,000.00</span>
+        </div>
+        <div class="metric-footer">
+          <span id="metric-total-pnl-pill" class="pnl-pill neutral">+$0.00 (+0.00%)</span>
+          <span class="sub-label">All-time Net Return</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Cash & Allocation -->
+      <div class="glass-card metric-card">
+        <div class="metric-header">
+          <span class="metric-title">AVAILABLE CASH</span>
+          <span class="metric-badge-sub" id="asset-holding-label">0.0000 BTC</span>
+        </div>
+        <div class="metric-value-wrap">
+          <span class="currency-symbol">$</span>
+          <span id="metric-usdt-balance" class="metric-value mono">10,000.00</span>
+        </div>
+        <div class="metric-footer">
+          <div class="allocation-bar-wrap">
+            <div id="allocation-bar-fill" class="allocation-bar-fill" style="width: 0%;"></div>
+          </div>
+          <span id="allocation-pct-label" class="sub-label">0% in Asset</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Active Position Status -->
+      <div class="glass-card metric-card" id="card-active-position">
+        <div class="metric-header">
+          <span class="metric-title">OPEN POSITION</span>
+          <span id="pos-status-badge" class="pos-badge none">NO POSITION</span>
+        </div>
+        <div class="metric-value-wrap" id="pos-value-wrap">
+          <span id="pos-pnl-display" class="metric-value mono neutral">$0.00</span>
+          <span id="pos-pnl-pct" class="pos-pnl-pct mono neutral">(0.00%)</span>
+        </div>
+        <div class="metric-footer" id="pos-footer-details">
+          <span id="pos-details-text" class="sub-label">🔱 Neptune Fleet scanning for setups</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Performance Statistics -->
+      <div class="glass-card metric-card">
+        <div class="metric-header">
+          <span class="metric-title">WIN RATE & RISK</span>
+          <span id="trades-count-badge" class="metric-badge-sub">0 TRADES</span>
+        </div>
+        <div class="metric-value-wrap">
+          <span id="metric-win-rate" class="metric-value mono">0.0%</span>
+          <span class="stat-sub-label">WIN RATE</span>
+        </div>
+        <div class="metric-footer stats-breakdown">
+          <span>Profit Factor: <strong id="metric-profit-factor" class="mono">1.00</strong></span>
+          <span>Max DD: <strong id="metric-max-dd" class="mono danger">0.0%</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN TRADING INTERFACE -->
+    <main class="main-layout">
+      <!-- LEFT COLUMN: Live Candlestick Chart, Signal HUD & Day Trader Radar -->
+      <div class="left-column">
+        <!-- Main Chart Section -->
+        <section class="chart-section glass-card">
+          <!-- Chart HUD Toolbar -->
+          <div class="chart-hud">
+            <div class="hud-left">
+              <div class="ticker-box">
+                <span id="hud-symbol" class="hud-symbol">BTC/USDT</span>
+                <span id="hud-price" class="hud-price mono">---.--</span>
+              </div>
+              <div class="hud-tags">
+                <span id="hud-strategy-tag" class="hud-tag neptune">🔱 NEPTUNE AUTONOMOUS FLEET</span>
+                <span id="hud-status-tag" class="hud-tag green">1s LIVE WEBSOCKET</span>
+              </div>
+            </div>
+
+            <!-- Indicator Values Mini Bar -->
+            <div class="hud-indicators">
+              <div class="indicator-chip">
+                <span class="chip-name">EMA 9:</span>
+                <span id="val-ema-fast" class="chip-val mono cyan">---</span>
+              </div>
+              <div class="indicator-chip">
+                <span class="chip-name">EMA 21:</span>
+                <span id="val-ema-slow" class="chip-val mono purple">---</span>
+              </div>
+              <div class="indicator-chip">
+                <span class="chip-name">RSI 14:</span>
+                <span id="val-rsi" class="chip-val mono">50.0</span>
+              </div>
+              <div class="indicator-chip signal-chip">
+                <span class="chip-name">FLEET:</span>
+                <span id="val-signal-action" class="signal-badge hold">SCANNING</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- The Lightweight Charts Canvas Container -->
+          <div id="tv-chart-container" class="chart-canvas"></div>
+        </section>
+
+        <!-- DAY TRADER RADAR & TIME MACHINE TWO-COL GRID -->
+        <section class="day-trader-grid">
+          <!-- Card A: Live Setup Scanner Radar -->
+          <div class="glass-card panel-card">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <span class="panel-icon">📡</span>
+                <h3>DAY TRADER SETUP SCANNER</h3>
+              </div>
+              <span id="radar-pulse-badge" class="pulse-badge">SCANNING 15s</span>
+            </div>
+            <div class="setups-list" id="setups-container">
+              <div class="setup-item">
+                <div class="setup-meta">
+                  <span class="setup-badge orb">ORB</span>
+                  <span class="setup-name">Opening Range Breakout</span>
+                </div>
+                <span class="setup-status idle">Awaiting Range</span>
+              </div>
+              <div class="setup-item">
+                <div class="setup-meta">
+                  <span class="setup-badge flag">FLAG</span>
+                  <span class="setup-name">Bull Flag Momentum</span>
+                </div>
+                <span class="setup-status idle">Scanning Channel</span>
+              </div>
+              <div class="setup-item">
+                <div class="setup-meta">
+                  <span class="setup-badge bounce">BOUNCE</span>
+                  <span class="setup-name">Oversold RSI Bounce</span>
+                </div>
+                <span class="setup-status idle">RSI > 30 (Normal)</span>
+              </div>
+              <div class="setup-item">
+                <div class="setup-meta">
+                  <span class="setup-badge reclaim">RECLAIM</span>
+                  <span class="setup-name">20-MA Support Reclaim</span>
+                </div>
+                <span class="setup-status idle">Tracking 20 SMA</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card B: Time Machine Monte Carlo Simulator -->
+          <div class="glass-card panel-card">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <span class="panel-icon">⏳</span>
+                <h3>TIME MACHINE (1,000 PATHS)</h3>
+              </div>
+              <button id="btn-run-timemachine" class="btn-xs-action">Re-run</button>
+            </div>
+            <div class="timemachine-body">
+              <div class="tm-verdict-row">
+                <span class="tm-label">HONEST ODDS VERDICT:</span>
+                <span id="tm-verdict-badge" class="verdict-badge neutral">CALCULATING...</span>
+              </div>
+
+              <!-- Monte Carlo Win Prob Bar -->
+              <div class="tm-odds-bar-wrap">
+                <div class="tm-odds-labels">
+                  <span>Target 2R: <strong id="tm-target-pct">50%</strong></span>
+                  <span>Stop 1R: <strong id="tm-stop-pct">50%</strong></span>
+                </div>
+                <div class="tm-progress-track">
+                  <div id="tm-target-fill" class="tm-progress-target" style="width: 50%;"></div>
+                  <div id="tm-stop-fill" class="tm-progress-stop" style="width: 50%;"></div>
+                </div>
+              </div>
+
+              <div class="tm-stats-grid">
+                <div class="tm-stat-box">
+                  <span class="tm-stat-name">EXPECTED R</span>
+                  <span id="tm-expected-r" class="tm-stat-val mono">+0.00R</span>
+                </div>
+                <div class="tm-stat-box">
+                  <span class="tm-stat-name">SIMULATED PATHS</span>
+                  <span class="tm-stat-val mono">1,000</span>
+                </div>
+                <div class="tm-stat-box">
+                  <span class="tm-stat-name">REWARD : RISK</span>
+                  <span id="tm-rr-ratio" class="tm-stat-val mono success">2.0R</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: Neptune Fleet Station, Risk Gate & Recent Trades -->
+      <aside class="sidebar-section">
+        <!-- Multi-Bot Fleet & Strategy Control -->
+        <div class="glass-card panel-card">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="panel-icon">🔱</span>
+              <h3>NEPTUNE FLEET COMMAND</h3>
+            </div>
+            <span class="header-icon">⚙️</span>
+          </div>
+          <div class="panel-body">
+            <!-- Active Bot / Fleet Selector -->
+            <div class="control-row">
+              <label for="strategy-select">Active Bot / Strategy Mode</label>
+              <select id="strategy-select" class="custom-select full neptune-select">
+                <option value="neptune_fleet" selected>🔱 Neptune Fleet (All Bots Concurrently)</option>
+                <option value="orb">Bot 1: Opening Range Breakout (ORB)</option>
+                <option value="bull_flag">Bot 2: Bull Flag Momentum</option>
+                <option value="oversold_bounce">Bot 3: Oversold Bounce (RSI)</option>
+                <option value="reclaim_ma20">Bot 4: 20-MA Reclaim</option>
+                <option value="ema_rsi">Bot 5: EMA 9/21 Trend Momentum</option>
+              </select>
+            </div>
+
+            <!-- Position Size -->
+            <div class="control-row">
+              <div class="label-with-val">
+                <label for="input-trade-amount">Order Budget (USDT)</label>
+                <span id="val-trade-amount-disp" class="input-disp mono">$500</span>
+              </div>
+              <input type="number" id="input-trade-amount" class="custom-input" value="500" min="20" max="50000" step="50">
+            </div>
+
+            <!-- Stop-Loss Slider -->
+            <div class="control-row">
+              <div class="label-with-val">
+                <label for="input-stop-loss">Bracket Stop-Loss (%)</label>
+                <span id="val-stop-loss-disp" class="input-disp mono danger">-1.5%</span>
+              </div>
+              <input type="range" id="input-stop-loss" class="custom-slider" min="0.5" max="10.0" step="0.1" value="1.5">
+            </div>
+
+            <!-- Take-Profit Slider -->
+            <div class="control-row">
+              <div class="label-with-val">
+                <label for="input-take-profit">Bracket 2R Target (%)</label>
+                <span id="val-take-profit-disp" class="input-disp mono success">+3.0%</span>
+              </div>
+              <input type="range" id="input-take-profit" class="custom-slider" min="0.5" max="20.0" step="0.1" value="3.0">
+            </div>
+
+            <!-- Trailing Stop Toggle -->
+            <div class="control-row checkbox-row">
+              <label class="switch-container">
+                <input type="checkbox" id="check-trailing-stop" checked>
+                <span class="switch-slider"></span>
+              </label>
+              <div class="trailing-info">
+                <span class="trailing-title">Trailing Stop Protection</span>
+                <span class="trailing-desc">Locks profit as price moves upward</span>
+              </div>
+            </div>
+
+            <button id="btn-apply-settings" class="btn btn-apply">Apply Fleet Parameters</button>
+          </div>
+        </div>
+
+        <!-- Pre-Trade Bracket Plan & Risk Gate Card -->
+        <div class="glass-card panel-card">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="panel-icon">🛡️</span>
+              <h3>BRACKET PLAN & RISK GATE</h3>
+            </div>
+            <span id="risk-gate-badge" class="risk-badge pass">PASS</span>
+          </div>
+          <div class="panel-body">
+            <div class="bracket-plan-box">
+              <div class="bracket-row">
+                <span class="bracket-label">ENTRY ESTIMATE:</span>
+                <span id="plan-entry-price" class="bracket-val mono">---</span>
+              </div>
+              <div class="bracket-row">
+                <span class="bracket-label">STOP LOSS (1R):</span>
+                <span id="plan-stop-price" class="bracket-val mono danger">---</span>
+              </div>
+              <div class="bracket-row">
+                <span class="bracket-label">TAKE PROFIT (2R):</span>
+                <span id="plan-target-price" class="bracket-val mono success">---</span>
+              </div>
+              <div class="bracket-row">
+                <span class="bracket-label">REWARD : RISK:</span>
+                <span id="plan-rr-ratio" class="bracket-val mono">2.00R</span>
+              </div>
+            </div>
+            <p id="signal-reason-text" class="reason-text">🔱 Neptune Autonomous Fleet scanning all 5 setups every second...</p>
+          </div>
+        </div>
+
+        <!-- Recent Executed Trades Card -->
+        <div class="glass-card panel-card trades-panel">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="panel-icon">📜</span>
+              <h3>RECENT EXECUTIONS</h3>
+            </div>
+          </div>
+          <div class="trades-table-wrap">
+            <table class="trades-table">
+              <thead>
+                <tr>
+                  <th>TIME</th>
+                  <th>SIDE</th>
+                  <th>PRICE</th>
+                  <th>PNL</th>
+                </tr>
+              </thead>
+              <tbody id="trades-table-body">
+                <tr class="empty-row">
+                  <td colspan="4">No trades executed yet. Click "TEST BUY" to simulate.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- BOTTOM SYSTEM TERMINAL / AUDIT LOG -->
+    <footer class="terminal-footer glass-card">
+      <div class="terminal-bar">
+        <div class="terminal-left">
+          <span class="terminal-icon">⚡</span>
+          <span class="terminal-title">NEPTUNE AUDIT CONSOLE</span>
+          <span id="terminal-count" class="terminal-count-badge">0 logs</span>
+        </div>
+        <div class="terminal-filters">
+          <button class="log-filter-btn active" data-filter="ALL">ALL</button>
+          <button class="log-filter-btn" data-filter="TRADE">TRADES</button>
+          <button class="log-filter-btn" data-filter="SIGNAL">SIGNALS</button>
+          <button class="log-filter-btn" data-filter="RISK">RISK</button>
+        </div>
+        <div class="terminal-right">
+          <button id="btn-reset-wallet" class="btn-text-danger" title="Reset paper wallet to $10,000">
+            🔄 Reset Wallet
+          </button>
+          <button id="btn-toggle-terminal" class="icon-btn-sm" title="Toggle console height">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="terminal-log-stream" class="terminal-body mono">
+        <!-- Live log entries injected here -->
+      </div>
+    </footer>
+  </div>
+
+  <!-- CONFIGURATION & API KEYS MODAL -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h2>Neptune Bot Settings & API Keys</h2>
+        <button id="btn-close-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tab-group">
+          <label>TRADING ENVIRONMENT</label>
+          <div class="env-toggle-group">
+            <button id="tab-env-paper" class="env-btn active" data-mode="PAPER">
+              <span class="env-icon">🧪</span>
+              <span class="env-name">Paper Trading</span>
+              <span class="env-sub">Simulated $10k Virtual Balance</span>
+            </button>
+            <button id="tab-env-testnet" class="env-btn" data-mode="BINANCE_TESTNET">
+              <span class="env-icon">🟡</span>
+              <span class="env-name">Binance Spot Testnet</span>
+              <span class="env-sub">Official testnet.binance.vision</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="testnet-credentials-box" class="settings-box hidden">
+          <div class="box-info-banner">
+            <p><strong>Binance Spot Testnet API:</strong> Free official testnet. No KYC or real funds required from Bangladesh.</p>
+            <a href="https://testnet.binance.vision" target="_blank" rel="noopener" class="banner-link">Get Free Keys at testnet.binance.vision &rarr;</a>
+          </div>
+          <div class="control-row">
+            <label for="testnet-api-key">Testnet API Key</label>
+            <input type="text" id="testnet-api-key" class="custom-input" placeholder="Enter Binance Testnet API Key">
+          </div>
+          <div class="control-row">
+            <label for="testnet-api-secret">Testnet API Secret</label>
+            <input type="password" id="testnet-api-secret" class="custom-input" placeholder="Enter Binance Testnet Secret">
+          </div>
+        </div>
+
+        <div class="settings-box">
+          <h3>Day Trader Risk Limits (trader-risk & budget)</h3>
+          <div class="two-col-grid">
+            <div class="control-row">
+              <label for="input-max-risk-trade">Max Risk Per Trade (USD)</label>
+              <input type="number" id="input-max-risk-trade" class="custom-input" value="50.0">
+            </div>
+            <div class="control-row">
+              <label for="input-max-daily-loss">Daily Max Drawdown (USD)</label>
+              <input type="number" id="input-max-daily-loss" class="custom-input" value="200.0">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+        <button id="btn-save-modal" class="btn btn-primary">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main JavaScript App -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

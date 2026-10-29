@@ -1,0 +1,41 @@
+{
+  "usdt_balance": 9800.0,
+  "asset_balance": 0.0024902645225116657,
+  "active_position": {
+    "symbol": "BTC/USDT",
+    "entry_price": 80240.069985,
+    "quantity": 0.001245013869238589,
+    "cost_usdt": 100.0,
+    "entry_time": 1793272836580,
+    "highest_price": 80240.069985,
+    "stop_loss_price": null,
+    "take_profit_price": null,
+    "reason": "MANUAL INSTANT TEST TRADE"
+  },
+  "trades_history": [
+    {
+      "id": "TRD-1793272836580",
+      "timestamp": 1793272836580,
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "price": 80240.07,
+      "quantity": 0.001245,
+      "cost_usdt": 100.0,
+      "fee_usdt": 0.1,
+      "reason": "MANUAL INSTANT TEST TRADE"
+    },
+    {
+      "id": "TRD-1793272773647",
+      "timestamp": 1793272773647,
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "price": 80224.8124,
+      "quantity": 0.001245,
+      "cost_usdt": 100.0,
+      "fee_usdt": 0.1,
+      "reason": "MANUAL INSTANT TEST TRADE"
+    }
+  ],
+  "peak_equity": 10000.0,
+  "max_drawdown_pct": 0.0015696070367266658
+}

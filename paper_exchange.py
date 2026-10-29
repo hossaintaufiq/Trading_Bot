@@ -1,0 +1,231 @@
+"""
+Realistic Paper Trading Exchange Simulator.
+Simulates order execution, slippage, Binance-style fees, PnL tracking,
+portfolio equity, win rate, and drawdown statistics.
+"""
+
+import json
+import os
+import time
+from typing import Dict, Any, List, Optional
+
+
+class PaperExchange:
+    def __init__(self, initial_balance: float = 10000.0, fee_pct: float = 0.1, slippage_pct: float = 0.05, state_file: str = "paper_state.json"):
+        self.state_file = state_file
+        self.initial_balance = initial_balance
+        self.fee_pct = fee_pct
+        self.slippage_pct = slippage_pct
+
+        self.usdt_balance = initial_balance
+        self.asset_balance = 0.0
+        self.current_symbol = "BTC/USDT"
+        self.active_position: Optional[Dict[str, Any]] = None
+        self.trades_history: List[Dict[str, Any]] = []
+
+        self.peak_equity = initial_balance
+        self.max_drawdown_pct = 0.0
+
+        self.load_state()
+
+    def load_state(self):
+        """Load persisted paper trading state if exists."""
+        if os.path.exists(self.state_file):
+            try:
+                with open(self.state_file, "r") as f:
+                    data = json.load(f)
+                    self.usdt_balance = float(data.get("usdt_balance", self.initial_balance))
+                    self.asset_balance = float(data.get("asset_balance", 0.0))
+                    self.active_position = data.get("active_position", None)
+                    self.trades_history = data.get("trades_history", [])
+                    self.peak_equity = float(data.get("peak_equity", self.initial_balance))
+                    self.max_drawdown_pct = float(data.get("max_drawdown_pct", 0.0))
+            except Exception:
+                pass
+
+    def save_state(self):
+        """Persist state to disk."""
+        data = {
+            "usdt_balance": self.usdt_balance,
+            "asset_balance": self.asset_balance,
+            "active_position": self.active_position,
+            "trades_history": self.trades_history,
+            "peak_equity": self.peak_equity,
+            "max_drawdown_pct": self.max_drawdown_pct
+        }
+        try:
+            with open(self.state_file, "w") as f:
+                json.dump(data, f, indent=2)
+        except Exception:
+            pass
+
+    def reset_wallet(self, initial_balance: float = 10000.0):
+        """Reset paper wallet to clean initial state."""
+        self.initial_balance = initial_balance
+        self.usdt_balance = initial_balance
+        self.asset_balance = 0.0
+        self.active_position = None
+        self.trades_history = []
+        self.peak_equity = initial_balance
+        self.max_drawdown_pct = 0.0
+        self.save_state()
+
+    def execute_buy(self, symbol: str, market_price: float, usdt_amount: float, reason: str = "") -> Dict[str, Any]:
+        """Execute simulated market BUY order."""
+        if usdt_amount > self.usdt_balance:
+            usdt_amount = self.usdt_balance
+
+        if usdt_amount < 10.0:
+            return {"success": False, "error": f"Insufficient USDT balance: ${self.usdt_balance:.2f}"}
+
+        # Apply slippage (buy slightly higher than market tick)
+        execution_price = market_price * (1 + self.slippage_pct / 100)
+        fee = usdt_amount * (self.fee_pct / 100)
+        net_usdt = usdt_amount - fee
+        qty = net_usdt / execution_price
+
+        self.usdt_balance -= usdt_amount
+        self.asset_balance += qty
+
+        trade_record = {
+            "id": f"TRD-{int(time.time() * 1000)}",
+            "timestamp": int(time.time() * 1000),
+            "symbol": symbol,
+            "side": "BUY",
+            "price": round(execution_price, 4),
+            "quantity": round(qty, 6),
+            "cost_usdt": round(usdt_amount, 2),
+            "fee_usdt": round(fee, 4),
+            "reason": reason
+        }
+
+        self.active_position = {
+            "symbol": symbol,
+            "entry_price": execution_price,
+            "quantity": qty,
+            "cost_usdt": usdt_amount,
+            "entry_time": int(time.time() * 1000),
+            "highest_price": execution_price,
+            "stop_loss_price": None,
+            "take_profit_price": None,
+            "reason": reason
+        }
+
+        self.trades_history.insert(0, trade_record)
+        if len(self.trades_history) > 100:
+            self.trades_history = self.trades_history[:100]
+
+        self.save_state()
+        return {"success": True, "trade": trade_record, "position": self.active_position}
+
+    def execute_sell(self, symbol: str, market_price: float, reason: str = "") -> Dict[str, Any]:
+        """Execute simulated market SELL order closing active position."""
+        if not self.active_position or self.asset_balance <= 0:
+            return {"success": False, "error": "No active position to sell"}
+
+        qty = self.active_position["quantity"]
+        entry_price = self.active_position["entry_price"]
+        cost_usdt = self.active_position["cost_usdt"]
+
+        # Apply slippage (sell slightly lower than market tick)
+        execution_price = market_price * (1 - self.slippage_pct / 100)
+        gross_proceeds = qty * execution_price
+        fee = gross_proceeds * (self.fee_pct / 100)
+        net_proceeds = gross_proceeds - fee
+
+        realized_pnl = net_proceeds - cost_usdt
+        realized_pnl_pct = (realized_pnl / cost_usdt) * 100
+
+        self.usdt_balance += net_proceeds
+        self.asset_balance = 0.0
+
+        trade_record = {
+            "id": f"TRD-{int(time.time() * 1000)}",
+            "timestamp": int(time.time() * 1000),
+            "symbol": symbol,
+            "side": "SELL",
+            "price": round(execution_price, 4),
+            "quantity": round(qty, 6),
+            "cost_usdt": round(cost_usdt, 2),
+            "proceeds_usdt": round(net_proceeds, 2),
+            "fee_usdt": round(fee, 4),
+            "realized_pnl": round(realized_pnl, 2),
+            "realized_pnl_pct": round(realized_pnl_pct, 2),
+            "hold_duration_sec": int((time.time() * 1000 - self.active_position["entry_time"]) / 1000),
+            "reason": reason
+        }
+
+        self.active_position = None
+        self.trades_history.insert(0, trade_record)
+        if len(self.trades_history) > 100:
+            self.trades_history = self.trades_history[:100]
+
+        self.save_state()
+        return {"success": True, "trade": trade_record}
+
+    def get_portfolio_summary(self, current_price: float) -> Dict[str, Any]:
+        """Compute live equity, unrealized PnL, and performance statistics."""
+        current_price = float(current_price) if current_price > 0 else 1.0
+
+        position_value = self.asset_balance * current_price
+        total_equity = self.usdt_balance + position_value
+
+        # Update Peak and Drawdown
+        if total_equity > self.peak_equity:
+            self.peak_equity = total_equity
+        drawdown_pct = 0.0
+        if self.peak_equity > 0:
+            drawdown_pct = ((self.peak_equity - total_equity) / self.peak_equity) * 100
+            if drawdown_pct > self.max_drawdown_pct:
+                self.max_drawdown_pct = drawdown_pct
+
+        # Active Position details
+        active_pos_data = None
+        if self.active_position and self.asset_balance > 0:
+            entry_price = self.active_position["entry_price"]
+            cost = self.active_position["cost_usdt"]
+            unrealized_pnl = position_value - cost
+            unrealized_pnl_pct = (unrealized_pnl / cost) * 100 if cost > 0 else 0.0
+
+            # Update highest price for trailing stop tracking
+            if current_price > self.active_position.get("highest_price", entry_price):
+                self.active_position["highest_price"] = current_price
+
+            active_pos_data = {
+                **self.active_position,
+                "current_price": round(current_price, 4),
+                "market_value": round(position_value, 2),
+                "unrealized_pnl": round(unrealized_pnl, 2),
+                "unrealized_pnl_pct": round(unrealized_pnl_pct, 2)
+            }
+
+        # Calculate Closed Trades Metrics
+        closed_trades = [t for t in self.trades_history if t.get("side") == "SELL" and "realized_pnl" in t]
+        total_closed = len(closed_trades)
+        winning_trades = [t for t in closed_trades if t["realized_pnl"] > 0]
+        losing_trades = [t for t in closed_trades if t["realized_pnl"] <= 0]
+
+        win_rate = (len(winning_trades) / total_closed * 100) if total_closed > 0 else 0.0
+        gross_profit = sum(t["realized_pnl"] for t in winning_trades)
+        gross_loss = abs(sum(t["realized_pnl"] for t in losing_trades))
+        profit_factor = (gross_profit / gross_loss) if gross_loss > 0 else (gross_profit if gross_profit > 0 else 1.0)
+
+        total_realized_pnl = sum(t["realized_pnl"] for t in closed_trades)
+        total_pnl_pct = ((total_equity - self.initial_balance) / self.initial_balance) * 100
+
+        return {
+            "initial_balance": round(self.initial_balance, 2),
+            "usdt_balance": round(self.usdt_balance, 2),
+            "asset_balance": round(self.asset_balance, 6),
+            "total_equity": round(total_equity, 2),
+            "total_realized_pnl": round(total_realized_pnl, 2),
+            "total_pnl_pct": round(total_pnl_pct, 2),
+            "win_rate_pct": round(win_rate, 1),
+            "profit_factor": round(profit_factor, 2),
+            "max_drawdown_pct": round(self.max_drawdown_pct, 2),
+            "total_trades": len(self.trades_history),
+            "winning_trades_count": len(winning_trades),
+            "losing_trades_count": len(losing_trades),
+            "active_position": active_pos_data,
+            "recent_trades": self.trades_history[:15]
+        }
