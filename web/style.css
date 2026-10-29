@@ -3,31 +3,31 @@
    ========================================================================== */
 
 :root {
-  /* Color Palette */
-  --bg-dark: #080b11;
-  --bg-card: rgba(16, 22, 34, 0.78);
-  --bg-card-hover: rgba(22, 30, 46, 0.88);
-  --bg-surface: #0e1420;
-  --bg-surface-elevated: #151d2e;
+  /* Institutional Ergonomic Dark Palette (Calibrated for extended monitoring) */
+  --bg-dark: #0a0e17;
+  --bg-card: rgba(17, 24, 39, 0.75);
+  --bg-card-hover: rgba(26, 36, 56, 0.88);
+  --bg-surface: #0f172a;
+  --bg-surface-elevated: #1e293b;
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(0, 245, 155, 0.25);
-  --border-active: rgba(0, 229, 255, 0.4);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-glow: rgba(56, 189, 248, 0.22);
+  --border-active: rgba(56, 189, 248, 0.45);
 
-  --accent-cyan: #00e5ff;
-  --accent-cyan-glow: rgba(0, 229, 255, 0.25);
-  --accent-emerald: #00f59b;
-  --accent-emerald-glow: rgba(0, 245, 155, 0.25);
-  --accent-crimson: #ff3366;
-  --accent-crimson-glow: rgba(255, 51, 102, 0.25);
-  --accent-purple: #9d4edd;
-  --accent-purple-glow: rgba(157, 78, 221, 0.25);
-  --accent-gold: #ffb703;
-  --accent-gold-glow: rgba(255, 183, 3, 0.25);
+  --accent-cyan: #38bdf8;
+  --accent-cyan-glow: rgba(56, 189, 248, 0.2);
+  --accent-emerald: #10b981;
+  --accent-emerald-glow: rgba(16, 185, 129, 0.2);
+  --accent-crimson: #f43f5e;
+  --accent-crimson-glow: rgba(244, 63, 94, 0.2);
+  --accent-purple: #818cf8;
+  --accent-purple-glow: rgba(129, 140, 248, 0.2);
+  --accent-gold: #f59e0b;
+  --accent-gold-glow: rgba(245, 158, 11, 0.2);
 
-  --text-primary: #f0f4fc;
-  --text-secondary: #9aa9c2;
-  --text-muted: #5e6f8a;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 
   /* Typography */
   --font-display: 'Outfit', sans-serif;
@@ -570,21 +570,311 @@ body {
 }
 
 /* ==========================================================================
-   CHART SECTION
+   CHART SECTION WITH MULTI-COIN FLEET TABS & LINE CONTROLS
    ========================================================================== */
 .chart-section {
   display: flex;
   flex-direction: column;
-  height: 620px;
+  min-height: 680px;
   overflow: hidden;
   position: relative;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+/* Fleet Market / Trade Tab Bar on Graph */
+.chart-fleet-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: rgba(11, 16, 26, 0.95);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.chart-fleet-tabs-bar::-webkit-scrollbar {
+  height: 3px;
+}
+.chart-fleet-tabs-bar::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.25);
+  border-radius: 3px;
+}
+
+.tabs-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-cyan);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chart-fleet-tabs-scroll {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-grow: 1;
+}
+
+.chart-coin-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(18, 25, 41, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.chart-coin-tab:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #fff;
+}
+
+.chart-coin-tab.active {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: var(--accent-cyan);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.chart-coin-tab.in-trade {
+  border-color: rgba(16, 185, 129, 0.45);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.chart-coin-tab.in-trade.active {
+  border-color: var(--accent-emerald);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.tab-pos-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 6px var(--accent-emerald);
+  animation: pulse-ring 1.8s infinite;
+}
+
+.tab-badge-pos {
+  font-size: 8px;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.25);
+  color: var(--accent-emerald);
+  border: 1px solid var(--accent-emerald);
+  padding: 0 4px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+.tab-pnl {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.tab-pnl.profit {
+  color: var(--accent-emerald);
+}
+
+.tab-pnl.loss {
+  color: var(--accent-crimson);
+}
+
+/* Chart Controls Bar (Candles / Line & Overlays) */
+.chart-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: rgba(14, 20, 32, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chart-ctrl-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctrl-group-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+}
+
+.ctrl-btn-group {
+  display: flex;
+  gap: 4px;
+}
+
+.chart-style-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chart-style-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.chart-style-btn.active {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #07131e;
+  font-weight: 700;
+}
+
+.chart-overlay-pill {
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chart-overlay-pill.active {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: var(--accent-cyan);
+}
+
+/* Position HUD Banner */
+.chart-position-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.85));
+  border-bottom: 1px solid rgba(16, 185, 129, 0.35);
+  animation: fadeIn 0.25s ease;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pos-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pos-banner-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+  animation: pulse-ring 1.8s infinite;
+}
+
+.pos-banner-sym {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.pos-banner-tag {
+  font-size: 9px;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.pos-banner-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.banner-lbl {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.text-success {
+  color: var(--accent-emerald) !important;
+}
+
+.text-danger {
+  color: var(--accent-crimson) !important;
+}
+
+.pos-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pos-banner-pnl-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pos-pnl-val {
+  font-size: 13px;
+}
+
+.btn-close-pos-action {
+  padding: 4px 10px;
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  border-radius: 4px;
+  color: var(--accent-crimson);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+}
+
+.btn-close-pos-action:hover {
+  background: rgba(244, 63, 94, 0.35);
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.35);
 }
 
 .chart-hud {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--border-subtle);
   background: rgba(14, 20, 32, 0.6);
   flex-wrap: wrap;
@@ -2638,8 +2928,8 @@ body {
 
 /* Real Money Guide */
 .real-money-guide-card {
-  background: linear-gradient(135deg, rgba(14, 20, 32, 0.8) 0%, rgba(21, 29, 46, 0.9) 100%);
-  border: 1px solid rgba(0, 229, 255, 0.25);
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: var(--radius-md);
   padding: 16px;
 }

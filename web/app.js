@@ -17,12 +17,25 @@ const state = {
   soundEnabled: true,
   logFilter: 'ALL',
   allLogs: [],
-  chartMarkers: []
+  chartMarkers: [],
+  chartStyle: 'candles', // 'candles' | 'line'
+  showEmaFast: true,
+  showEmaSlow: true,
+  showBrackets: true,
+  watchlist: [],
+  prices: {},
+  activePositions: [],
+  priceLines: {
+    entry: null,
+    tp: null,
+    sl: null
+  }
 };
 
 // Global Chart References
 let chart = null;
 let candleSeries = null;
+let areaSeries = null;
 let emaFastSeries = null;
 let emaSlowSeries = null;
 let ws = null;
@@ -92,59 +105,68 @@ function initChart() {
     width: container.clientWidth,
     height: container.clientHeight || 520,
     layout: {
-      background: { type: 'solid', color: '#0a0e16' },
-      textColor: '#8e9cb2',
+      background: { type: 'solid', color: '#090d16' },
+      textColor: '#94a3b8',
       fontFamily: "'JetBrains Mono', monospace",
       fontSize: 11
     },
     grid: {
-      vertLines: { color: 'rgba(255, 255, 255, 0.03)' },
-      horzLines: { color: 'rgba(255, 255, 255, 0.03)' }
+      vertLines: { color: 'rgba(255, 255, 255, 0.02)' },
+      horzLines: { color: 'rgba(255, 255, 255, 0.02)' }
     },
     crosshair: {
       mode: LightweightCharts.CrosshairMode.Normal,
       vertLine: {
-        color: 'rgba(0, 229, 255, 0.4)',
+        color: 'rgba(56, 189, 248, 0.35)',
         width: 1,
         style: LightweightCharts.LineStyle.Dashed
       },
       horzLine: {
-        color: 'rgba(0, 229, 255, 0.4)',
+        color: 'rgba(56, 189, 248, 0.35)',
         width: 1,
         style: LightweightCharts.LineStyle.Dashed
       }
     },
     rightPriceScale: {
-      borderColor: 'rgba(255, 255, 255, 0.08)',
+      borderColor: 'rgba(255, 255, 255, 0.06)',
       scaleMargins: { top: 0.1, bottom: 0.15 }
     },
     timeScale: {
-      borderColor: 'rgba(255, 255, 255, 0.08)',
+      borderColor: 'rgba(255, 255, 255, 0.06)',
       timeVisible: true,
       secondsVisible: false
     }
   });
 
-  // Candlestick Series
+  // Candlestick Series (Ergonomic Emerald & Rose)
   candleSeries = chart.addSeries(LightweightCharts.CandlestickSeries, {
-    upColor: '#00f59b',
-    downColor: '#ff3366',
+    upColor: '#10b981',
+    downColor: '#f43f5e',
     borderVisible: false,
-    wickUpColor: '#00f59b',
-    wickDownColor: '#ff3366'
+    wickUpColor: '#10b981',
+    wickDownColor: '#f43f5e'
   });
 
-  // Fast EMA (9) - Cyan
+  // Area Series (Smooth line & soft glow for line view)
+  areaSeries = chart.addSeries(LightweightCharts.AreaSeries, {
+    topColor: 'rgba(56, 189, 248, 0.28)',
+    bottomColor: 'rgba(56, 189, 248, 0.01)',
+    lineColor: '#38bdf8',
+    lineWidth: 2,
+    visible: false
+  });
+
+  // Fast EMA (9) - Sky Cyan
   emaFastSeries = chart.addSeries(LightweightCharts.LineSeries, {
-    color: '#00e5ff',
+    color: '#38bdf8',
     lineWidth: 2,
     title: 'EMA 9',
     crosshairMarkerVisible: false
   });
 
-  // Slow EMA (21) - Purple
+  // Slow EMA (21) - Indigo
   emaSlowSeries = chart.addSeries(LightweightCharts.LineSeries, {
-    color: '#9d4edd',
+    color: '#818cf8',
     lineWidth: 2,
     title: 'EMA 21',
     crosshairMarkerVisible: false
@@ -249,8 +271,13 @@ function loadInitialState(data) {
   state.activeStrategy = data.active_strategy;
   state.currentPrice = data.current_price;
 
-  // Render Top Watchlist Ticker Tape
-  renderWatchlistTape(state.watchlist, state.prices, state.symbol, data.portfolio?.active_positions || []);
+  state.activePositions = data.portfolio?.active_positions || (data.portfolio?.active_position ? [data.portfolio.active_position] : []);
+
+  // Render Top Watchlist Ticker Tape & Chart Fleet Tabs
+  renderWatchlistTape(state.watchlist, state.prices, state.symbol, state.activePositions);
+  renderChartFleetTabs(state.watchlist, state.prices, state.symbol, state.activePositions);
+  updateChartPositionBanner(state.symbol, state.activePositions);
+  updateChartPriceLines(state.symbol, state.activePositions);
 
   // Sync Top Controls & Custom Pair Option
   const pairSelect = document.getElementById('pair-select');
@@ -305,8 +332,9 @@ function loadInitialState(data) {
   }
 
   // Populate Candles on Chart
-  if (data.candles && data.candles.length > 0 && candleSeries) {
-    candleSeries.setData(data.candles);
+  if (data.candles && data.candles.length > 0) {
+    if (candleSeries) candleSeries.setData(data.candles);
+    if (areaSeries) areaSeries.setData(data.candles.map(c => ({ time: c.time, value: c.close })));
 
     // Compute basic initial EMA series for chart lines
     const emaFastData = [];
@@ -315,8 +343,8 @@ function loadInitialState(data) {
       emaFastData.push({ time: c.time, value: c.close });
       emaSlowData.push({ time: c.time, value: c.close });
     });
-    emaFastSeries.setData(emaFastData);
-    emaSlowSeries.setData(emaSlowData);
+    if (emaFastSeries) emaFastSeries.setData(emaFastData);
+    if (emaSlowSeries) emaSlowSeries.setData(emaSlowData);
     chart.timeScale().fitContent();
   }
 
@@ -379,14 +407,17 @@ function handleTickerUpdate(data) {
     state.lastPrice = price;
 
     // Update live candle on chart
-    if (data.candle && candleSeries) {
-      candleSeries.update(data.candle);
+    if (data.candle) {
+      if (candleSeries) candleSeries.update(data.candle);
+      if (areaSeries) areaSeries.update({ time: data.candle.time, value: data.candle.close });
     }
   }
 
   // Update Portfolio Equity & Positions Basket in real time
   if (data.portfolio) {
     updatePortfolioUI(data.portfolio);
+  } else if (state.activePositions && state.activePositions.length > 0) {
+    updateChartPositionBanner(state.symbol, state.activePositions);
   }
 
   // Update Live Market Trends as price ticks
@@ -505,11 +536,18 @@ function updatePortfolioUI(p) {
     if (chipsContainer) chipsContainer.innerHTML = '';
   }
 
+  state.activePositions = activePositions;
+
   // Update Basket Tray Section
   renderBasketTray(activePositions, positionsVal);
 
   // Update Top Watchlist Tape
   renderWatchlistTape(state.watchlist || [], state.prices || {}, state.symbol, activePositions);
+
+  // Update Chart Fleet Tabs & Position Overlays on Graph
+  renderChartFleetTabs(state.watchlist || [], state.prices || {}, state.symbol, activePositions);
+  updateChartPositionBanner(state.symbol, activePositions);
+  updateChartPriceLines(state.symbol, activePositions);
 
   // Populate recent trades table if available
   if (p.recent_trades && Array.isArray(p.recent_trades)) {
@@ -517,76 +555,172 @@ function updatePortfolioUI(p) {
   }
 }
 
-function renderBasketTray(activePositions, totalValue) {
-  const badge = document.getElementById('basket-count-badge');
-  if (badge) badge.textContent = activePositions.length;
-
-  const eqTag = document.getElementById('basket-equity-tag');
-  if (eqTag) eqTag.textContent = `ALLOCATED: $${formatNumber(totalValue)}`;
-
-  const container = document.getElementById('basket-grid-container');
+function renderChartFleetTabs(watchlist, prices, activeSymbol, activePositions) {
+  const container = document.getElementById('chart-fleet-tabs');
   if (!container) return;
 
-  if (activePositions.length === 0) {
-    container.innerHTML = `
-      <div class="basket-empty-state">
-        <span>No open coin positions. The fleet is actively watching top volume coins and will auto-enter on high-probability setups.</span>
-      </div>
-    `;
-    return;
-  }
+  const posMap = {};
+  (activePositions || []).forEach(p => { posMap[p.symbol] = p; });
 
-  container.innerHTML = activePositions.map(pos => {
-    const pnlSign = pos.unrealized_pnl >= 0 ? '+' : '';
-    const pnlClass = pos.unrealized_pnl >= 0 ? 'profit' : 'loss';
-    return `
-      <div class="basket-coin-card">
-        <div class="basket-coin-header">
-          <span class="basket-coin-symbol" onclick="switchMarket('${pos.symbol}')" style="cursor:pointer;" title="Click to view chart">
-            🪙 ${pos.symbol}
-            <span class="basket-coin-tag">LONG</span>
-          </span>
-          <button class="basket-btn-close" onclick="closePosition('${pos.symbol}')" title="Close this position">Close</button>
-        </div>
-        <div class="basket-coin-body">
-          <span class="basket-coin-pnl ${pnlClass}">
-            ${pnlSign}$${pos.unrealized_pnl.toFixed(2)} (${pnlSign}${pos.unrealized_pnl_pct.toFixed(2)}%)
-          </span>
-          <span class="mono font-bold" style="font-size:12px; color:#fff;">$${formatCurrency(pos.current_price)}</span>
-        </div>
-        <div class="basket-coin-details">
-          <span>Entry: $${formatCurrency(pos.entry_price)}</span>
-          <span>Cost: $${pos.cost_usdt.toFixed(1)}</span>
-        </div>
-      </div>
-    `;
+  const coins = Array.isArray(watchlist) && watchlist.length > 0 ? watchlist : [
+    "BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT", "SUI/USDT", "DOGE/USDT", "XRP/USDT", "PEPE/USDT"
+  ];
+
+  container.innerHTML = coins.map(sym => {
+    const isActive = sym === activeSymbol;
+    const pos = posMap[sym];
+    const px = prices[sym] || (isActive ? state.currentPrice : 0);
+    const pxStr = px > 0 ? `$${formatCurrency(px)}` : '---';
+
+    if (pos) {
+      const s = pos.unrealized_pnl >= 0 ? '+' : '';
+      const pnlCls = pos.unrealized_pnl >= 0 ? 'profit' : 'loss';
+      return `
+        <button type="button" class="chart-coin-tab in-trade ${isActive ? 'active' : ''}" onclick="switchMarket('${sym}')" title="Click to view ${sym} chart with active trade brackets">
+          <span class="tab-pos-dot"></span>
+          <strong class="tab-sym">${sym}</strong>
+          <span class="tab-badge-pos">LONG</span>
+          <span class="tab-pnl ${pnlCls}">${s}$${pos.unrealized_pnl.toFixed(2)} (${s}${pos.unrealized_pnl_pct.toFixed(1)}%)</span>
+        </button>
+      `;
+    } else {
+      return `
+        <button type="button" class="chart-coin-tab ${isActive ? 'active' : ''}" onclick="switchMarket('${sym}')" title="Click to view ${sym} chart">
+          <span class="tab-sym">${sym}</span>
+          <span class="tab-px mono">${pxStr}</span>
+        </button>
+      `;
+    }
   }).join('');
 }
 
-function renderWatchlistTape(watchlist, prices, activeSymbol, activePositions) {
-  const container = document.getElementById('watchlist-tape-items');
-  if (!container) return;
+function updateChartPositionBanner(symbol, activePositions) {
+  const banner = document.getElementById('chart-position-banner');
+  if (!banner) return;
 
-  const activeCoinsMap = {};
-  if (Array.isArray(activePositions)) {
-    activePositions.forEach(p => { activeCoinsMap[p.symbol] = p; });
+  const pos = (activePositions || []).find(p => p.symbol === symbol);
+  if (!pos) {
+    banner.classList.add('hidden');
+    return;
   }
 
-  container.innerHTML = watchlist.map(sym => {
-    const px = prices[sym] || (sym === activeSymbol ? state.currentPrice : 0);
-    const pxStr = px > 0 ? `$${formatCurrency(px)}` : '---';
-    const isActive = sym === activeSymbol;
-    const hasPos = Boolean(activeCoinsMap[sym]);
-    const base = sym.split('/')[0];
+  banner.classList.remove('hidden');
+  const symEl = document.getElementById('pos-banner-sym');
+  if (symEl) symEl.textContent = pos.symbol;
 
-    return `
-      <div class="tape-coin-pill ${isActive ? 'active' : ''} ${hasPos ? 'has-position' : ''}" onclick="switchMarket('${sym}')" title="Click to view ${sym} chart and radar">
-        <span class="tape-coin-symbol">${base}</span>
-        <span class="tape-coin-price mono" id="tape-px-${base}">${pxStr}</span>
-        ${hasPos ? '<span class="tape-coin-badge">HELD</span>' : ''}
-      </div>
-    `;
-  }).join('');
+  const entryEl = document.getElementById('pos-banner-entry');
+  if (entryEl) entryEl.textContent = `$${formatCurrency(pos.entry_price)}`;
+
+  const tpEl = document.getElementById('pos-banner-tp');
+  if (tpEl) tpEl.textContent = pos.take_profit_price ? `$${formatCurrency(pos.take_profit_price)} (+3.0%)` : '---';
+
+  const slEl = document.getElementById('pos-banner-sl');
+  if (slEl) slEl.textContent = pos.stop_loss_price ? `$${formatCurrency(pos.stop_loss_price)} (-1.5%)` : '---';
+
+  const pnlEl = document.getElementById('pos-banner-pnl');
+  if (pnlEl) {
+    const s = pos.unrealized_pnl >= 0 ? '+' : '';
+    pnlEl.textContent = `${s}$${pos.unrealized_pnl.toFixed(2)} (${s}${pos.unrealized_pnl_pct.toFixed(2)}%)`;
+    pnlEl.className = 'mono font-bold pos-pnl-val ' + (pos.unrealized_pnl >= 0 ? 'text-success' : 'text-danger');
+  }
+
+  const closeBtn = document.getElementById('pos-banner-close-btn');
+  if (closeBtn) {
+    closeBtn.onclick = () => closePosition(pos.symbol);
+  }
+}
+
+function updateChartPriceLines(symbol, activePositions) {
+  if (!candleSeries) return;
+
+  // Clear existing price lines
+  if (state.priceLines.entry) {
+    try { candleSeries.removePriceLine(state.priceLines.entry); } catch (e) {}
+    state.priceLines.entry = null;
+  }
+  if (state.priceLines.tp) {
+    try { candleSeries.removePriceLine(state.priceLines.tp); } catch (e) {}
+    state.priceLines.tp = null;
+  }
+  if (state.priceLines.sl) {
+    try { candleSeries.removePriceLine(state.priceLines.sl); } catch (e) {}
+    state.priceLines.sl = null;
+  }
+
+  if (!state.showBrackets) return;
+
+  const pos = (activePositions || []).find(p => p.symbol === symbol);
+  if (!pos) return;
+
+  if (pos.entry_price && pos.entry_price > 0) {
+    state.priceLines.entry = candleSeries.createPriceLine({
+      price: pos.entry_price,
+      color: '#38bdf8',
+      lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      axisLabelVisible: true,
+      title: `ENTRY $${formatCurrency(pos.entry_price)}`
+    });
+  }
+
+  if (pos.take_profit_price && pos.take_profit_price > 0) {
+    state.priceLines.tp = candleSeries.createPriceLine({
+      price: pos.take_profit_price,
+      color: '#10b981',
+      lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Dashed,
+      axisLabelVisible: true,
+      title: `TARGET (2R) $${formatCurrency(pos.take_profit_price)}`
+    });
+  }
+
+  if (pos.stop_loss_price && pos.stop_loss_price > 0) {
+    state.priceLines.sl = candleSeries.createPriceLine({
+      price: pos.stop_loss_price,
+      color: '#f43f5e',
+      lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Dashed,
+      axisLabelVisible: true,
+      title: `STOP (1R) $${formatCurrency(pos.stop_loss_price)}`
+    });
+  }
+}
+
+function setChartStyle(style) {
+  state.chartStyle = style;
+  const btnCandles = document.getElementById('btn-chart-style-candles');
+  const btnLine = document.getElementById('btn-chart-style-line');
+
+  if (style === 'candles') {
+    if (btnCandles) btnCandles.classList.add('active');
+    if (btnLine) btnLine.classList.remove('active');
+    if (candleSeries) candleSeries.applyOptions({ visible: true });
+    if (areaSeries) areaSeries.applyOptions({ visible: false });
+  } else {
+    if (btnCandles) btnCandles.classList.remove('active');
+    if (btnLine) btnLine.classList.add('active');
+    if (candleSeries) candleSeries.applyOptions({ visible: false });
+    if (areaSeries) areaSeries.applyOptions({ visible: true });
+  }
+}
+
+function toggleOverlay(name) {
+  if (name === 'ema9') {
+    state.showEmaFast = !state.showEmaFast;
+    const btn = document.getElementById('btn-overlay-ema9');
+    if (btn) btn.classList.toggle('active', state.showEmaFast);
+    if (emaFastSeries) emaFastSeries.applyOptions({ visible: state.showEmaFast });
+  } else if (name === 'ema21') {
+    state.showEmaSlow = !state.showEmaSlow;
+    const btn = document.getElementById('btn-overlay-ema21');
+    if (btn) btn.classList.toggle('active', state.showEmaSlow);
+    if (emaSlowSeries) emaSlowSeries.applyOptions({ visible: state.showEmaSlow });
+  } else if (name === 'brackets') {
+    state.showBrackets = !state.showBrackets;
+    const btn = document.getElementById('btn-overlay-brackets');
+    if (btn) btn.classList.toggle('active', state.showBrackets);
+    updateChartPriceLines(state.symbol, state.activePositions);
+  }
 }
 
 async function switchMarket(symbol) {
@@ -594,6 +728,11 @@ async function switchMarket(symbol) {
     state.symbol = symbol;
     const pairSelect = document.getElementById('pair-select');
     if (pairSelect) pairSelect.value = symbol;
+
+    // Immediately update tab highlights and position banner
+    renderChartFleetTabs(state.watchlist, state.prices, state.symbol, state.activePositions);
+    updateChartPositionBanner(state.symbol, state.activePositions);
+    updateChartPriceLines(state.symbol, state.activePositions);
 
     const res = await fetch('/api/market/switch', {
       method: 'POST',
@@ -909,6 +1048,22 @@ function setupEventListeners() {
       updateBotButton(state.status);
     }
   });
+
+  // Chart Style Toggles (Candles vs Line)
+  const btnCandles = document.getElementById('btn-chart-style-candles');
+  const btnLine = document.getElementById('btn-chart-style-line');
+  if (btnCandles && btnLine) {
+    btnCandles.addEventListener('click', () => setChartStyle('candles'));
+    btnLine.addEventListener('click', () => setChartStyle('line'));
+  }
+
+  // Chart Overlay Toggles (EMA 9, EMA 21, Brackets)
+  const btnEma9 = document.getElementById('btn-overlay-ema9');
+  const btnEma21 = document.getElementById('btn-overlay-ema21');
+  const btnBrackets = document.getElementById('btn-overlay-brackets');
+  if (btnEma9) btnEma9.addEventListener('click', () => toggleOverlay('ema9'));
+  if (btnEma21) btnEma21.addEventListener('click', () => toggleOverlay('ema21'));
+  if (btnBrackets) btnBrackets.addEventListener('click', () => toggleOverlay('brackets'));
 
   // Pair Dropdown Change
   const pairSelect = document.getElementById('pair-select');

@@ -245,6 +245,17 @@
       <div class="left-column">
         <!-- Main Chart Section -->
         <section class="chart-section glass-card">
+          <!-- Multi-Coin Fleet Active Trade Tabs (Click any coin to display its graph) -->
+          <div class="chart-fleet-tabs-bar">
+            <div class="tabs-label">
+              <span class="tabs-label-icon">📈</span>
+              <span class="tabs-label-text">FLEET MARKETS &amp; ACTIVE POSITIONS:</span>
+            </div>
+            <div class="chart-fleet-tabs-scroll" id="chart-fleet-tabs">
+              <!-- Dynamically rendered tabs for all coins; coins with active trades feature live PnL badge -->
+            </div>
+          </div>
+
           <!-- Chart HUD Toolbar -->
           <div class="chart-hud">
             <div class="hud-left">
@@ -276,6 +287,54 @@
                 <span class="chip-name">SIGNAL:</span>
                 <span id="val-signal-action" class="signal-badge hold">SCANNING</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Chart Controls Bar (Candles vs Line & Overlay Toggles) -->
+          <div class="chart-controls-bar">
+            <div class="chart-ctrl-group">
+              <span class="ctrl-group-label">CHART STYLE:</span>
+              <div class="ctrl-btn-group">
+                <button type="button" class="chart-style-btn active" id="btn-chart-style-candles" title="Candlestick View">🕯️ Candles</button>
+                <button type="button" class="chart-style-btn" id="btn-chart-style-line" title="Smooth Area / Line View">📈 Line &amp; Area</button>
+              </div>
+            </div>
+
+            <div class="chart-ctrl-group">
+              <span class="ctrl-group-label">OVERLAYS:</span>
+              <div class="ctrl-btn-group">
+                <button type="button" class="chart-overlay-pill active" id="btn-overlay-ema9" title="Toggle EMA 9">EMA 9</button>
+                <button type="button" class="chart-overlay-pill active" id="btn-overlay-ema21" title="Toggle EMA 21">EMA 21</button>
+                <button type="button" class="chart-overlay-pill active" id="btn-overlay-brackets" title="Toggle Stop Loss &amp; Take Profit Target Lines">🎯 Brackets (SL/TP)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Trade Position HUD Banner (Appears when viewing a coin the bot is holding) -->
+          <div class="chart-position-banner hidden" id="chart-position-banner">
+            <div class="pos-banner-left">
+              <span class="pos-banner-pulse"></span>
+              <strong id="pos-banner-sym" class="pos-banner-sym">SOL/USDT</strong>
+              <span class="pos-banner-tag">ACTIVE POSITION</span>
+              <div class="pos-banner-item">
+                <span class="banner-lbl">ENTRY:</span>
+                <strong id="pos-banner-entry" class="mono font-bold">$102.55</strong>
+              </div>
+              <div class="pos-banner-item">
+                <span class="banner-lbl">TARGET (2R):</span>
+                <strong id="pos-banner-tp" class="mono font-bold text-success">$104.65 (+3.0%)</strong>
+              </div>
+              <div class="pos-banner-item">
+                <span class="banner-lbl">STOP (1R):</span>
+                <strong id="pos-banner-sl" class="mono font-bold text-danger">$101.42 (-1.5%)</strong>
+              </div>
+            </div>
+            <div class="pos-banner-right">
+              <div class="pos-banner-pnl-wrap">
+                <span class="banner-lbl">LIVE PNL:</span>
+                <strong id="pos-banner-pnl" class="mono font-bold pos-pnl-val neutral">$0.00 (0.00%)</strong>
+              </div>
+              <button type="button" class="btn-close-pos-action" id="pos-banner-close-btn" title="Close this position">Close Position</button>
             </div>
           </div>
 
