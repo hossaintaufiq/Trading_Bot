@@ -100,13 +100,47 @@ async def reset_paper():
     return {"success": True, "message": "Paper wallet successfully reset."}
 
 
+class ManualBuyPayload(BaseModel):
+    symbol: Optional[str] = None
+    amount: Optional[float] = None
+
+
 @app.post("/api/bot/manual-buy")
-async def manual_buy():
-    """Manually trigger an immediate test buy order."""
+async def manual_buy(payload: Optional[ManualBuyPayload] = None):
+    """Manually trigger an immediate test buy order for a specific symbol or active symbol."""
     if not engine:
         raise HTTPException(status_code=503, detail="Engine initializing")
-    res = await engine.manual_buy()
+    sym = payload.symbol if payload else None
+    amt = payload.amount if payload else None
+    res = await engine.manual_buy(symbol=sym, amount_usdt=amt)
     return res
+
+
+class SwitchMarketPayload(BaseModel):
+    symbol: str
+
+
+@app.post("/api/market/switch")
+async def switch_market(payload: SwitchMarketPayload):
+    """Switch active display chart and market focus."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    await engine.switch_market(payload.symbol)
+    return {"success": True, "symbol": engine.symbol}
+
+
+class ClosePositionPayload(BaseModel):
+    symbol: str
+
+
+@app.post("/api/bot/close-position")
+async def close_position(payload: ClosePositionPayload):
+    """Liquidate a specific position in the basket."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    px = engine.markets.get(payload.symbol, {}).get("current_price", engine.current_price)
+    await engine._execute_sell(payload.symbol, px, "MANUAL POSITION CLOSE")
+    return {"success": True, "symbol": payload.symbol}
 
 
 @app.post("/api/bot/time-machine/run")

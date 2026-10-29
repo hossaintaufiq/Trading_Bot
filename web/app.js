@@ -240,9 +240,17 @@ function loadInitialState(data) {
   state.status = data.status;
   state.mode = data.mode;
   state.symbol = data.symbol;
+  state.watchlist = data.watchlist || [
+    "BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT",
+    "SUI/USDT", "DOGE/USDT", "XRP/USDT", "PEPE/USDT"
+  ];
+  state.prices = data.prices || {};
   state.timeframe = data.timeframe;
   state.activeStrategy = data.active_strategy;
   state.currentPrice = data.current_price;
+
+  // Render Top Watchlist Ticker Tape
+  renderWatchlistTape(state.watchlist, state.prices, state.symbol, data.portfolio?.active_positions || []);
 
   // Sync Top Controls & Custom Pair Option
   const pairSelect = document.getElementById('pair-select');
@@ -342,33 +350,47 @@ function loadInitialState(data) {
 }
 
 function handleTickerUpdate(data) {
-  const price = data.price;
-  state.currentPrice = price;
-
-  // Flash ticker price in HUD
-  const priceEl = document.getElementById('hud-price');
-  if (priceEl) {
-    priceEl.textContent = formatCurrency(price);
-    priceEl.classList.remove('tick-up', 'tick-down');
-    if (state.lastPrice > 0) {
-      if (price > state.lastPrice) priceEl.classList.add('tick-up');
-      else if (price < state.lastPrice) priceEl.classList.add('tick-down');
+  // Update multi-coin prices map
+  if (data.prices) {
+    state.prices = { ...state.prices, ...data.prices };
+    for (const [sym, px] of Object.entries(data.prices)) {
+      const base = sym.split('/')[0];
+      const el = document.getElementById(`tape-px-${base}`);
+      if (el) el.textContent = `$${formatCurrency(px)}`;
     }
   }
-  state.lastPrice = price;
 
-  // Update live candle on chart
-  if (data.candle && candleSeries) {
-    candleSeries.update(data.candle);
+  // If this tick belongs to currently displayed chart symbol
+  const isCurrent = data.symbol === state.symbol || (data.active_symbol && data.active_symbol === state.symbol);
+  if (isCurrent && data.price > 0) {
+    const price = data.price;
+    state.currentPrice = price;
+
+    // Flash ticker price in HUD
+    const priceEl = document.getElementById('hud-price');
+    if (priceEl) {
+      priceEl.textContent = formatCurrency(price);
+      priceEl.classList.remove('tick-up', 'tick-down');
+      if (state.lastPrice > 0) {
+        if (price > state.lastPrice) priceEl.classList.add('tick-up');
+        else if (price < state.lastPrice) priceEl.classList.add('tick-down');
+      }
+    }
+    state.lastPrice = price;
+
+    // Update live candle on chart
+    if (data.candle && candleSeries) {
+      candleSeries.update(data.candle);
+    }
   }
 
-  // Update Portfolio Equity & Position in real time
+  // Update Portfolio Equity & Positions Basket in real time
   if (data.portfolio) {
     updatePortfolioUI(data.portfolio);
   }
 
   // Update Live Market Trends as price ticks
-  if (data.market_trends) {
+  if (data.market_trends && isCurrent) {
     updateMarketTrendsUI(data.market_trends);
   }
 }
@@ -429,47 +451,173 @@ function updatePortfolioUI(p) {
 
   // Allocation Bar
   const totalVal = p.total_equity > 0 ? p.total_equity : 10000;
-  const assetVal = p.active_position ? p.active_position.market_value : 0;
-  const allocPct = Math.min(100, Math.max(0, (assetVal / totalVal) * 100));
+  const positionsVal = p.total_positions_value || (p.active_position ? p.active_position.market_value : 0);
+  const allocPct = Math.min(100, Math.max(0, (positionsVal / totalVal) * 100));
   document.getElementById('allocation-bar-fill').style.width = `${allocPct.toFixed(1)}%`;
-  document.getElementById('allocation-pct-label').textContent = `${allocPct.toFixed(1)}% in Asset`;
+  document.getElementById('allocation-pct-label').textContent = `${allocPct.toFixed(1)}% in Basket`;
+
+  const activePositions = p.active_positions || (p.active_position ? [p.active_position] : []);
+  const basketCount = activePositions.length;
+  const maxSlots = 5;
 
   const assetBase = state.symbol.split('/')[0];
-  document.getElementById('asset-holding-label').textContent = `${p.asset_balance.toFixed(4)} ${assetBase}`;
+  document.getElementById('asset-holding-label').textContent = `${basketCount} Coins Held`;
 
-  // Active Position Card
+  // Active Basket Card (Card 3)
   const posBadge = document.getElementById('pos-status-badge');
   const posPnlDisp = document.getElementById('pos-pnl-display');
   const posPnlPct = document.getElementById('pos-pnl-pct');
   const posDetails = document.getElementById('pos-details-text');
+  const chipsContainer = document.getElementById('positions-chips-container');
 
-  if (p.active_position) {
-    const pos = p.active_position;
-    posBadge.textContent = `LONG ${pos.quantity.toFixed(4)} ${assetBase}`;
+  if (basketCount > 0) {
+    posBadge.textContent = `${basketCount} / ${maxSlots} ACTIVE`;
     posBadge.className = 'pos-badge long';
 
-    const pnlSign = pos.unrealized_pnl >= 0 ? '+' : '';
-    posPnlDisp.textContent = `${pnlSign}$${pos.unrealized_pnl.toFixed(2)}`;
-    posPnlPct.textContent = `(${pnlSign}${pos.unrealized_pnl_pct.toFixed(2)}%)`;
+    const totalUnrealizedPnl = activePositions.reduce((sum, x) => sum + (x.unrealized_pnl || 0), 0);
+    const totalCost = activePositions.reduce((sum, x) => sum + (x.cost_usdt || 0), 0);
+    const totalUnrealizedPct = totalCost > 0 ? (totalUnrealizedPnl / totalCost) * 100 : 0;
 
-    const posClass = pos.unrealized_pnl >= 0 ? 'profit' : 'loss';
+    const pSign = totalUnrealizedPnl >= 0 ? '+' : '';
+    posPnlDisp.textContent = `${pSign}$${totalUnrealizedPnl.toFixed(2)}`;
+    posPnlPct.textContent = `(${pSign}${totalUnrealizedPct.toFixed(2)}%)`;
+
+    const posClass = totalUnrealizedPnl >= 0 ? 'profit' : 'loss';
     posPnlDisp.className = `metric-value mono ${posClass}`;
     posPnlPct.className = `pos-pnl-pct mono ${posClass}`;
 
-    posDetails.innerHTML = `Entry: <strong>$${formatCurrency(pos.entry_price)}</strong> | Val: <strong>$${formatNumber(pos.market_value)}</strong>`;
+    posDetails.innerHTML = `Basket Value: <strong>$${formatNumber(positionsVal)}</strong> in <strong>${basketCount}</strong> coins`;
+
+    if (chipsContainer) {
+      chipsContainer.innerHTML = activePositions.map(pos => {
+        const s = pos.unrealized_pnl >= 0 ? '+' : '';
+        return `<span class="pos-chip ${pos.unrealized_pnl >= 0 ? 'profit' : 'loss'}" onclick="switchMarket('${pos.symbol}')" title="Click to view chart">${pos.symbol.split('/')[0]}: ${s}$${pos.unrealized_pnl.toFixed(1)}</span>`;
+      }).join('');
+    }
   } else {
-    posBadge.textContent = 'NO OPEN POSITION';
+    posBadge.textContent = `0 / ${maxSlots} SLOTS`;
     posBadge.className = 'pos-badge none';
     posPnlDisp.textContent = '$0.00';
     posPnlPct.textContent = '(0.00%)';
     posPnlDisp.className = 'metric-value mono neutral';
     posPnlPct.className = 'pos-pnl-pct mono neutral';
-    posDetails.textContent = 'Bot awaiting entry triggers';
+    posDetails.textContent = 'Fleet scanning 8 high-volume coins';
+    if (chipsContainer) chipsContainer.innerHTML = '';
   }
+
+  // Update Basket Tray Section
+  renderBasketTray(activePositions, positionsVal);
+
+  // Update Top Watchlist Tape
+  renderWatchlistTape(state.watchlist || [], state.prices || {}, state.symbol, activePositions);
 
   // Populate recent trades table if available
   if (p.recent_trades && Array.isArray(p.recent_trades)) {
     renderTradesTable(p.recent_trades);
+  }
+}
+
+function renderBasketTray(activePositions, totalValue) {
+  const badge = document.getElementById('basket-count-badge');
+  if (badge) badge.textContent = activePositions.length;
+
+  const eqTag = document.getElementById('basket-equity-tag');
+  if (eqTag) eqTag.textContent = `ALLOCATED: $${formatNumber(totalValue)}`;
+
+  const container = document.getElementById('basket-grid-container');
+  if (!container) return;
+
+  if (activePositions.length === 0) {
+    container.innerHTML = `
+      <div class="basket-empty-state">
+        <span>No open coin positions. The fleet is actively watching top volume coins and will auto-enter on high-probability setups.</span>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = activePositions.map(pos => {
+    const pnlSign = pos.unrealized_pnl >= 0 ? '+' : '';
+    const pnlClass = pos.unrealized_pnl >= 0 ? 'profit' : 'loss';
+    return `
+      <div class="basket-coin-card">
+        <div class="basket-coin-header">
+          <span class="basket-coin-symbol" onclick="switchMarket('${pos.symbol}')" style="cursor:pointer;" title="Click to view chart">
+            🪙 ${pos.symbol}
+            <span class="basket-coin-tag">LONG</span>
+          </span>
+          <button class="basket-btn-close" onclick="closePosition('${pos.symbol}')" title="Close this position">Close</button>
+        </div>
+        <div class="basket-coin-body">
+          <span class="basket-coin-pnl ${pnlClass}">
+            ${pnlSign}$${pos.unrealized_pnl.toFixed(2)} (${pnlSign}${pos.unrealized_pnl_pct.toFixed(2)}%)
+          </span>
+          <span class="mono font-bold" style="font-size:12px; color:#fff;">$${formatCurrency(pos.current_price)}</span>
+        </div>
+        <div class="basket-coin-details">
+          <span>Entry: $${formatCurrency(pos.entry_price)}</span>
+          <span>Cost: $${pos.cost_usdt.toFixed(1)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderWatchlistTape(watchlist, prices, activeSymbol, activePositions) {
+  const container = document.getElementById('watchlist-tape-items');
+  if (!container) return;
+
+  const activeCoinsMap = {};
+  if (Array.isArray(activePositions)) {
+    activePositions.forEach(p => { activeCoinsMap[p.symbol] = p; });
+  }
+
+  container.innerHTML = watchlist.map(sym => {
+    const px = prices[sym] || (sym === activeSymbol ? state.currentPrice : 0);
+    const pxStr = px > 0 ? `$${formatCurrency(px)}` : '---';
+    const isActive = sym === activeSymbol;
+    const hasPos = Boolean(activeCoinsMap[sym]);
+    const base = sym.split('/')[0];
+
+    return `
+      <div class="tape-coin-pill ${isActive ? 'active' : ''} ${hasPos ? 'has-position' : ''}" onclick="switchMarket('${sym}')" title="Click to view ${sym} chart and radar">
+        <span class="tape-coin-symbol">${base}</span>
+        <span class="tape-coin-price mono" id="tape-px-${base}">${pxStr}</span>
+        ${hasPos ? '<span class="tape-coin-badge">HELD</span>' : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+async function switchMarket(symbol) {
+  try {
+    state.symbol = symbol;
+    const pairSelect = document.getElementById('pair-select');
+    if (pairSelect) pairSelect.value = symbol;
+
+    const res = await fetch('/api/market/switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbol })
+    });
+    const data = await res.json();
+    console.log('[Market] Switched to:', data.symbol);
+  } catch (err) {
+    console.error('Failed to switch market:', err);
+  }
+}
+
+async function closePosition(symbol) {
+  try {
+    const res = await fetch('/api/bot/close-position', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbol })
+    });
+    const data = await res.json();
+    console.log('[Position] Closed:', data.symbol);
+  } catch (err) {
+    console.error('Failed to close position:', err);
   }
 }
 
@@ -764,16 +912,12 @@ function setupEventListeners() {
 
   // Pair Dropdown Change
   const pairSelect = document.getElementById('pair-select');
-  pairSelect.addEventListener('change', async e => {
-    const symbol = e.target.value;
-    state.symbol = symbol;
-    document.getElementById('hud-symbol').textContent = symbol;
-    await fetch('/api/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ symbol })
+  if (pairSelect) {
+    pairSelect.addEventListener('change', async e => {
+      const symbol = e.target.value;
+      await switchMarket(symbol);
     });
-  });
+  }
 
   // Custom Pair Modal
   const btnCustomPair = document.getElementById('btn-custom-pair');
@@ -805,41 +949,8 @@ function setupEventListeners() {
           rawSymbol = `${rawSymbol}/USDT`;
         }
 
-        state.symbol = rawSymbol;
-        document.getElementById('hud-symbol').textContent = rawSymbol;
-
-        // Add to select options if not present
-        let exists = false;
-        for (let i = 0; i < pairSelect.options.length; i++) {
-          if (pairSelect.options[i].value === rawSymbol) {
-            exists = true;
-            break;
-          }
-        }
-        if (!exists) {
-          const opt = document.createElement('option');
-          opt.value = rawSymbol;
-          opt.textContent = `${rawSymbol} — Custom Pair`;
-          pairSelect.appendChild(opt);
-        }
-        pairSelect.value = rawSymbol;
-
         closePairModal();
-
-        try {
-          await fetch('/api/config', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ symbol: rawSymbol })
-          });
-          appendLog({
-            time: new Date().toLocaleTimeString(),
-            level: 'INFO',
-            message: `Switched active market to ${rawSymbol}`
-          });
-        } catch (err) {
-          console.error('Failed to update pair config:', err);
-        }
+        await switchMarket(rawSymbol);
       });
 
       inputCustomSymbol.addEventListener('keydown', e => {

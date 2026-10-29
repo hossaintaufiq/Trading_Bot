@@ -11,6 +11,7 @@ Implements the core quantitative skills from the Day Trader framework:
 
 from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional, Tuple
+import math
 import numpy as np
 import pandas as pd
 import time
@@ -385,20 +386,28 @@ class DayTraderSuite:
                 "multi_timeframe": []
             }
 
+        def _safe_float(val, default: float = 0.0) -> float:
+            try:
+                v = float(val)
+                return default if (math.isnan(v) or math.isinf(v)) else v
+            except (TypeError, ValueError):
+                return default
+
         curr = df.iloc[-1]
-        price = current_price or float(curr["close"])
-        ema9 = float(curr.get("ema_fast", price))
-        ema21 = float(curr.get("ema_slow", price))
-        rsi = float(curr.get("rsi", 50.0))
-        ma20 = float(curr.get("bb_middle", price))
+        raw_price = current_price or float(curr["close"])
+        price = _safe_float(raw_price, 1.0)
+        ema9 = _safe_float(curr.get("ema_fast"), price)
+        ema21 = _safe_float(curr.get("ema_slow"), price)
+        rsi = _safe_float(curr.get("rsi"), 50.0)
+        ma20 = _safe_float(curr.get("bb_middle"), price)
 
         # 1. EMA Spread & Momentum Velocity
-        ema_spread = ema9 - ema21
-        ema_spread_pct = (ema_spread / price) * 100 if price > 0 else 0.0
+        ema_spread = _safe_float(ema9 - ema21, 0.0)
+        ema_spread_pct = _safe_float((ema_spread / price) * 100 if price > 0 else 0.0, 0.0)
 
         # 2. Volume Surge Ratio vs 20-period average
-        vol_curr = float(curr.get("volume", 0))
-        vol_avg = float(df["volume"].tail(20).mean()) if "volume" in df.columns else 1.0
+        vol_curr = _safe_float(curr.get("volume"), 0.0)
+        vol_avg = _safe_float(df["volume"].tail(20).mean() if "volume" in df.columns else 1.0, 1.0)
         vol_surge = round(vol_curr / max(0.001, vol_avg), 2)
 
         # 3. Trend Direction & Strength Score (0 to 100)
@@ -435,8 +444,8 @@ class DayTraderSuite:
             trend_class = "neutral"
 
         # 4. Volatility Regime
-        atr = float(curr.get("atr", price * 0.005))
-        atr_avg = float(df["atr"].tail(20).mean()) if "atr" in df.columns else atr
+        atr = _safe_float(curr.get("atr"), price * 0.005)
+        atr_avg = _safe_float(df["atr"].tail(20).mean() if "atr" in df.columns else atr, atr)
         if atr > atr_avg * 1.25:
             vol_regime = "HIGH VOLATILITY EXPANSION"
         elif atr < atr_avg * 0.75:
@@ -446,11 +455,11 @@ class DayTraderSuite:
 
         # 5. Multi-Timeframe Trend Confluence (1m, 3m, 5m, 15m)
         t_1m = "BULL" if price >= ema9 else "BEAR"
-        c_3m_ago = float(df.iloc[-4]["close"]) if len(df) >= 4 else price
+        c_3m_ago = _safe_float(df.iloc[-4]["close"] if len(df) >= 4 else price, price)
         t_3m = "BULL" if price >= c_3m_ago else "BEAR"
-        c_5m_ago = float(df.iloc[-6]["close"]) if len(df) >= 6 else price
+        c_5m_ago = _safe_float(df.iloc[-6]["close"] if len(df) >= 6 else price, price)
         t_5m = "BULL" if price >= c_5m_ago else "BEAR"
-        c_15m_ago = float(df.iloc[-16]["close"]) if len(df) >= 16 else price
+        c_15m_ago = _safe_float(df.iloc[-16]["close"] if len(df) >= 16 else price, price)
         t_15m = "BULL" if price >= c_15m_ago else "BEAR"
 
         multi_tf = [
@@ -467,8 +476,8 @@ class DayTraderSuite:
             "trend_class": trend_class,
             "volatility_regime": vol_regime,
             "volume_surge_ratio": vol_surge,
-            "ema_spread_usd": round(ema_spread, 2),
-            "ema_spread_pct": round(ema_spread_pct, 3),
+            "ema_spread_usd": round(ema_spread, 4),
+            "ema_spread_pct": round(ema_spread_pct, 4),
             "multi_timeframe": multi_tf
         }
 

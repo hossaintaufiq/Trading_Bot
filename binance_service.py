@@ -21,16 +21,32 @@ class BinanceService:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.symbol = config.get("symbol", "BTC/USDT")
+        self.watchlist = config.get("watchlist", [
+            "BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT",
+            "SUI/USDT", "DOGE/USDT", "XRP/USDT", "PEPE/USDT"
+        ])
+        if self.symbol not in self.watchlist:
+            self.watchlist.insert(0, self.symbol)
+
         self.timeframe = config.get("timeframe", "1m")
         self.ws_task: Optional[asyncio.Task] = None
         self.is_running = False
         self.on_candle_callback: Optional[Callable] = None
         self.on_ticker_callback: Optional[Callable] = None
 
+        # Build symbol mapping (e.g., 'BTCUSDT' -> 'BTC/USDT')
+        self._build_symbol_map()
+
         # CCXT Clients for Testnet & Live (Real Money)
         self.ccxt_testnet: Optional[ccxt_async.binance] = None
         self.ccxt_live: Optional[ccxt_async.binance] = None
         self._init_ccxt_client()
+
+    def _build_symbol_map(self):
+        self.symbol_map: Dict[str, str] = {}
+        for s in self.watchlist:
+            clean = self.format_symbol_for_api(s)
+            self.symbol_map[clean] = s
 
     def _init_ccxt_client(self):
         """Initialize CCXT clients for both Binance Spot Testnet and Live Real Money."""
@@ -83,6 +99,18 @@ class BinanceService:
         """Convert 'BTC/USDT' -> 'btcusdt'."""
         return symbol.replace("/", "").lower()
 
+    def map_api_symbol_to_pair(self, api_sym: str) -> str:
+        """Map 'BTCUSDT' to 'BTC/USDT'."""
+        api_upper = api_sym.upper()
+        if api_upper in self.symbol_map:
+            return self.symbol_map[api_upper]
+        if api_upper.endswith("USDT"):
+            base = api_upper[:-4]
+            pair = f"{base}/USDT"
+            self.symbol_map[api_upper] = pair
+            return pair
+        return api_upper
+
     async def fetch_historical_klines(self, symbol: str, timeframe: str = "1m", limit: int = 150) -> pd.DataFrame:
         """Fetch historical klines via Binance public REST API."""
         binance_symbol = self.format_symbol_for_api(symbol)
@@ -92,18 +120,17 @@ class BinanceService:
             try:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
                     if resp.status != 200:
-                        logger.error(f"Failed to fetch klines: HTTP {resp.status}")
+                        logger.error(f"Failed to fetch klines for {symbol}: HTTP {resp.status}")
                         return pd.DataFrame()
                     data = await resp.json()
             except Exception as e:
-                logger.error(f"Error fetching historical klines: {e}")
+                logger.error(f"Error fetching historical klines for {symbol}: {e}")
                 return pd.DataFrame()
 
         rows = []
         for k in data:
-            # kline format: [open_time, open, high, low, close, volume, close_time, ...]
             rows.append({
-                "time": int(k[0] / 1000),  # Unix timestamp in seconds for Lightweight Charts
+                "time": int(k[0] / 1000),
                 "open": float(k[1]),
                 "high": float(k[2]),
                 "low": float(k[3]),
@@ -116,7 +143,7 @@ class BinanceService:
         return df
 
     async def start_websocket(self, on_candle: Callable, on_ticker: Callable):
-        """Start background WebSocket listener for live price action."""
+        """Start background WebSocket listener for live price action across all watchlist coins."""
         self.on_candle_callback = on_candle
         self.on_ticker_callback = on_ticker
         self.is_running = True
@@ -137,21 +164,33 @@ class BinanceService:
             await self.ccxt_live.close()
 
     async def _ws_loop(self):
-        """Persistent WebSocket loop with automatic reconnection."""
+        """Combined multiplex WebSocket loop streaming real-time klines for the entire watchlist."""
         while self.is_running:
-            symbol_ws = self.format_symbol_for_ws(self.symbol)
-            stream_url = f"wss://stream.binance.com:9443/ws/{symbol_ws}@kline_{self.timeframe}"
+            # Ensure current symbol is in watchlist
+            if self.symbol not in self.watchlist:
+                self.watchlist.insert(0, self.symbol)
+            self._build_symbol_map()
+
+            # Form combined stream URL: wss://stream.binance.com:9443/stream?streams=btcusdt@kline_1m/ethusdt@kline_1m/...
+            stream_names = [f"{self.format_symbol_for_ws(s)}@kline_{self.timeframe}" for s in self.watchlist]
+            streams_param = "/".join(stream_names)
+            combined_url = f"wss://stream.binance.com:9443/stream?streams={streams_param}"
 
             try:
                 async with aiohttp.ClientSession() as session:
-                    async with session.ws_connect(stream_url, heartbeat=20.0) as ws:
-                        logger.info(f"Connected to Binance WebSocket stream: {symbol_ws}@kline_{self.timeframe}")
+                    async with session.ws_connect(combined_url, heartbeat=20.0) as ws:
+                        logger.info(f"Connected to Binance Multi-Coin WebSocket: {len(self.watchlist)} streams active.")
                         async for msg in ws:
                             if not self.is_running:
                                 break
                             if msg.type == aiohttp.WSMsgType.TEXT:
                                 payload = json.loads(msg.data)
-                                kline = payload.get("k", {})
+                                # Combined stream wraps in {"stream": "...", "data": {...}}
+                                event_data = payload.get("data", payload)
+                                kline = event_data.get("k", {})
+                                raw_sym = kline.get("s", "") or event_data.get("s", "")
+                                pair_symbol = self.map_api_symbol_to_pair(raw_sym)
+
                                 candle = {
                                     "time": int(kline.get("t", 0) / 1000),
                                     "open": float(kline.get("o", 0)),
@@ -164,9 +203,9 @@ class BinanceService:
                                 current_price = float(kline.get("c", 0))
 
                                 if self.on_ticker_callback:
-                                    await self.on_ticker_callback(self.symbol, current_price, candle)
+                                    await self.on_ticker_callback(pair_symbol, current_price, candle)
                                 if self.on_candle_callback:
-                                    await self.on_candle_callback(self.symbol, candle)
+                                    await self.on_candle_callback(pair_symbol, candle)
 
                             elif msg.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
                                 break

@@ -159,6 +159,17 @@
       </div>
     </header>
 
+    <!-- MULTI-COIN FLEET WATCHLIST TICKER TAPE -->
+    <section class="watchlist-tape-bar">
+      <div class="tape-label">
+        <span class="tape-icon">🌐</span>
+        <span class="tape-title">FLEET HIGH-VOLUME WATCH:</span>
+      </div>
+      <div class="tape-items-container" id="watchlist-tape-items">
+        <!-- Dynamically injected coins: BTC, ETH, SOL, BNB, SUI, DOGE, XRP, PEPE -->
+      </div>
+    </section>
+
     <!-- HERO METRICS RIBBON (4 TELEMETRY CARDS) -->
     <section class="metrics-grid">
       <!-- Card 1: Total Portfolio Equity -->
@@ -191,23 +202,24 @@
           <div class="allocation-bar-wrap">
             <div id="allocation-bar-fill" class="allocation-bar-fill" style="width: 0%;"></div>
           </div>
-          <span id="allocation-pct-label" class="sub-label">0% in Asset</span>
+          <span id="allocation-pct-label" class="sub-label">0% in Basket</span>
         </div>
       </div>
 
-      <!-- Card 3: Active Position Status -->
+      <!-- Card 3: Active Positions Basket -->
       <div class="glass-card metric-card" id="card-active-position">
         <div class="metric-header">
-          <span class="metric-title">OPEN POSITION</span>
-          <span id="pos-status-badge" class="pos-badge none">NO POSITION</span>
+          <span class="metric-title">OPEN BASKET</span>
+          <span id="pos-status-badge" class="pos-badge none">0 / 5 SLOTS</span>
         </div>
         <div class="metric-value-wrap" id="pos-value-wrap">
           <span id="pos-pnl-display" class="metric-value mono neutral">$0.00</span>
           <span id="pos-pnl-pct" class="pos-pnl-pct mono neutral">(0.00%)</span>
         </div>
         <div class="metric-footer" id="pos-footer-details">
-          <span id="pos-details-text" class="sub-label">Neptune Fleet scanning for setups</span>
+          <span id="pos-details-text" class="sub-label">Fleet scanning 8 high-volume coins</span>
         </div>
+        <div class="positions-chips-wrap" id="positions-chips-container"></div>
       </div>
 
       <!-- Card 4: Performance Statistics -->
@@ -269,6 +281,22 @@
 
           <!-- The Lightweight Charts Canvas Container -->
           <div id="tv-chart-container" class="chart-canvas"></div>
+        </section>
+
+        <!-- ACTIVE MULTI-COIN BASKET TRAY -->
+        <section class="glass-card panel-card basket-tray-section" id="basket-tray-section">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="panel-icon">🧺</span>
+              <h3>ACTIVE MULTI-COIN BASKET (<span id="basket-count-badge">0</span>/5 SLOTS)</h3>
+            </div>
+            <span class="sub-header-tag" id="basket-equity-tag">ALLOCATED: $0.00</span>
+          </div>
+          <div class="basket-grid" id="basket-grid-container">
+            <div class="basket-empty-state">
+              <span>No open coin positions. The fleet is actively watching top volume coins and will auto-enter on high-probability setups.</span>
+            </div>
+          </div>
         </section>
 
         <!-- BOT FLEET STATUS & DIAGNOSTICS MATRIX (Transparent Bot Feedback) -->

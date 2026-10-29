@@ -2736,6 +2736,684 @@ body {
   color: var(--accent-crimson);
 }
 
+/* ==========================================================================
+   MULTI-COIN FLEET WATCHLIST TICKER TAPE
+   ========================================================================== */
+.watchlist-tape-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 18px;
+  background: rgba(11, 16, 26, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  backdrop-filter: blur(12px);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 229, 255, 0.25) transparent;
+}
 
+.watchlist-tape-bar::-webkit-scrollbar {
+  height: 4px;
+}
 
+.watchlist-tape-bar::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.25);
+  border-radius: 4px;
+}
+
+.tape-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.tape-items-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.tape-coin-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tape-coin-pill:hover {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.tape-coin-pill.active {
+  background: rgba(0, 245, 212, 0.14);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+}
+
+.tape-coin-pill.has-position {
+  border-color: var(--accent-emerald);
+  background: rgba(0, 245, 155, 0.12);
+}
+
+.tape-coin-symbol {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.tape-coin-price {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-cyan);
+}
+
+.tape-coin-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 245, 155, 0.2);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(0, 245, 155, 0.35);
+}
+
+/* ==========================================================================
+   ACTIVE POSITIONS BASKET TRAY
+   ========================================================================== */
+.basket-tray-section {
+  padding: 14px 18px;
+  background: rgba(11, 17, 28, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  margin-top: 14px;
+}
+
+.basket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.basket-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 18px;
+  color: var(--text-muted);
+  font-size: 12px;
+  background: rgba(14, 20, 32, 0.4);
+  border-radius: var(--radius-sm);
+  border: 1px dashed rgba(255, 255, 255, 0.07);
+}
+
+.basket-coin-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(16, 23, 37, 0.85);
+  border: 1px solid rgba(0, 245, 155, 0.25);
+  border-radius: var(--radius-md);
+  position: relative;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.basket-coin-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 245, 155, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.basket-coin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.basket-coin-symbol {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.basket-coin-tag {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(0, 245, 155, 0.15);
+  color: var(--accent-emerald);
+}
+
+.basket-coin-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.basket-coin-pnl {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.basket-coin-pnl.profit {
+  color: var(--accent-emerald);
+}
+
+.basket-coin-pnl.loss {
+  color: var(--accent-crimson);
+}
+
+.basket-coin-details {
+  font-size: 11px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.basket-btn-close {
+  background: rgba(255, 51, 102, 0.12);
+  border: 1px solid rgba(255, 51, 102, 0.3);
+  color: var(--accent-crimson);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.basket-btn-close:hover {
+  background: rgba(255, 51, 102, 0.25);
+  color: #fff;
+}
+
+/* Card 3 Mini Chips */
+.positions-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.pos-chip {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(0, 245, 155, 0.12);
+  border: 1px solid rgba(0, 245, 155, 0.3);
+  color: var(--accent-emerald);
+}
+
+/* ==========================================================================
+   FLUID & RESPONSIVE DESIGN (Mobile < 768px, Tablet < 1024px, Desktop)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .top-nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .nav-center {
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .nav-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .report-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .guide-steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .app-wrapper {
+    padding: 10px 8px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .chart-section {
+    height: 440px;
+  }
+
+  .chart-hud {
+    padding: 10px 12px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hud-indicators {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .day-trader-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trade-extremes-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .guide-steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    width: 95vw;
+    max-height: 90vh;
+    padding: 14px;
+  }
+
+  .terminal-body {
+    height: 120px;
+  }
+}
+
+/* ==========================================================================
+   MULTI-COIN WATCHLIST TICKER TAPE & BASKET TRAY STYLES
+   ========================================================================== */
+
+.watchlist-tape-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(11, 24, 43, 0.75);
+  border: 1px solid rgba(0, 245, 212, 0.16);
+  border-radius: 12px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.watchlist-tape-bar::-webkit-scrollbar {
+  height: 4px;
+}
+.watchlist-tape-bar::-webkit-scrollbar-thumb {
+  background: rgba(0, 245, 212, 0.3);
+  border-radius: 4px;
+}
+
+.tape-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.tape-icon {
+  font-size: 14px;
+  animation: pulseRotate 12s linear infinite;
+}
+
+@keyframes pulseRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.tape-items-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-grow: 1;
+}
+
+.tape-coin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(14, 30, 54, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tape-coin-pill:hover {
+  background: rgba(0, 245, 212, 0.12);
+  border-color: rgba(0, 245, 212, 0.4);
+  transform: translateY(-1px);
+}
+
+.tape-coin-pill.active {
+  background: rgba(0, 245, 212, 0.18);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 245, 212, 0.35);
+}
+
+.tape-coin-sym {
+  font-weight: 700;
+  font-size: 11px;
+  color: #fff;
+  letter-spacing: 0.03em;
+}
+
+.tape-coin-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: color 0.3s ease;
+}
+
+.tape-coin-price.tick-up {
+  color: #00f5d4 !important;
+  text-shadow: 0 0 8px rgba(0, 245, 212, 0.6);
+}
+
+.tape-coin-price.tick-down {
+  color: #ff3366 !important;
+  text-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
+}
+
+.tape-coin-pos-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00f5d4;
+  box-shadow: 0 0 8px #00f5d4;
+  animation: pulse-ring 1.8s infinite;
+}
+
+/* Positions Chips in Metric Card 3 */
+.positions-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.pos-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 245, 212, 0.1);
+  border: 1px solid rgba(0, 245, 212, 0.3);
+  border-radius: 6px;
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #00f5d4;
+}
+
+.pos-chip.profit {
+  background: rgba(0, 245, 212, 0.15);
+  border-color: #00f5d4;
+  color: #00f5d4;
+}
+
+.pos-chip.loss {
+  background: rgba(255, 51, 102, 0.15);
+  border-color: #ff3366;
+  color: #ff3366;
+}
+
+/* Basket Tray Section */
+.basket-tray-section {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.basket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.basket-empty-state {
+  grid-column: 1 / -1;
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  background: rgba(14, 30, 54, 0.35);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.basket-coin-card {
+  background: rgba(13, 27, 49, 0.85);
+  border: 1px solid rgba(0, 245, 212, 0.2);
+  border-radius: 10px;
+  padding: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.basket-coin-card:hover {
+  border-color: rgba(0, 245, 212, 0.5);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.basket-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.basket-card-sym {
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  letter-spacing: 0.04em;
+}
+
+.basket-pnl-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.basket-pnl-badge.profit {
+  background: rgba(0, 245, 212, 0.2);
+  color: #00f5d4;
+  border: 1px solid rgba(0, 245, 212, 0.4);
+}
+
+.basket-pnl-badge.loss {
+  background: rgba(255, 51, 102, 0.2);
+  color: #ff3366;
+  border: 1px solid rgba(255, 51, 102, 0.4);
+}
+
+.basket-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.basket-stat-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.basket-btn-close {
+  margin-top: 10px;
+  width: 100%;
+  padding: 6px 0;
+  background: rgba(255, 51, 102, 0.15);
+  border: 1px solid rgba(255, 51, 102, 0.4);
+  border-radius: 6px;
+  color: #ff3366;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.basket-btn-close:hover {
+  background: rgba(255, 51, 102, 0.35);
+  box-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+}
+
+/* Basket Card Specifics for JS Renderer */
+.basket-coin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.basket-coin-symbol {
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.basket-coin-tag {
+  font-size: 9px;
+  background: rgba(0, 245, 212, 0.2);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 245, 212, 0.4);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 800;
+}
+
+.basket-coin-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.basket-coin-pnl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.basket-coin-pnl.profit {
+  color: #00f5d4;
+  text-shadow: 0 0 8px rgba(0, 245, 212, 0.4);
+}
+
+.basket-coin-pnl.loss {
+  color: #ff3366;
+  text-shadow: 0 0 8px rgba(255, 51, 102, 0.4);
+}
+
+.basket-coin-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 6px;
+}
+
+.tape-coin-symbol {
+  font-weight: 700;
+  font-size: 11px;
+  color: #fff;
+  letter-spacing: 0.03em;
+}
+
+.tape-coin-badge {
+  font-size: 9px;
+  background: rgba(0, 245, 212, 0.25);
+  color: #00f5d4;
+  border: 1px solid #00f5d4;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-weight: 700;
+}
+
+.tape-coin-pill.has-position {
+  border-color: rgba(0, 245, 212, 0.5);
+  background: rgba(0, 245, 212, 0.08);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .watchlist-tape-bar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .tape-label {
+    display: none;
+  }
+  .basket-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
