@@ -181,6 +181,17 @@ function initChart() {
     }
   });
   resizeObserver.observe(container);
+
+  // Fallback Window Resize Listener for instantaneous layout sync
+  window.addEventListener('resize', () => {
+    if (chart && container) {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w > 0 && h > 0) {
+        chart.applyOptions({ width: w, height: h });
+      }
+    }
+  });
 }
 
 // ==========================================================================
@@ -305,30 +316,43 @@ function loadInitialState(data) {
   updateBotButton(data.status);
 
   // Sync Strategy & Risk Inputs
-  document.getElementById('strategy-select').value = data.active_strategy;
+  const stratSelect = document.getElementById('strategy-select');
+  if (stratSelect && data.active_strategy) stratSelect.value = data.active_strategy;
+
   const cfg = data.config || {};
   if (cfg.trade_amount_usdt) {
-    document.getElementById('input-trade-amount').value = cfg.trade_amount_usdt;
-    document.getElementById('val-trade-amount-disp').textContent = `$${cfg.trade_amount_usdt}`;
+    const el = document.getElementById('input-trade-amount');
+    if (el) el.value = cfg.trade_amount_usdt;
+    const disp = document.getElementById('val-trade-amount-disp');
+    if (disp) disp.textContent = `$${cfg.trade_amount_usdt}`;
   }
   if (cfg.stop_loss_pct) {
-    document.getElementById('input-stop-loss').value = cfg.stop_loss_pct;
-    document.getElementById('val-stop-loss-disp').textContent = `-${cfg.stop_loss_pct}%`;
+    const el = document.getElementById('input-stop-loss');
+    if (el) el.value = cfg.stop_loss_pct;
+    const disp = document.getElementById('val-stop-loss-disp');
+    if (disp) disp.textContent = `-${cfg.stop_loss_pct}%`;
   }
   if (cfg.take_profit_pct) {
-    document.getElementById('input-take-profit').value = cfg.take_profit_pct;
-    document.getElementById('val-take-profit-disp').textContent = `+${cfg.take_profit_pct}%`;
+    const el = document.getElementById('input-take-profit');
+    if (el) el.value = cfg.take_profit_pct;
+    const disp = document.getElementById('val-take-profit-disp');
+    if (disp) disp.textContent = `+${cfg.take_profit_pct}%`;
   }
   if (cfg.trailing_stop_enabled !== undefined) {
-    document.getElementById('check-trailing-stop').checked = cfg.trailing_stop_enabled;
+    const el = document.getElementById('check-trailing-stop');
+    if (el) el.checked = cfg.trailing_stop_enabled;
   }
   if (cfg.binance_testnet) {
-    if (cfg.binance_testnet.api_key) document.getElementById('testnet-api-key').value = cfg.binance_testnet.api_key;
-    if (cfg.binance_testnet.api_secret) document.getElementById('testnet-api-secret').value = cfg.binance_testnet.api_secret;
+    const k = document.getElementById('testnet-api-key');
+    if (k && cfg.binance_testnet.api_key) k.value = cfg.binance_testnet.api_key;
+    const s = document.getElementById('testnet-api-secret');
+    if (s && cfg.binance_testnet.api_secret) s.value = cfg.binance_testnet.api_secret;
   }
   if (cfg.binance_live) {
-    if (cfg.binance_live.api_key) document.getElementById('live-api-key').value = cfg.binance_live.api_key;
-    if (cfg.binance_live.api_secret) document.getElementById('live-api-secret').value = cfg.binance_live.api_secret;
+    const k = document.getElementById('live-api-key');
+    if (k && cfg.binance_live.api_key) k.value = cfg.binance_live.api_key;
+    const s = document.getElementById('live-api-secret');
+    if (s && cfg.binance_live.api_secret) s.value = cfg.binance_live.api_secret;
   }
 
   // Populate Candles on Chart
@@ -480,21 +504,20 @@ function updatePortfolioUI(p) {
   pnlPill.textContent = `${pnlSign}$${p.total_realized_pnl.toFixed(2)} (${p.total_pnl_pct >= 0 ? '+' : ''}${p.total_pnl_pct.toFixed(2)}%)`;
   pnlPill.className = 'pnl-pill ' + (p.total_realized_pnl > 0 ? 'profit' : (p.total_realized_pnl < 0 ? 'loss' : 'neutral'));
 
-  // Allocation Bar
+  // Allocation Bar & Card 2 (Active Capital in Trades)
   const totalVal = p.total_equity > 0 ? p.total_equity : 10000;
   const positionsVal = p.total_positions_value || (p.active_position ? p.active_position.market_value : 0);
   const allocPct = Math.min(100, Math.max(0, (positionsVal / totalVal) * 100));
   document.getElementById('allocation-bar-fill').style.width = `${allocPct.toFixed(1)}%`;
-  document.getElementById('allocation-pct-label').textContent = `${allocPct.toFixed(1)}% in Basket`;
 
   const activePositions = p.active_positions || (p.active_position ? [p.active_position] : []);
   const basketCount = activePositions.length;
   const maxSlots = 5;
 
-  const assetBase = state.symbol.split('/')[0];
-  document.getElementById('asset-holding-label').textContent = `${basketCount} Coins Held`;
+  document.getElementById('allocation-pct-label').textContent = `${allocPct.toFixed(1)}% Allocated (${basketCount}/${maxSlots} Slots in Trade)`;
+  document.getElementById('asset-holding-label').textContent = `${basketCount} COINS IN TRADE ($${formatCurrency(positionsVal)})`;
 
-  // Active Basket Card (Card 3)
+  // Active Basket Card (Card 3: Net Live PnL & Interactive Traded Coin Chips)
   const posBadge = document.getElementById('pos-status-badge');
   const posPnlDisp = document.getElementById('pos-pnl-display');
   const posPnlPct = document.getElementById('pos-pnl-pct');
@@ -502,7 +525,7 @@ function updatePortfolioUI(p) {
   const chipsContainer = document.getElementById('positions-chips-container');
 
   if (basketCount > 0) {
-    posBadge.textContent = `${basketCount} / ${maxSlots} ACTIVE`;
+    posBadge.textContent = `${basketCount} / ${maxSlots} ACTIVE TRADES`;
     posBadge.className = 'pos-badge long';
 
     const totalUnrealizedPnl = activePositions.reduce((sum, x) => sum + (x.unrealized_pnl || 0), 0);
@@ -517,12 +540,19 @@ function updatePortfolioUI(p) {
     posPnlDisp.className = `metric-value mono ${posClass}`;
     posPnlPct.className = `pos-pnl-pct mono ${posClass}`;
 
-    posDetails.innerHTML = `Basket Value: <strong>$${formatNumber(positionsVal)}</strong> in <strong>${basketCount}</strong> coins`;
+    posDetails.innerHTML = `Active Trades Mark: <strong>$${formatNumber(positionsVal)}</strong> across <strong>${basketCount}</strong> coins`;
 
     if (chipsContainer) {
       chipsContainer.innerHTML = activePositions.map(pos => {
         const s = pos.unrealized_pnl >= 0 ? '+' : '';
-        return `<span class="pos-chip ${pos.unrealized_pnl >= 0 ? 'profit' : 'loss'}" onclick="switchMarket('${pos.symbol}')" title="Click to view chart">${pos.symbol.split('/')[0]}: ${s}$${pos.unrealized_pnl.toFixed(1)}</span>`;
+        const pnlCls = pos.unrealized_pnl >= 0 ? 'profit' : 'loss';
+        const base = pos.symbol.split('/')[0];
+        return `
+          <button type="button" class="pos-chip ${pnlCls}" onclick="switchMarket('${pos.symbol}')" title="Inspect ${pos.symbol} on chart">
+            <span class="chip-sym">${base}</span>
+            <span class="chip-pnl">${s}$${pos.unrealized_pnl.toFixed(2)}</span>
+          </button>
+        `;
       }).join('');
     }
   } else {
@@ -532,7 +562,7 @@ function updatePortfolioUI(p) {
     posPnlPct.textContent = '(0.00%)';
     posPnlDisp.className = 'metric-value mono neutral';
     posPnlPct.className = 'pos-pnl-pct mono neutral';
-    posDetails.textContent = 'Fleet scanning 8 high-volume coins';
+    posDetails.textContent = 'Fleet scanning 8 high-volume markets';
     if (chipsContainer) chipsContainer.innerHTML = '';
   }
 
@@ -553,6 +583,127 @@ function updatePortfolioUI(p) {
   if (p.recent_trades && Array.isArray(p.recent_trades)) {
     renderTradesTable(p.recent_trades);
   }
+}
+
+function renderWatchlistTape(watchlist, prices, activeSymbol, activePositions) {
+  const container = document.getElementById('watchlist-tape-items');
+  if (!container) return;
+
+  const posMap = {};
+  (activePositions || []).forEach(p => { posMap[p.symbol] = p; });
+
+  const coins = Array.isArray(watchlist) && watchlist.length > 0 ? watchlist : [
+    "BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT", "SUI/USDT", "DOGE/USDT", "XRP/USDT", "PEPE/USDT"
+  ];
+
+  container.innerHTML = coins.map(sym => {
+    const isActive = sym === activeSymbol;
+    const pos = posMap[sym];
+    const base = sym.split('/')[0];
+    const px = prices[sym] || (isActive ? state.currentPrice : 0);
+    const pxStr = px > 0 ? `$${formatCurrency(px)}` : '---';
+
+    if (pos) {
+      const s = pos.unrealized_pnl >= 0 ? '+' : '';
+      const pnlCls = pos.unrealized_pnl >= 0 ? 'profit' : 'loss';
+      return `
+        <div class="tape-coin-pill has-position ${isActive ? 'active' : ''}" onclick="switchMarket('${sym}')" title="Click to view ${sym} chart (Active Position)">
+          <span class="tape-coin-pos-dot"></span>
+          <strong class="tape-coin-sym">${base}</strong>
+          <span class="tape-pos-badge">LONG</span>
+          <span class="tape-coin-price mono" id="tape-px-${base}">${pxStr}</span>
+          <span class="tab-pnl ${pnlCls}">${s}$${pos.unrealized_pnl.toFixed(2)}</span>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="tape-coin-pill ${isActive ? 'active' : ''}" onclick="switchMarket('${sym}')" title="Click to view ${sym} chart">
+          <strong class="tape-coin-sym">${base}</strong>
+          <span class="tape-coin-price mono" id="tape-px-${base}">${pxStr}</span>
+        </div>
+      `;
+    }
+  }).join('');
+}
+
+function renderBasketTray(activePositions, positionsVal) {
+  const container = document.getElementById('basket-grid-container');
+  const countBadge = document.getElementById('basket-count-badge');
+  const eqTag = document.getElementById('basket-equity-tag');
+
+  const positions = activePositions || [];
+  if (countBadge) countBadge.textContent = positions.length;
+  if (eqTag) eqTag.textContent = `ALLOCATED: $${formatCurrency(positionsVal)}`;
+
+  if (!container) return;
+
+  if (positions.length === 0) {
+    container.innerHTML = `
+      <div class="basket-empty-state">
+        <span>No open coin positions. The fleet is actively watching top volume coins and will auto-enter on high-probability setups.</span>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = positions.map(pos => {
+    const s = pos.unrealized_pnl >= 0 ? '+' : '';
+    const pnlCls = pos.unrealized_pnl >= 0 ? 'profit' : 'loss';
+    const isChartActive = pos.symbol === state.symbol;
+
+    // Distances to TP and SL
+    let tpDist = '---';
+    let slDist = '---';
+    if (pos.current_price && pos.take_profit_price) {
+      const tpDiffPct = ((pos.take_profit_price - pos.current_price) / pos.current_price) * 100;
+      tpDist = `${tpDiffPct >= 0 ? '+' : ''}${tpDiffPct.toFixed(1)}%`;
+    }
+    if (pos.current_price && pos.stop_loss_price) {
+      const slDiffPct = ((pos.stop_loss_price - pos.current_price) / pos.current_price) * 100;
+      slDist = `${slDiffPct.toFixed(1)}%`;
+    }
+
+    return `
+      <div class="basket-coin-card ${pnlCls}">
+        <div class="basket-card-header">
+          <div class="basket-card-title">
+            <span class="basket-pulse-dot"></span>
+            <strong class="basket-card-sym">${pos.symbol}</strong>
+            <span class="basket-strat-tag">LONG</span>
+          </div>
+          <span class="basket-pnl-pill ${pnlCls}">${s}$${pos.unrealized_pnl.toFixed(2)} (${s}${pos.unrealized_pnl_pct.toFixed(2)}%)</span>
+        </div>
+        <div class="basket-card-body">
+          <div class="basket-stat-row">
+            <span class="basket-stat-lbl">MARK / ENTRY:</span>
+            <span class="basket-stat-val">$${formatCurrency(pos.current_price || pos.entry_price)} / $${formatCurrency(pos.entry_price)}</span>
+          </div>
+          <div class="basket-stat-row">
+            <span class="basket-stat-lbl">ALLOCATION:</span>
+            <span class="basket-stat-val">$${formatCurrency(pos.cost_usdt)} &bull; ${pos.quantity}</span>
+          </div>
+          <div class="basket-stat-row">
+            <span class="basket-stat-lbl">TARGET (2R):</span>
+            <span class="basket-stat-val text-success">$${formatCurrency(pos.take_profit_price)} (${tpDist})</span>
+          </div>
+          <div class="basket-stat-row">
+            <span class="basket-stat-lbl">STOP (1R):</span>
+            <span class="basket-stat-val text-danger">$${formatCurrency(pos.stop_loss_price)} (${slDist})</span>
+          </div>
+        </div>
+        <div class="basket-card-actions">
+          <button type="button" class="basket-btn-chart" onclick="switchMarket('${pos.symbol}')" title="Inspect ${pos.symbol} on chart">
+            <svg class="svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>${isChartActive ? 'Viewing' : 'Inspect Chart'}</span>
+          </button>
+          <button type="button" class="basket-btn-close" onclick="closePosition('${pos.symbol}')" title="Close this position">
+            <svg class="svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <span>Close Position</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderChartFleetTabs(watchlist, prices, activeSymbol, activePositions) {
@@ -761,21 +912,28 @@ async function closePosition(symbol) {
 }
 
 function updateIndicatorsHUD(ind) {
-  if (ind.ema_fast) document.getElementById('val-ema-fast').textContent = formatCurrency(ind.ema_fast);
-  if (ind.ema_slow) document.getElementById('val-ema-slow').textContent = formatCurrency(ind.ema_slow);
+  if (!ind) return;
+  const emaFastEl = document.getElementById('val-ema-fast');
+  if (emaFastEl && ind.ema_fast !== undefined) emaFastEl.textContent = formatCurrency(ind.ema_fast);
+
+  const emaSlowEl = document.getElementById('val-ema-slow');
+  if (emaSlowEl && ind.ema_slow !== undefined) emaSlowEl.textContent = formatCurrency(ind.ema_slow);
 
   if (ind.rsi !== undefined) {
     const rsi = ind.rsi;
     const rsiEl = document.getElementById('val-rsi');
-    rsiEl.textContent = rsi.toFixed(1);
+    if (rsiEl) {
+      rsiEl.textContent = rsi.toFixed(1);
 
-    // Color code RSI
-    if (rsi <= 30) rsiEl.className = 'chip-val mono success';
-    else if (rsi >= 70) rsiEl.className = 'chip-val mono danger';
-    else rsiEl.className = 'chip-val mono';
+      // Color code RSI
+      if (rsi <= 30) rsiEl.className = 'chip-val mono success';
+      else if (rsi >= 70) rsiEl.className = 'chip-val mono danger';
+      else rsiEl.className = 'chip-val mono';
+    }
 
-    // Update RSI Gauge in Sidebar
-    document.getElementById('gauge-rsi-val').textContent = rsi.toFixed(1);
+    // Update RSI Gauge in Sidebar if elements exist
+    const gaugeVal = document.getElementById('gauge-rsi-val');
+    if (gaugeVal) gaugeVal.textContent = rsi.toFixed(1);
     const needle = document.getElementById('rsi-pointer');
     if (needle) {
       needle.style.left = `${Math.min(100, Math.max(0, rsi))}%`;
@@ -784,14 +942,21 @@ function updateIndicatorsHUD(ind) {
 }
 
 function updateSignalCard(sig) {
+  if (!sig) return;
   const actionBadge = document.getElementById('val-signal-action');
   const action = sig.action || 'HOLD';
-  actionBadge.textContent = action;
-  actionBadge.className = `signal-badge ${action.toLowerCase()}`;
+  if (actionBadge) {
+    actionBadge.textContent = action;
+    actionBadge.className = `signal-badge ${action.toLowerCase()}`;
+  }
 
-  document.getElementById('signal-reason-text').textContent = sig.reason || 'Analyzing market trend...';
-  const confPct = Math.round((sig.confidence || 0) * 100);
-  document.getElementById('signal-confidence').textContent = `${confPct}% CONFIDENCE`;
+  const reasonEl = document.getElementById('signal-reason-text');
+  if (reasonEl) reasonEl.textContent = sig.reason || 'Analyzing market trend...';
+  const confEl = document.getElementById('signal-confidence');
+  if (confEl) {
+    const confPct = Math.round((sig.confidence || 0) * 100);
+    confEl.textContent = `${confPct}% CONFIDENCE`;
+  }
 }
 
 function updateDayTraderSuite(suite) {
@@ -847,7 +1012,18 @@ function updateDayTraderSuite(suite) {
   }
 
   // 3. Update Bracket Plan
-  if (suite.plan) {
+  const activeForSymbol = (state.activePositions || []).find(p => p.symbol === state.symbol);
+  if (activeForSymbol) {
+    document.getElementById('plan-entry-price').textContent = `$${formatCurrency(activeForSymbol.entry_price)}`;
+    document.getElementById('plan-stop-price').textContent = `$${formatCurrency(activeForSymbol.stop_loss_price)}`;
+    document.getElementById('plan-target-price').textContent = `$${formatCurrency(activeForSymbol.take_profit_price)}`;
+    const distTarget = activeForSymbol.take_profit_price && activeForSymbol.entry_price ? Math.abs(activeForSymbol.take_profit_price - activeForSymbol.entry_price) : 0;
+    const distStop = activeForSymbol.stop_loss_price && activeForSymbol.entry_price ? Math.abs(activeForSymbol.entry_price - activeForSymbol.stop_loss_price) : 0;
+    const rr = distStop > 0 ? (distTarget / distStop).toFixed(2) : '2.00';
+    document.getElementById('plan-rr-ratio').textContent = `${rr}R (ACTIVE)`;
+    const reasonEl = document.getElementById('signal-reason-text');
+    if (reasonEl) reasonEl.textContent = activeForSymbol.reason ? activeForSymbol.reason.replace(/\[.*?\]\s*/g, '') : `Active position in ${state.symbol}`;
+  } else if (suite.plan) {
     const plan = suite.plan;
     document.getElementById('plan-entry-price').textContent = `$${formatCurrency(plan.entry_price)}`;
     document.getElementById('plan-stop-price').textContent = `$${formatCurrency(plan.stop_loss)}`;
@@ -1023,31 +1199,35 @@ function setupEventListeners() {
 
   // Bot Start/Pause Button
   const btnToggle = document.getElementById('btn-bot-toggle');
-  btnToggle.addEventListener('click', async () => {
-    initAudio();
-    if (state.status === 'RUNNING') {
-      await fetch('/api/bot/stop', { method: 'POST' });
-      state.status = 'PAUSED';
-      state.isRunning = false;
-    } else {
-      await fetch('/api/bot/start', { method: 'POST' });
-      state.status = 'RUNNING';
-      state.isRunning = true;
-    }
-    updateBotButton(state.status);
-  });
+  if (btnToggle) {
+    btnToggle.addEventListener('click', async () => {
+      initAudio();
+      if (state.status === 'RUNNING') {
+        await fetch('/api/bot/stop', { method: 'POST' });
+        state.status = 'PAUSED';
+        state.isRunning = false;
+      } else {
+        await fetch('/api/bot/start', { method: 'POST' });
+        state.status = 'RUNNING';
+        state.isRunning = true;
+      }
+      updateBotButton(state.status);
+    });
+  }
 
   // Panic Button
   const btnPanic = document.getElementById('btn-panic');
-  btnPanic.addEventListener('click', async () => {
-    initAudio();
-    if (confirm('🚨 EMERGENCY PANIC:\n\nLiquidate all open positions at market price and halt trading?')) {
-      await fetch('/api/bot/panic', { method: 'POST' });
-      state.status = 'PAUSED';
-      state.isRunning = false;
-      updateBotButton(state.status);
-    }
-  });
+  if (btnPanic) {
+    btnPanic.addEventListener('click', async () => {
+      initAudio();
+      if (confirm('EMERGENCY PANIC:\n\nLiquidate all open positions at market price and halt trading?')) {
+        await fetch('/api/bot/panic', { method: 'POST' });
+        state.status = 'PAUSED';
+        state.isRunning = false;
+        updateBotButton(state.status);
+      }
+    });
+  }
 
   // Chart Style Toggles (Candles vs Line)
   const btnCandles = document.getElementById('btn-chart-style-candles');
@@ -1133,63 +1313,80 @@ function setupEventListeners() {
 
   // Sliders Live Value Updates
   const inputAmount = document.getElementById('input-trade-amount');
-  inputAmount.addEventListener('input', e => {
-    document.getElementById('val-trade-amount-disp').textContent = `$${e.target.value}`;
-  });
+  if (inputAmount) {
+    inputAmount.addEventListener('input', e => {
+      const disp = document.getElementById('val-trade-amount-disp');
+      if (disp) disp.textContent = `$${e.target.value}`;
+    });
+  }
 
   const inputSL = document.getElementById('input-stop-loss');
-  inputSL.addEventListener('input', e => {
-    document.getElementById('val-stop-loss-disp').textContent = `-${parseFloat(e.target.value).toFixed(1)}%`;
-  });
+  if (inputSL) {
+    inputSL.addEventListener('input', e => {
+      const disp = document.getElementById('val-stop-loss-disp');
+      if (disp) disp.textContent = `-${parseFloat(e.target.value).toFixed(1)}%`;
+    });
+  }
 
   const inputTP = document.getElementById('input-take-profit');
-  inputTP.addEventListener('input', e => {
-    document.getElementById('val-take-profit-disp').textContent = `+${parseFloat(e.target.value).toFixed(1)}%`;
-  });
+  if (inputTP) {
+    inputTP.addEventListener('input', e => {
+      const disp = document.getElementById('val-take-profit-disp');
+      if (disp) disp.textContent = `+${parseFloat(e.target.value).toFixed(1)}%`;
+    });
+  }
 
   // Apply Settings Button
   const btnApply = document.getElementById('btn-apply-settings');
-  btnApply.addEventListener('click', async () => {
-    const payload = {
-      active_strategy: document.getElementById('strategy-select').value,
-      trade_amount_usdt: parseFloat(inputAmount.value) || 500,
-      stop_loss_pct: parseFloat(inputSL.value) || 1.5,
-      take_profit_pct: parseFloat(inputTP.value) || 3.0,
-      trailing_stop_enabled: document.getElementById('check-trailing-stop').checked
-    };
+  if (btnApply) {
+    btnApply.addEventListener('click', async () => {
+      const stratVal = document.getElementById('strategy-select') ? document.getElementById('strategy-select').value : 'adaptive_multi';
+      const checkTrailing = document.getElementById('check-trailing-stop');
+      const payload = {
+        active_strategy: stratVal,
+        trade_amount_usdt: inputAmount ? parseFloat(inputAmount.value) || 500 : 500,
+        stop_loss_pct: inputSL ? parseFloat(inputSL.value) || 1.5 : 1.5,
+        take_profit_pct: inputTP ? parseFloat(inputTP.value) || 3.0 : 3.0,
+        trailing_stop_enabled: checkTrailing ? checkTrailing.checked : true
+      };
 
-    btnApply.textContent = 'Applying...';
-    try {
-      await fetch('/api/config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      btnApply.textContent = '✓ Parameters Applied!';
-      setTimeout(() => { btnApply.textContent = 'Apply Strategy Parameters'; }, 1600);
-    } catch (e) {
-      btnApply.textContent = 'Error Applying';
-    }
-  });
+      btnApply.textContent = 'Applying...';
+      try {
+        await fetch('/api/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        btnApply.textContent = '✓ Parameters Applied!';
+        setTimeout(() => { btnApply.textContent = 'Apply Strategy Parameters'; }, 1600);
+      } catch (e) {
+        btnApply.textContent = 'Error Applying';
+      }
+    });
+  }
 
   // Reset Paper Wallet Button
   const btnReset = document.getElementById('btn-reset-wallet');
-  btnReset.addEventListener('click', async () => {
-    if (confirm('Reset simulated wallet back to $10,000.00 USDT and clear trade history?')) {
-      await fetch('/api/bot/reset-paper', { method: 'POST' });
-    }
-  });
+  if (btnReset) {
+    btnReset.addEventListener('click', async () => {
+      if (confirm('Reset simulated wallet back to $10,000.00 USDT and clear trade history?')) {
+        await fetch('/api/bot/reset-paper', { method: 'POST' });
+      }
+    });
+  }
 
   // Sound Toggle Button
   const btnSound = document.getElementById('btn-sound-toggle');
-  btnSound.addEventListener('click', () => {
-    state.soundEnabled = !state.soundEnabled;
-    btnSound.classList.toggle('active', state.soundEnabled);
-    if (state.soundEnabled) {
-      initAudio();
-      playTradeSound('BUY');
-    }
-  });
+  if (btnSound) {
+    btnSound.addEventListener('click', () => {
+      state.soundEnabled = !state.soundEnabled;
+      btnSound.classList.toggle('active', state.soundEnabled);
+      if (state.soundEnabled) {
+        initAudio();
+        playTradeSound('BUY');
+      }
+    });
+  }
 
   // Terminal Log Filters
   document.querySelectorAll('.log-filter-btn').forEach(btn => {
@@ -1203,10 +1400,12 @@ function setupEventListeners() {
 
   // Terminal Collapse Toggle
   const btnToggleTerminal = document.getElementById('btn-toggle-terminal');
-  btnToggleTerminal.addEventListener('click', () => {
-    const body = document.getElementById('terminal-log-stream');
-    body.classList.toggle('collapsed');
-  });
+  if (btnToggleTerminal) {
+    btnToggleTerminal.addEventListener('click', () => {
+      const body = document.getElementById('terminal-log-stream');
+      if (body) body.classList.toggle('collapsed');
+    });
+  }
 
   // Settings Modal Controls
   const modal = document.getElementById('settings-modal');
@@ -1215,9 +1414,9 @@ function setupEventListeners() {
   const btnCancelModal = document.getElementById('btn-cancel-modal');
   const btnSaveModal = document.getElementById('btn-save-modal');
 
-  btnOpenModal.addEventListener('click', () => modal.classList.remove('hidden'));
-  btnCloseModal.addEventListener('click', () => modal.classList.add('hidden'));
-  btnCancelModal.addEventListener('click', () => modal.classList.add('hidden'));
+  if (btnOpenModal && modal) btnOpenModal.addEventListener('click', () => modal.classList.remove('hidden'));
+  if (btnCloseModal && modal) btnCloseModal.addEventListener('click', () => modal.classList.add('hidden'));
+  if (btnCancelModal && modal) btnCancelModal.addEventListener('click', () => modal.classList.add('hidden'));
 
   // Environment Mode Switcher inside modal (Paper, Testnet, Live)
   const btnEnvPaper = document.getElementById('tab-env-paper');
@@ -1226,30 +1425,34 @@ function setupEventListeners() {
   const testnetBox = document.getElementById('testnet-credentials-box');
   const liveBox = document.getElementById('live-credentials-box');
 
-  btnEnvPaper.addEventListener('click', () => {
-    btnEnvPaper.classList.add('active');
-    btnEnvTestnet.classList.remove('active');
-    if (btnEnvLive) btnEnvLive.classList.remove('active');
-    testnetBox.classList.add('hidden');
-    if (liveBox) liveBox.classList.add('hidden');
-    state.mode = 'PAPER';
-  });
+  if (btnEnvPaper) {
+    btnEnvPaper.addEventListener('click', () => {
+      btnEnvPaper.classList.add('active');
+      if (btnEnvTestnet) btnEnvTestnet.classList.remove('active');
+      if (btnEnvLive) btnEnvLive.classList.remove('active');
+      if (testnetBox) testnetBox.classList.add('hidden');
+      if (liveBox) liveBox.classList.add('hidden');
+      state.mode = 'PAPER';
+    });
+  }
 
-  btnEnvTestnet.addEventListener('click', () => {
-    btnEnvTestnet.classList.add('active');
-    btnEnvPaper.classList.remove('active');
-    if (btnEnvLive) btnEnvLive.classList.remove('active');
-    testnetBox.classList.remove('hidden');
-    if (liveBox) liveBox.classList.add('hidden');
-    state.mode = 'BINANCE_TESTNET';
-  });
+  if (btnEnvTestnet) {
+    btnEnvTestnet.addEventListener('click', () => {
+      btnEnvTestnet.classList.add('active');
+      if (btnEnvPaper) btnEnvPaper.classList.remove('active');
+      if (btnEnvLive) btnEnvLive.classList.remove('active');
+      if (testnetBox) testnetBox.classList.remove('hidden');
+      if (liveBox) liveBox.classList.add('hidden');
+      state.mode = 'BINANCE_TESTNET';
+    });
+  }
 
   if (btnEnvLive) {
     btnEnvLive.addEventListener('click', () => {
       btnEnvLive.classList.add('active');
-      btnEnvPaper.classList.remove('active');
-      btnEnvTestnet.classList.remove('active');
-      testnetBox.classList.add('hidden');
+      if (btnEnvPaper) btnEnvPaper.classList.remove('active');
+      if (btnEnvTestnet) btnEnvTestnet.classList.remove('active');
+      if (testnetBox) testnetBox.classList.add('hidden');
       if (liveBox) liveBox.classList.remove('hidden');
       state.mode = 'BINANCE_LIVE';
     });
@@ -1260,16 +1463,20 @@ function setupEventListeners() {
   const liveFeedback = document.getElementById('live-verify-feedback');
   if (btnVerifyLive) {
     btnVerifyLive.addEventListener('click', async () => {
-      const apiKey = document.getElementById('live-api-key').value.trim();
-      const apiSecret = document.getElementById('live-api-secret').value.trim();
+      const apiKey = document.getElementById('live-api-key') ? document.getElementById('live-api-key').value.trim() : '';
+      const apiSecret = document.getElementById('live-api-secret') ? document.getElementById('live-api-secret').value.trim() : '';
       if (!apiKey || !apiSecret) {
-        liveFeedback.className = 'verify-feedback error';
-        liveFeedback.textContent = '⚠️ Please enter both API Key and Secret first.';
+        if (liveFeedback) {
+          liveFeedback.className = 'verify-feedback error';
+          liveFeedback.textContent = 'Please enter both API Key and Secret first.';
+        }
         return;
       }
       btnVerifyLive.disabled = true;
-      liveFeedback.className = 'verify-feedback';
-      liveFeedback.textContent = 'Connecting to Binance Spot API...';
+      if (liveFeedback) {
+        liveFeedback.className = 'verify-feedback';
+        liveFeedback.textContent = 'Connecting to Binance Spot API...';
+      }
       try {
         const resp = await fetch('/api/binance/validate', {
           method: 'POST',
@@ -1278,46 +1485,58 @@ function setupEventListeners() {
         });
         const res = await resp.json();
         if (res.valid) {
-          liveFeedback.className = 'verify-feedback success';
-          liveFeedback.textContent = `✓ Connected! Spot Balance: $${res.usdt_balance.toFixed(2)} USDT`;
+          if (liveFeedback) {
+            liveFeedback.className = 'verify-feedback success';
+            liveFeedback.textContent = `Connected! Spot Balance: $${res.usdt_balance.toFixed(2)} USDT`;
+          }
         } else {
-          liveFeedback.className = 'verify-feedback error';
-          liveFeedback.textContent = `✕ Failed: ${res.error}`;
+          if (liveFeedback) {
+            liveFeedback.className = 'verify-feedback error';
+            liveFeedback.textContent = `Connection failed: ${res.error}`;
+          }
         }
       } catch (err) {
-        liveFeedback.className = 'verify-feedback error';
-        liveFeedback.textContent = '✕ Network error verifying keys.';
+        if (liveFeedback) {
+          liveFeedback.className = 'verify-feedback error';
+          liveFeedback.textContent = 'Network error verifying keys.';
+        }
       } finally {
         btnVerifyLive.disabled = false;
       }
     });
   }
 
-  btnSaveModal.addEventListener('click', async () => {
-    const payload = {
-      mode: state.mode,
-      binance_testnet: {
-        api_key: document.getElementById('testnet-api-key').value.trim(),
-        api_secret: document.getElementById('testnet-api-secret').value.trim()
-      },
-      binance_live: {
-        api_key: document.getElementById('live-api-key').value.trim(),
-        api_secret: document.getElementById('live-api-secret').value.trim()
-      }
-    };
-    await fetch('/api/config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+  if (btnSaveModal) {
+    btnSaveModal.addEventListener('click', async () => {
+      const testnetKey = document.getElementById('testnet-api-key') ? document.getElementById('testnet-api-key').value.trim() : '';
+      const testnetSecret = document.getElementById('testnet-api-secret') ? document.getElementById('testnet-api-secret').value.trim() : '';
+      const liveKey = document.getElementById('live-api-key') ? document.getElementById('live-api-key').value.trim() : '';
+      const liveSecret = document.getElementById('live-api-secret') ? document.getElementById('live-api-secret').value.trim() : '';
+      const payload = {
+        mode: state.mode,
+        binance_testnet: {
+          api_key: testnetKey,
+          api_secret: testnetSecret
+        },
+        binance_live: {
+          api_key: liveKey,
+          api_secret: liveSecret
+        }
+      };
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      updateModeBadge(state.mode);
+      if (modal) modal.classList.add('hidden');
+      appendLog({
+        time: new Date().toLocaleTimeString(),
+        level: 'INFO',
+        message: `Trading environment updated to [${state.mode}]`
+      });
     });
-    updateModeBadge(state.mode);
-    modal.classList.add('hidden');
-    appendLog({
-      time: new Date().toLocaleTimeString(),
-      level: 'INFO',
-      message: `Trading environment updated to [${state.mode}]`
-    });
-  });
+  }
 
   // 24-Hour Performance Report Modal & CSV Controls
   const reportModal = document.getElementById('daily-report-modal');
@@ -1451,12 +1670,12 @@ async function refreshDailyReportModal() {
   if (banner && rIcon && rTitle && rDesc) {
     if (data.ready_for_real_money) {
       banner.className = 'readiness-banner ready';
-      rIcon.textContent = '🎉';
+      rIcon.innerHTML = `<svg class="panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
       rTitle.textContent = 'READY FOR REAL MONEY TRADING';
       rDesc.textContent = 'Your Neptune Bot fleet has maintained positive net returns and disciplined risk controls. You can safely proceed to Step 2 to trade real money on Binance Spot.';
     } else {
       banner.className = 'readiness-banner in-progress';
-      rIcon.textContent = '⏳';
+      rIcon.innerHTML = `<svg class="panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
       rTitle.textContent = '24-HOUR BENCHMARK IN PROGRESS';
       rDesc.textContent = 'Autonomous paper trading is actively running. Let the bot trade uninterrupted for 24 hours to gather statistical validity before deploying real capital.';
     }

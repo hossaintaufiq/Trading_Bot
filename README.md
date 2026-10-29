@@ -89,8 +89,22 @@ An institutional-grade, multi-bot algorithmic crypto trading terminal built in P
   Media queries (<768px and <1024px) with flexible grid wrapping ensure the dashboard scales cleanly from smartphones to multi-monitor trading desks.
 * **24-Hour Benchmark Session Tracking**:
   - Live session timer (`24H RUN: Xh Ym`) in the navbar.
-  - Interactive **📊 24h Report** modal displaying win rate, profit factor, drawdown, and sub-bot performance breakdowns.
-  - 1-Click **📥 CSV** export (`neptune_trades_report.csv`) for trade audit logs.
+  - Interactive **24h Report** modal displaying win rate, profit factor, drawdown, and sub-bot performance breakdowns.
+  - 1-Click **Audit CSV** export (`neptune_trades_report.csv`) for trade audit logs.
+
+---
+
+### Phase 6: Multi-Coin Trade Focus & Institutional Vector SVG Overhaul
+* **Active Basket Capital Allocation (Card 2 & 3 Overhaul)**:
+  - Eliminated single-coin bias (previously fixed on `0.0000 BTC`). Card 2 now tracks aggregate capital in active trades (`X Coins Held ($X.XX Cost)`) and free cash reserve.
+  - Card 3 displays real-time aggregate open basket PnL with interactive chips for every coin currently held by the bots (`BTC`, `ETH`, `SUI`, `DOGE`, etc.). Clicking any chip instantly selects that coin on the chart.
+* **100% Vector SVG Iconography**:
+  - Completely purged amateur emoji characters across the entire dashboard.
+  - Engineered a cohesive, lightweight SVG vector icon system (`svg-icon-xs`, `svg-icon-sm`, `panel-icon-svg`) adhering to Bloomberg/TradingView terminal standards.
+* **Active Multi-Coin Basket Command Floor**:
+  - Prominent tray beneath the chart rendering dedicated high-contrast trade cards for every active coin with live mark prices, entry prices, PnL %, target/stop distances, and quick action controls ("Inspect Chart", "Close Position").
+* **Synchronized Dynamic Bracket HUD**:
+  - The Institutional Bracket Plan card and chart overlays dynamically bind to whichever traded coin is selected, providing instant visibility into entry price, 1R stop loss, and 2R profit targets.
 
 ---
 
