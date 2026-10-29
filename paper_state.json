@@ -1,8 +1,29 @@
 {
-  "usdt_balance": 9836.281620923612,
-  "asset_balance": 0.0,
-  "active_position": null,
+  "usdt_balance": 9736.281620923612,
+  "asset_balance": 0.0012460741202332554,
+  "active_position": {
+    "symbol": "BTC/USDT",
+    "entry_price": 80171.795865,
+    "quantity": 0.0012460741202332554,
+    "cost_usdt": 100.00000000000001,
+    "entry_time": 1793277499824,
+    "highest_price": 80171.795865,
+    "stop_loss_price": null,
+    "take_profit_price": null,
+    "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Reclaimed 20 Moving Average ($80,104.1)"
+  },
   "trades_history": [
+    {
+      "id": "TRD-1793277499824",
+      "timestamp": 1793277499824,
+      "symbol": "BTC/USDT",
+      "side": "BUY",
+      "price": 80171.7959,
+      "quantity": 0.001246,
+      "cost_usdt": 100.0,
+      "fee_usdt": 0.1,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Reclaimed 20 Moving Average ($80,104.1)"
+    },
     {
       "id": "TRD-1793275621088",
       "timestamp": 1793275621089,
@@ -213,5 +234,5 @@
     }
   ],
   "peak_equity": 10000.0,
-  "max_drawdown_pct": 1.6222012795195042
+  "max_drawdown_pct": 1.6371837907638835
 }

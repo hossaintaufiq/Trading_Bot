@@ -4,13 +4,13 @@
   "symbol": "BTC/USDT",
   "timeframe": "1m",
   "active_strategy": "neptune_fleet",
-  "trade_amount_usdt": 100.0,
+  "trade_amount_usdt": 500.0,
   "max_loss_per_trade_usd": 50.0,
   "max_daily_loss_usd": 200.0,
   "min_reward_risk": 1.5,
   "cash_buffer_pct": 10.0,
   "stop_loss_pct": 1.5,
-  "take_profit_pct": 3.0,
+  "take_profit_pct": 3.1,
   "trailing_stop_enabled": true,
   "trailing_stop_pct": 1.0,
   "max_open_positions": 1,
@@ -18,5 +18,6 @@
   "slippage_pct": 0.05,
   "taker_fee_pct": 0.1,
   "binance_testnet": {},
-  "strategies": {}
+  "strategies": {},
+  "binance_live": {}
 }
