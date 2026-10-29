@@ -222,6 +222,10 @@ function handleWsMessage(msg) {
       handleTradeExecuted(msg.data);
       break;
 
+    case 'RADAR_SCAN_PULSE':
+      updateDayTraderSuite(msg.data);
+      break;
+
     case 'LOG_ENTRY':
       appendLog(msg.data);
       break;
@@ -300,6 +304,9 @@ function loadInitialState(data) {
   }
   if (data.signal) {
     updateSignalCard(data.signal);
+  }
+  if (data.day_trader_suite) {
+    updateDayTraderSuite(data.day_trader_suite);
   }
 
   // Logs
@@ -470,6 +477,68 @@ function updateSignalCard(sig) {
   document.getElementById('signal-confidence').textContent = `${confPct}% CONFIDENCE`;
 }
 
+function updateDayTraderSuite(suite) {
+  if (!suite) return;
+
+  // 1. Update Setups Radar List
+  const container = document.getElementById('setups-container');
+  if (container && suite.setups) {
+    const defaultSetups = [
+      { setup: "ORB_BREAKOUT", name: "Opening Range Breakout", badge: "ORB", idle: "Awaiting 15m Range" },
+      { setup: "BULL_FLAG", name: "Bull Flag Momentum", badge: "FLAG", idle: "Scanning Channel" },
+      { setup: "OVERSOLD_BOUNCE", name: "Oversold RSI Bounce", badge: "BOUNCE", idle: "RSI > 30 (Normal)" },
+      { setup: "RECLAIM_MA20", name: "20-MA Support Reclaim", badge: "RECLAIM", idle: "Tracking 20 SMA" }
+    ];
+
+    container.innerHTML = defaultSetups.map(def => {
+      const active = suite.setups.find(s => s.setup === def.setup && s.active);
+      const isAct = Boolean(active);
+      const statusText = active ? active.detail : def.idle;
+      const statusClass = isAct ? 'active' : 'idle';
+      const itemClass = isAct ? 'setup-item active-setup' : 'setup-item';
+
+      return `
+        <div class="${itemClass}">
+          <div class="setup-meta">
+            <span class="setup-badge ${def.badge.toLowerCase()}">${def.badge}</span>
+            <span class="setup-name">${def.name}</span>
+          </div>
+          <span class="setup-status ${statusClass}">${statusText}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 2. Update Time Machine Monte Carlo Panel
+  if (suite.timemachine) {
+    const tm = suite.timemachine;
+    document.getElementById('tm-target-pct').textContent = `${tm.target_first_pct}%`;
+    document.getElementById('tm-stop-pct').textContent = `${tm.stop_first_pct}%`;
+    document.getElementById('tm-target-fill').style.width = `${tm.target_first_pct}%`;
+    document.getElementById('tm-stop-fill').style.width = `${tm.stop_first_pct}%`;
+
+    const expR = tm.expected_r >= 0 ? `+${tm.expected_r.toFixed(2)}R` : `${tm.expected_r.toFixed(2)}R`;
+    const expEl = document.getElementById('tm-expected-r');
+    expEl.textContent = expR;
+    expEl.className = 'tm-stat-val mono ' + (tm.expected_r >= 0 ? 'success' : 'danger');
+
+    const vBadge = document.getElementById('tm-verdict-badge');
+    vBadge.textContent = tm.verdict;
+    if (tm.verdict.includes('FAVORABLE')) vBadge.className = 'verdict-badge favorable';
+    else if (tm.verdict.includes('POOR')) vBadge.className = 'verdict-badge poor';
+    else vBadge.className = 'verdict-badge coinflip';
+  }
+
+  // 3. Update Bracket Plan
+  if (suite.plan) {
+    const plan = suite.plan;
+    document.getElementById('plan-entry-price').textContent = `$${formatCurrency(plan.entry_price)}`;
+    document.getElementById('plan-stop-price').textContent = `$${formatCurrency(plan.stop_loss)}`;
+    document.getElementById('plan-target-price').textContent = `$${formatCurrency(plan.take_profit)}`;
+    document.getElementById('plan-rr-ratio').textContent = `${plan.reward_risk_ratio.toFixed(2)}R`;
+  }
+}
+
 function prependTradeRow(t) {
   const tbody = document.getElementById('trades-table-body');
   if (!tbody) return;
@@ -562,6 +631,25 @@ function setupEventListeners() {
           btnTestBuy.disabled = false;
           btnTestBuy.style.opacity = '1';
         }, 1200);
+      }
+    });
+  }
+
+  // Re-run Time Machine Button
+  const btnRunTM = document.getElementById('btn-run-timemachine');
+  if (btnRunTM) {
+    btnRunTM.addEventListener('click', async () => {
+      btnRunTM.textContent = 'Simulating...';
+      try {
+        const res = await fetch('/api/bot/time-machine/run', { method: 'POST' });
+        const d = await res.json();
+        if (d.success) {
+          updateDayTraderSuite(d);
+        }
+      } catch (e) {
+        console.error('Time machine run failed:', e);
+      } finally {
+        setTimeout(() => { btnRunTM.textContent = 'Re-run'; }, 800);
       }
     });
   }

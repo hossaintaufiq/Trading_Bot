@@ -17,32 +17,6 @@
   "paper_initial_balance": 10000.0,
   "slippage_pct": 0.05,
   "taker_fee_pct": 0.1,
-  "binance_testnet": {
-    "api_key": "",
-    "api_secret": ""
-  },
-  "strategies": {
-    "orb": {
-      "or_minutes": 15,
-      "target_r": 2.0
-    },
-    "bull_flag": {
-      "min_impulse_pct": 0.8,
-      "max_flag_range_pct": 1.2
-    },
-    "oversold_bounce": {
-      "rsi_threshold": 32
-    },
-    "reclaim_ma20": {
-      "period": 20
-    },
-    "ema_rsi": {
-      "fast_ema": 9,
-      "slow_ema": 21,
-      "rsi_period": 14,
-      "rsi_buy_min": 45,
-      "rsi_buy_max": 70,
-      "rsi_sell_threshold": 75
-    }
-  }
+  "binance_testnet": {},
+  "strategies": {}
 }

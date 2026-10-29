@@ -35,22 +35,23 @@ def open_browser_delayed(url: str, delay: float = 1.2):
 
 
 def print_banner(port: int):
-    print("=" * 65)
+    print("=" * 68)
     print(r"""
-  _   _  _______   ___   _ _____   ____   ____ _______ 
- | \ | || ____\ \ / / | | / ___| | __ ) / __ \_   _\ 
- |  \| ||  _|  \ V /| | | \___ \ |  _ \| |  | || |   
- | |\  || |___  | | | |_| |___) || |_) | |__| || |   
- |_| \_||_____| |_|  \___/|____/ |____/ \____/ |_|   
+  _   _ _____ ____ _____ _   _ _   _ _____   ____   ___ _____ 
+ | \ | | ____|  _ \_   _| | | | \ | | ____| | __ ) / _ \_   _|
+ |  \| |  _| | |_) || | | | | |  \| |  _|   |  _ \| | | || |  
+ | |\  | |___|  __/ | | | |_| | |\  | |___  | |_) | |_| || |  
+ |_| \_|_____|_|    |_|  \___/|_| \_|_____| |____/ \___/ |_|  
     """)
-    print("  BINANCE ALGORITHMIC TRADING BOT & REAL-TIME DASHBOARD")
-    print("=" * 65)
+    print("  🔱 NEPTUNE BOT — QUANTITATIVE DAY TRADING & MULTI-BOT SUITE")
+    print("=" * 68)
     print(f"  [>] Local Web UI:    http://localhost:{port}")
-    print(f"  [>] API Docs:        http://localhost:{port}/docs")
-    print(f"  [>] Default Mode:    PAPER TRADING ($10,000 Simulated Funds)")
-    print(f"  [>] Status:          ACTIVE & STREAMING FROM BINANCE")
-    print("=" * 65)
-    print("  Press Ctrl+C to stop the bot and server at any time.\n")
+    print(f"  [>] Active Fleet:    Neptune Autonomous Multi-Bot Fleet")
+    print(f"  [>] Telemetry:       1-Second Live Ticks / 15-Second Radar Scan")
+    print(f"  [>] Day Trader Pack: Scanner, Bracket Planner, Time Machine (Monte Carlo)")
+    print(f"  [>] Paper Balance:   $10,000.00 Simulated USDT")
+    print("=" * 68)
+    print("  Press Ctrl+C to pause the bot and shutdown the server.\n")
 
 
 def main():

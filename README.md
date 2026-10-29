@@ -1,104 +1,64 @@
-# ⚡ Nexus Trader — Binance Algorithmic Trading Bot & Dashboard
+# 🔱 Neptune Bot — Quantitative Day Trading & Multi-Bot Suite
 
-An institutional-grade, fully automated crypto trading bot in Python with a real-time dark glassmorphic web dashboard, live WebSocket telemetry, TradingView candlestick charts, and multi-strategy support.
-
----
-
-## 🌟 Key Features
-
-1. **Dual Trading Environments**:
-   * **Paper Trading Simulator (Default)**: Pre-funded with **$10,000 virtual USDT**. Simulates real-world execution with realistic taker fees (0.10%) and slippage (0.05%). Completely risk-free.
-   * **Binance Spot Testnet**: Directly connects to `testnet.binance.vision` using official API keys without putting real capital at risk.
-2. **Real-time Live Market Data**:
-   * Streams live tick-by-tick prices and candlesticks directly from Binance's public WebSocket (`BTC/USDT`, `ETH/USDT`, `SOL/USDT`, `BNB/USDT`, `DOGE/USDT`). **No API keys needed for live market feeds.**
-3. **Institutional Web Dashboard**:
-   * Powered by **TradingView Lightweight Charts v5** with interactive candlestick charts, Fast EMA (9), Slow EMA (21), and Buy/Sell execution marker arrows.
-   * Dynamic telemetry: Total Equity, Realized/Unrealized P&L, Win Rate %, Profit Factor, Max Drawdown.
-   * Audio sound cues for trade executions (Web Audio API synthesized chimes).
-4. **Three Built-in Quantitative Strategies**:
-   * **EMA 9/21 Crossover + RSI 14 Momentum**: Trend-following strategy with momentum filter.
-   * **Bollinger Bands Mean Reversion**: Buys oversold dips at lower bands; exits at upper bands.
-   * **Dynamic Volatility Grid Scalper**: Captures micro-fluctuations around moving average baselines.
-5. **Strict Risk Management**:
-   * Hard Stop-Loss % cutoff.
-   * Take-Profit % target exit.
-   * Trailing Stop protection (locks in profits as the trade rises).
-   * **One-Click Emergency Panic Button**: Instantly liquidates open positions at market price and halts execution.
+An institutional-grade, multi-bot algorithmic crypto trading platform built in Python. Features real-time **1-second live WebSocket market telemetry**, **15-second quantitative radar pulses**, integrated **Day Trader Skills** (Opening Range Breakout, Bull Flag, Oversold Bounce, 20-MA Reclaim), a **Monte Carlo Time Machine (1,000 Paths)** simulator, and a **Cyber-Oceanic Glassmorphic Web Dashboard**.
 
 ---
 
-## 🚀 Quick Start Guide (Windows)
+## 🌟 The Day Trader Skill Implementation
 
-### Step 1: Open Terminal in Project Directory
-Open PowerShell or Command Prompt in `d:\Project 2026\Trading_bot`:
+Neptune Bot directly incorporates the proven quantitative skills from the Day Trader pack:
+
+| Skill | Module | Neptune Bot Execution |
+| :--- | :--- | :--- |
+| **`trader-scanner`** | Setup Radar | Scans real-time candles every 15s for **ORB Breakouts**, **Bull Flags**, **Oversold Bounces**, and **20-MA Reclaims**. |
+| **`trader-entry`** | Entry Timer | Watches bar-by-bar and executes *only* on confirmed candle closes to prevent fakeout wicks. |
+| **`trader-exit`** | Bracket Planner | Generates pre-trade bracket orders: Stop at Range Midpoint (`or-mid`) or `atr:1.5`, and Take-Profit at **2R** target. |
+| **`trader-timemachine`** | Time Machine | Replays **1,000 simulated paths** using the asset's empirical bar return distribution. Displays Target Hit %, Stop Hit %, and Expected R before risking capital. |
+| **`trader-budget`** | Budget Sizer | Sizes orders dynamically: `Position Units = Max Risk ($50) / Distance to Stop`. |
+| **`trader-risk`** | Risk Gate | Pre-trade validation gate enforcing minimum 1.5R reward-to-risk, daily drawdown caps, and cash buffers. |
+
+---
+
+## 🤖 The Neptune Autonomous Multi-Bot Fleet
+
+In the dashboard, you can run individual bots or deploy the entire fleet:
+
+1. **🔱 Neptune Autonomous Fleet (Default)**:
+   * Runs all 5 bots concurrently in parallel.
+   * Every second, it evaluates incoming market ticks.
+   * When any setup triggers and passes the Risk Gate and Time Machine odds, the Fleet executes the trade!
+2. **Bot 1: Opening Range Breakout (ORB)**:
+   * Measures the 15-minute Opening Range. Buys on the first closed bar breaking out above the range high. Sets stop at range midpoint.
+3. **Bot 2: Bull Flag Momentum**:
+   * Identifies strong impulse spikes followed by tight consolidation inside a 1.2% channel, triggering on the flag breakout.
+4. **Bot 3: Oversold Bounce**:
+   * Detects RSI(14) oversold dips below 30 and enters on the first green reversal candle targeting mean reversion.
+5. **Bot 4: 20-MA Reclaim**:
+   * Buys when price reclaims the 20-period moving average with rising volume.
+6. **Bot 5: EMA 9/21 Trend Momentum**:
+   * Golden Cross momentum engine with support pullback dip-buying.
+
+---
+
+## ⏱️ Telemetry Cadence: 1s Live Ticks / 15s Radar Scan
+
+* **1-Second Live Loop**:
+  * Real-time WebSocket connection to Binance (`BTC/USDT`, `ETH/USDT`, `SOL/USDT`, `BNB/USDT`).
+  * Instant tick updates on price, active position P&L, indicator values, and chart candles.
+* **15-Second Radar Pulse**:
+  * Scans all 4 day-trading setups.
+  * Runs the **Time Machine Monte Carlo 1,000-path simulation**.
+  * Updates the bracket plan and risk gate status.
+
+---
+
+## 🚀 Quick Launch (Windows)
+
 ```powershell
 cd "d:\Project 2026\Trading_bot"
-```
-
-### Step 2: Run the Bot
-```powershell
 python run.py
 ```
-* The launcher will automatically find a free port (default: `8000`), launch your default browser, and open:
-  **`http://localhost:8000`**
 
----
-
-## 🇧🇩 Bangladesh (BD) Setup Guide & Regulations
-
-### Is Paper Trading Legal and Free from Bangladesh?
-* **Yes!** Paper trading and Testnet trading use **simulated virtual money** (fake demo funds).
-* You do **not** need to deposit real money, link a bank account, or perform foreign currency outward remittances (which Bangladesh Bank restricts).
-* Binance's public market feeds and testnet are accessible directly from internet providers in Bangladesh.
-
----
-
-## 🔑 How to Get Free Binance Testnet API Keys (Optional)
-
-If you want to move from local Paper Trading to official Binance Testnet execution:
-
-1. Visit the official Binance Spot Testnet: **[https://testnet.binance.vision](https://testnet.binance.vision)**
-2. Click **"Log In with GitHub"** to authenticate (no KYC, passport, or credit card required).
-3. Click **"Generate API Key"**.
-4. Copy your **API Key** and **Secret Key**.
-5. In the Nexus Dashboard:
-   * Click the **Settings Gear (⚙️)** in the top right navigation bar.
-   * Select **Binance Spot Testnet**.
-   * Paste your **API Key** and **Secret Key**.
-   * Click **Save Configuration**.
-
----
-
-## 📊 Dashboard Controls Reference
-
-| Control | Description |
-| :--- | :--- |
-| **START BOT / PAUSE BOT** | Starts or pauses algorithmic signal evaluation and automated order execution. |
-| **PANIC EXIT** | Emergency kill switch: Market-sells open position immediately and pauses the bot. |
-| **PAIR SELECTOR** | Switch between `BTC/USDT`, `ETH/USDT`, `SOL/USDT`, `BNB/USDT`, `DOGE/USDT`. |
-| **TIMEFRAME (1m, 3m, 5m, 15m)** | Changes candle aggregation and indicator resolution on the fly. |
-| **RESET WALLET** | Resets paper trading balance back to $10,000.00 and clears historical stats. |
-| **AUDIO TOGGLE (🔊)** | Toggles the synthesized chime that rings when orders execute. |
-
----
-
-## 🛠 Project Architecture
-
-```
-Trading_bot/
-├── run.py                 # One-click launcher with auto-browser launch
-├── server.py              # FastAPI server + WebSocket gateway
-├── bot_engine.py          # Master trading loop & risk manager
-├── paper_exchange.py      # Simulated exchange engine with fees & slippage
-├── binance_service.py     # Binance WebSocket & CCXT testnet connector
-├── indicators.py          # Vectorized technical indicators (NumPy/Pandas)
-├── strategies.py          # Modular trading strategy classes
-├── config.json            # Active bot configuration & parameters
-├── web/
-│   ├── index.html         # Modern cyber-dark dashboard
-│   ├── style.css          # Glassmorphic CSS styling
-│   ├── app.js             # Client WebSocket & TradingView charts logic
-│   └── js/
-│       └── lightweight-charts.js  # TradingView Lightweight Charts library
-└── README.md              # Documentation & guide
-```
+* Opens browser automatically to **`http://localhost:8000`**.
+* Click **`TEST BUY`** at the top to simulate an instant trade and verify execution, chart markers, sound chimes, and P&L cards.
+* Click **`START BOT`** to let the Neptune Fleet trade autonomously.

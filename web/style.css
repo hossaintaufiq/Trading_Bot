@@ -1409,3 +1409,324 @@ body {
 .btn-primary:hover {
   box-shadow: 0 6px 18px var(--accent-cyan-glow);
 }
+
+/* ==========================================================================
+   NEPTUNE DAY TRADER SUITE STYLING
+   ========================================================================== */
+.radar-trident {
+  font-size: 16px;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 0 6px #00f5d4);
+}
+
+.telemetry-cadence-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 245, 212, 0.08);
+  border: 1px solid rgba(0, 245, 212, 0.25);
+  color: #00f5d4;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+.telemetry-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00f5d4;
+  box-shadow: 0 0 8px #00f5d4;
+  animation: pulse-ring 1.5s infinite;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hud-tag.neptune {
+  background: rgba(0, 245, 212, 0.15);
+  border: 1px solid rgba(0, 245, 212, 0.35);
+  color: #00f5d4;
+}
+
+/* Day Trader Grid Below Chart */
+.day-trader-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .day-trader-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-icon {
+  font-size: 14px;
+}
+
+.pulse-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: #00f5d4;
+  background: rgba(0, 245, 212, 0.1);
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 245, 212, 0.25);
+}
+
+.btn-xs-action {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-xs-action:hover {
+  background: var(--bg-surface-elevated);
+  color: var(--accent-cyan);
+}
+
+/* Setups List */
+.setups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setup-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 11px;
+  transition: all var(--transition-fast);
+}
+
+.setup-item:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.setup-item.active-setup {
+  border-color: #00f5d4;
+  background: rgba(0, 245, 212, 0.06);
+}
+
+.setup-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setup-badge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 3px;
+  letter-spacing: 0.4px;
+}
+
+.setup-badge.orb { background: rgba(0, 245, 212, 0.2); color: #00f5d4; }
+.setup-badge.flag { background: rgba(157, 78, 221, 0.2); color: var(--accent-purple); }
+.setup-badge.bounce { background: rgba(255, 183, 3, 0.2); color: var(--accent-gold); }
+.setup-badge.reclaim { background: rgba(0, 229, 255, 0.2); color: var(--accent-cyan); }
+
+.setup-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.setup-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.setup-status.idle {
+  color: var(--text-muted);
+}
+
+.setup-status.active {
+  color: #00f5d4;
+  font-weight: 700;
+}
+
+/* Time Machine Card */
+.timemachine-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tm-verdict-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tm-label {
+  color: var(--text-muted);
+}
+
+.verdict-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.5px;
+}
+
+.verdict-badge.favorable {
+  background: rgba(0, 245, 212, 0.18);
+  border: 1px solid rgba(0, 245, 212, 0.4);
+  color: #00f5d4;
+}
+
+.verdict-badge.coinflip {
+  background: rgba(255, 183, 3, 0.15);
+  border: 1px solid rgba(255, 183, 3, 0.35);
+  color: var(--accent-gold);
+}
+
+.verdict-badge.poor {
+  background: rgba(255, 0, 84, 0.15);
+  border: 1px solid rgba(255, 0, 84, 0.35);
+  color: #ff0054;
+}
+
+.tm-odds-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tm-odds-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.tm-progress-track {
+  height: 8px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-pill);
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.tm-progress-target {
+  height: 100%;
+  background: linear-gradient(90deg, #00b4d8, #00f5d4);
+  transition: width var(--transition-smooth);
+}
+
+.tm-progress-stop {
+  height: 100%;
+  background: linear-gradient(90deg, #ff0054, #d90429);
+  transition: width var(--transition-smooth);
+}
+
+.tm-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.tm-stat-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
+}
+
+.tm-stat-name {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.tm-stat-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Bracket Plan & Risk Gate */
+.bracket-plan-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bracket-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.bracket-label {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.bracket-val {
+  font-weight: 700;
+}
+
+.risk-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+}
+
+.risk-badge.pass {
+  background: rgba(0, 245, 212, 0.15);
+  border: 1px solid rgba(0, 245, 212, 0.35);
+  color: #00f5d4;
+}
+
+.risk-badge.block {
+  background: rgba(255, 0, 84, 0.15);
+  border: 1px solid rgba(255, 0, 84, 0.35);
+  color: #ff0054;
+}
+
