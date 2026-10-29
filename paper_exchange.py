@@ -8,6 +8,7 @@ import json
 import os
 import time
 from typing import Dict, Any, List, Optional
+from learning_engine import LocalLearningEngine
 
 
 class PaperExchange:
@@ -16,6 +17,7 @@ class PaperExchange:
         self.initial_balance = initial_balance
         self.fee_pct = fee_pct
         self.slippage_pct = slippage_pct
+        self.learning_engine = LocalLearningEngine()
 
         self.usdt_balance = initial_balance
         self.asset_balance = 0.0
@@ -68,6 +70,7 @@ class PaperExchange:
         self.trades_history = []
         self.peak_equity = initial_balance
         self.max_drawdown_pct = 0.0
+        self.learning_engine.reset_learning_memory()
         self.save_state()
 
     def execute_buy(self, symbol: str, market_price: float, usdt_amount: float, reason: str = "") -> Dict[str, Any]:
@@ -160,6 +163,9 @@ class PaperExchange:
         if len(self.trades_history) > 100:
             self.trades_history = self.trades_history[:100]
 
+        # Ingest trade into Local Learning Engine to adaptively update setup weights
+        self.learning_engine.record_closed_trade(trade_record)
+
         self.save_state()
         return {"success": True, "trade": trade_record}
 
@@ -229,3 +235,92 @@ class PaperExchange:
             "active_position": active_pos_data,
             "recent_trades": self.trades_history[:15]
         }
+
+    def get_daily_report(self) -> Dict[str, Any]:
+        """Generate comprehensive 24-hour test session analytics for review before real money."""
+        summary = self.get_portfolio_summary(self.active_position["entry_price"] if self.active_position else self.initial_balance)
+        closed_trades = [t for t in self.trades_history if t.get("side") == "SELL" and "realized_pnl" in t]
+
+        bot_breakdown = {
+            "orb": {"name": "ORB Breakout", "trades": 0, "wins": 0, "pnl": 0.0},
+            "bull_flag": {"name": "Bull Flag Momentum", "trades": 0, "wins": 0, "pnl": 0.0},
+            "oversold_bounce": {"name": "Oversold Bounce", "trades": 0, "wins": 0, "pnl": 0.0},
+            "reclaim_ma20": {"name": "20-MA Reclaim", "trades": 0, "wins": 0, "pnl": 0.0},
+            "ema_rsi": {"name": "EMA 9/21 Trend", "trades": 0, "wins": 0, "pnl": 0.0}
+        }
+
+        best_trade = None
+        worst_trade = None
+
+        for t in closed_trades:
+            pnl = float(t.get("realized_pnl", 0.0))
+            if best_trade is None or pnl > float(best_trade.get("realized_pnl", -999999)):
+                best_trade = t
+            if worst_trade is None or pnl < float(worst_trade.get("realized_pnl", 999999)):
+                worst_trade = t
+
+            r = str(t.get("reason", "")).lower()
+            if "orb" in r:
+                bot_breakdown["orb"]["trades"] += 1
+                bot_breakdown["orb"]["pnl"] += pnl
+                if pnl > 0: bot_breakdown["orb"]["wins"] += 1
+            elif "flag" in r:
+                bot_breakdown["bull_flag"]["trades"] += 1
+                bot_breakdown["bull_flag"]["pnl"] += pnl
+                if pnl > 0: bot_breakdown["bull_flag"]["wins"] += 1
+            elif "oversold" in r or "bounce" in r:
+                bot_breakdown["oversold_bounce"]["trades"] += 1
+                bot_breakdown["oversold_bounce"]["pnl"] += pnl
+                if pnl > 0: bot_breakdown["oversold_bounce"]["wins"] += 1
+            elif "20-ma" in r or "reclaim" in r:
+                bot_breakdown["reclaim_ma20"]["trades"] += 1
+                bot_breakdown["reclaim_ma20"]["pnl"] += pnl
+                if pnl > 0: bot_breakdown["reclaim_ma20"]["wins"] += 1
+            else:
+                bot_breakdown["ema_rsi"]["trades"] += 1
+                bot_breakdown["ema_rsi"]["pnl"] += pnl
+                if pnl > 0: bot_breakdown["ema_rsi"]["wins"] += 1
+
+        first_trade_time = self.trades_history[-1]["timestamp"] if self.trades_history else int(time.time() * 1000)
+        session_elapsed_sec = max(1, int((time.time() * 1000 - first_trade_time) / 1000))
+        hours = session_elapsed_sec // 3600
+        mins = (session_elapsed_sec % 3600) // 60
+
+        # Ready for real money assessment
+        is_ready = summary["total_realized_pnl"] >= 0 and summary["win_rate_pct"] >= 50.0 and len(closed_trades) >= 2
+
+        return {
+            "session_duration_str": f"{hours}h {mins}m",
+            "session_hours": round(session_elapsed_sec / 3600, 2),
+            "initial_balance": summary["initial_balance"],
+            "current_equity": summary["total_equity"],
+            "total_realized_pnl": summary["total_realized_pnl"],
+            "total_pnl_pct": summary["total_pnl_pct"],
+            "win_rate_pct": summary["win_rate_pct"],
+            "profit_factor": summary["profit_factor"],
+            "max_drawdown_pct": summary["max_drawdown_pct"],
+            "total_trades": len(self.trades_history),
+            "closed_trades_count": len(closed_trades),
+            "winning_trades_count": summary["winning_trades_count"],
+            "losing_trades_count": summary["losing_trades_count"],
+            "best_trade": best_trade,
+            "worst_trade": worst_trade,
+            "bot_breakdown": bot_breakdown,
+            "ready_for_real_money": is_ready,
+            "learning_insights": self.learning_engine.get_learning_insights()
+        }
+
+    def generate_trades_csv(self) -> str:
+        """Export all executed trades to CSV spreadsheet format."""
+        header = "Trade_ID,Timestamp,DateTime,Symbol,Side,Price,Quantity,Cost_USDT,Proceeds_USDT,Fee_USDT,Realized_PnL,Realized_PnL_Pct,Hold_Sec,Reason"
+        lines = [header]
+        for t in reversed(self.trades_history):
+            dt_str = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(t.get('timestamp', 0) / 1000))
+            lines.append(
+                f"{t.get('id')},{t.get('timestamp')},{dt_str},{t.get('symbol')},{t.get('side')},"
+                f"{t.get('price')},{t.get('quantity')},{t.get('cost_usdt', '')},{t.get('proceeds_usdt', '')},"
+                f"{t.get('fee_usdt', '')},{t.get('realized_pnl', '')},{t.get('realized_pnl_pct', '')},"
+                f"{t.get('hold_duration_sec', '')},\"{t.get('reason', '')}\""
+            )
+        return "\n".join(lines)
+

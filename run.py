@@ -43,7 +43,7 @@ def print_banner(port: int):
  | |\  | |___|  __/ | | | |_| | |\  | |___  | |_) | |_| || |  
  |_| \_|_____|_|    |_|  \___/|_| \_|_____| |____/ \___/ |_|  
     """)
-    print("  🔱 NEPTUNE BOT — QUANTITATIVE DAY TRADING & MULTI-BOT SUITE")
+    print("  [NEPTUNE BOT] -- QUANTITATIVE DAY TRADING & MULTI-BOT SUITE")
     print("=" * 68)
     print(f"  [>] Local Web UI:    http://localhost:{port}")
     print(f"  [>] Active Fleet:    Neptune Autonomous Multi-Bot Fleet")

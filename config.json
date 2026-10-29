@@ -4,7 +4,7 @@
   "symbol": "BTC/USDT",
   "timeframe": "1m",
   "active_strategy": "neptune_fleet",
-  "trade_amount_usdt": 500.0,
+  "trade_amount_usdt": 100.0,
   "max_loss_per_trade_usd": 50.0,
   "max_daily_loss_usd": 200.0,
   "min_reward_risk": 1.5,

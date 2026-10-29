@@ -13,7 +13,7 @@ from typing import Dict, Any
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel
 
 from bot_engine import BotEngine
@@ -122,17 +122,74 @@ async def run_time_machine():
     }
 
 
+@app.get("/api/reports/daily-summary")
+async def get_daily_summary():
+    """Get comprehensive 24-hour test session analytics for review before real money."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    return engine.paper_exchange.get_daily_report()
+
+
+@app.get("/api/reports/trades.csv")
+async def export_trades_csv():
+    """Export complete trade audit log to CSV spreadsheet format."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    csv_content = engine.paper_exchange.generate_trades_csv()
+    return Response(
+        content=csv_content,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=neptune_trades_report.csv"}
+    )
+
+
+@app.get("/api/learning/insights")
+async def get_learning_insights():
+    """Retrieve local autonomous learning memory and adaptive strategy weights."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    return engine.paper_exchange.learning_engine.get_learning_insights()
+
+
+@app.post("/api/learning/reset")
+async def reset_learning_memory():
+    """Reset local learning memory to default prior weights."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    engine.paper_exchange.learning_engine.reset_learning_memory()
+    return {"success": True, "message": "Local learning memory reset."}
+
+
+class ValidateBinancePayload(BaseModel):
+    api_key: str
+    api_secret: str
+    is_testnet: bool = False
+
+
+@app.post("/api/binance/validate")
+async def validate_binance_credentials(payload: ValidateBinancePayload):
+    """Verify Binance API credentials and check balance before live activation."""
+    from binance_service import BinanceService
+    res = await BinanceService.validate_credentials(
+        api_key=payload.api_key,
+        api_secret=payload.api_secret,
+        is_testnet=payload.is_testnet
+    )
+    return res
+
+
 class ConfigPayload(BaseModel):
     mode: str = "PAPER"
     symbol: str = "BTC/USDT"
     timeframe: str = "1m"
-    active_strategy: str = "ema_rsi"
+    active_strategy: str = "neptune_fleet"
     trade_amount_usdt: float = 500.0
     stop_loss_pct: float = 1.5
     take_profit_pct: float = 3.0
     trailing_stop_enabled: bool = False
     trailing_stop_pct: float = 1.0
     binance_testnet: Dict[str, str] = {}
+    binance_live: Dict[str, str] = {}
     strategies: Dict[str, Any] = {}
 
 

@@ -58,17 +58,18 @@ class BotEngine:
             slippage_pct=self.config.get("slippage_pct", 0.05)
         )
         self.binance_service = BinanceService(self.config)
-        self.strategy = get_strategy(self.active_strategy_name, self.config)
+        self.strategy = get_strategy(self.active_strategy_name, self.config, learning_engine=self.paper_exchange.learning_engine)
 
         # Logging & Telemetry broadcast
         self.logs: List[Dict[str, Any]] = []
         self.ws_subscribers: List[asyncio.Queue] = []
         self.chart_markers: List[Dict[str, Any]] = []
+        self.latest_market_trends: Dict[str, Any] = {}
 
         # Background 15s pulse task
         self.pulse_task: Optional[asyncio.Task] = None
 
-        self.log("INFO", f"🔱 Neptune Engine initialized. Active: [{self.active_strategy_name}]. Mode: [{self.mode}].")
+        self.log("INFO", f"🌐 Neptune Engine initialized. Active: [{self.active_strategy_name}]. Mode: [{self.mode}].")
 
     def load_config(self) -> Dict[str, Any]:
         """Load configuration from JSON file."""
@@ -155,12 +156,16 @@ class BotEngine:
                 await asyncio.sleep(self.pulse_interval_sec)
                 if not self.klines_df.empty and len(self.klines_df) >= 25:
                     self._run_skills_scan()
+                    fleet_status = self.get_fleet_diagnostics()
+
                     await self.broadcast({
                         "type": "RADAR_SCAN_PULSE",
                         "data": {
                             "setups": self.detected_setups,
+                            "fleet_status": fleet_status,
                             "plan": self.latest_plan.__dict__ if self.latest_plan else None,
                             "timemachine": self.latest_timemachine.__dict__ if self.latest_timemachine else None,
+                            "market_trends": self.latest_market_trends,
                             "timestamp": int(time.time() * 1000)
                         }
                     })
@@ -194,6 +199,8 @@ class BotEngine:
             df=self.klines_df,
             num_replays=1000
         )
+        # 4. Live Market Trends
+        self.latest_market_trends = self.day_trader.compute_market_trends(self.klines_df, self.current_price)
         self.last_scan_time = int(time.time() * 1000)
 
     async def handle_ticker_tick(self, symbol: str, price: float, candle: Dict[str, Any]):
@@ -221,13 +228,17 @@ class BotEngine:
 
         # Emit live ticker update (1s / real-time)
         portfolio = self.paper_exchange.get_portfolio_summary(self.current_price)
+        if not self.klines_df.empty:
+            self.latest_market_trends = self.day_trader.compute_market_trends(self.klines_df, self.current_price)
+
         await self.broadcast({
             "type": "TICKER_UPDATE",
             "data": {
                 "symbol": symbol,
                 "price": self.current_price,
                 "candle": candle,
-                "portfolio": portfolio
+                "portfolio": portfolio,
+                "market_trends": self.latest_market_trends
             }
         })
 
@@ -356,8 +367,17 @@ class BotEngine:
             await self._execute_sell(signal.reason)
 
     async def _execute_buy(self, amount_usdt: float, reason: str, stop_price: Optional[float] = None, tp_price: Optional[float] = None):
-        """Execute buy order in Paper or Testnet."""
-        if self.mode == "BINANCE_TESTNET" and self.binance_service.ccxt_testnet:
+        """Execute buy order in Live Real Money, Testnet, or Paper."""
+        if self.mode == "BINANCE_LIVE" and self.binance_service.ccxt_live:
+            self.log("TRADE", f"Executing LIVE REAL MONEY BUY: ${amount_usdt:,.2f} of {self.symbol}...")
+            res = await self.binance_service.live_create_order(self.symbol, "BUY", amount_usdt, self.current_price)
+            if not res.get("success"):
+                self.log("ERROR", f"Live Order Failed: {res.get('error')}. Trade aborted for safety.")
+                return
+            else:
+                self.log("TRADE", f"Live Order Filled: {res.get('order', {}).get('id')}")
+                result = self.paper_exchange.execute_buy(self.symbol, self.current_price, amount_usdt, f"[LIVE] {reason}")
+        elif self.mode == "BINANCE_TESTNET" and self.binance_service.ccxt_testnet:
             self.log("TRADE", f"Executing Testnet BUY: ${amount_usdt:,.2f} of {self.symbol}...")
             res = await self.binance_service.testnet_create_order(self.symbol, "BUY", amount_usdt, self.current_price)
             if not res.get("success"):
@@ -390,8 +410,16 @@ class BotEngine:
             self.log("WARNING", f"Buy could not execute: {result.get('error')}")
 
     async def _execute_sell(self, reason: str):
-        """Execute sell order in Paper or Testnet."""
-        if self.mode == "BINANCE_TESTNET" and self.binance_service.ccxt_testnet:
+        """Execute sell order in Live Real Money, Testnet, or Paper."""
+        if self.mode == "BINANCE_LIVE" and self.binance_service.ccxt_live:
+            pos = self.paper_exchange.active_position
+            if pos:
+                self.log("TRADE", f"Executing LIVE REAL MONEY SELL: {pos['quantity']} {self.symbol.split('/')[0]}...")
+                res = await self.binance_service.live_create_order(self.symbol, "SELL", pos["cost_usdt"], self.current_price)
+                if not res.get("success"):
+                    self.log("ERROR", f"Live Sell Order Failed: {res.get('error')}")
+            result = self.paper_exchange.execute_sell(self.symbol, self.current_price, f"[LIVE] {reason}")
+        elif self.mode == "BINANCE_TESTNET" and self.binance_service.ccxt_testnet:
             pos = self.paper_exchange.active_position
             if pos:
                 await self.binance_service.testnet_create_order(self.symbol, "SELL", pos["cost_usdt"], self.current_price)
@@ -425,13 +453,13 @@ class BotEngine:
         """Activate algorithmic execution."""
         self.is_running = True
         self.status = "RUNNING"
-        self.log("INFO", f"▶️ 🔱 Neptune Bot active in [{self.mode}] mode. Strategy: [{self.active_strategy_name}]. Monitoring setups...")
+        self.log("INFO", f"▶️ Neptune Bot active in [{self.mode}] mode. Strategy: [{self.active_strategy_name}]. Monitoring setups...")
 
     def stop_bot(self):
         """Pause algorithmic execution."""
         self.is_running = False
         self.status = "PAUSED"
-        self.log("INFO", "⏸️ 🔱 Neptune Bot paused. Active positions remain protected by Stop/Target.")
+        self.log("INFO", "⏸️ Neptune Bot paused. Active positions remain protected by Stop/Target.")
 
     async def panic_exit(self):
         """Emergency Kill Switch: Liquidate all active positions immediately."""
@@ -473,7 +501,7 @@ class BotEngine:
         self.timeframe = self.config.get("timeframe", "1m")
         self.active_strategy_name = self.config.get("active_strategy", "neptune_fleet")
 
-        self.strategy = get_strategy(self.active_strategy_name, self.config)
+        self.strategy = get_strategy(self.active_strategy_name, self.config, learning_engine=self.paper_exchange.learning_engine)
         self.day_trader.config = self.config
         self.binance_service.config = self.config
         self.binance_service._init_ccxt_client()
@@ -486,7 +514,17 @@ class BotEngine:
             await self.initialize()
 
         self.save_config()
-        self.log("INFO", f"🔱 Neptune configuration updated. Active Strategy: [{self.active_strategy_name}].")
+        self.log("INFO", f"🌐 Neptune configuration updated. Active Strategy: [{self.active_strategy_name}].")
+
+    def get_fleet_diagnostics(self) -> List[Dict[str, Any]]:
+        """Return real-time diagnostic status and feedback from all 5 sub-bots."""
+        if hasattr(self.strategy, "get_fleet_status"):
+            return self.strategy.get_fleet_status(self.klines_df, self.paper_exchange.active_position)
+        else:
+            if not hasattr(self, "_diagnostic_fleet") or self._diagnostic_fleet is None:
+                from strategies import NeptuneFleetStrategy
+                self._diagnostic_fleet = NeptuneFleetStrategy(self.config, learning_engine=self.paper_exchange.learning_engine)
+            return self._diagnostic_fleet.get_fleet_status(self.klines_df, self.paper_exchange.active_position)
 
     def get_telemetry_snapshot(self) -> Dict[str, Any]:
         """Generate comprehensive telemetry payload for the UI."""
@@ -513,6 +551,8 @@ class BotEngine:
             curr_ema_fast = float(row.get("ema_fast", self.current_price))
             curr_ema_slow = float(row.get("ema_slow", self.current_price))
 
+        fleet_status = self.get_fleet_diagnostics()
+
         return {
             "bot_name": self.bot_name,
             "status": self.status,
@@ -531,14 +571,17 @@ class BotEngine:
             },
             "signal": {
                 "action": self.latest_signal.action if self.latest_signal else "HOLD",
-                "reason": self.latest_signal.reason if self.latest_signal else "🔱 Neptune Fleet scanning setups...",
+                "reason": self.latest_signal.reason if self.latest_signal else "Neptune Fleet scanning setups...",
                 "confidence": self.latest_signal.confidence if self.latest_signal else 0.0,
                 "setup_name": self.latest_signal.setup_name if self.latest_signal else "Fleet Radar"
             },
             "day_trader_suite": {
                 "setups": self.detected_setups,
+                "fleet_status": fleet_status,
                 "plan": self.latest_plan.__dict__ if self.latest_plan else None,
                 "timemachine": self.latest_timemachine.__dict__ if self.latest_timemachine else None,
+                "market_trends": self.latest_market_trends,
+                "learning_insights": self.paper_exchange.learning_engine.get_learning_insights(),
                 "last_scan_time": self.last_scan_time
             },
             "candles": candles,

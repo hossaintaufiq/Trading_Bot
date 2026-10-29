@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Any, List, Optional, Tuple
 import numpy as np
 import pandas as pd
+import time
 
 
 @dataclass
@@ -40,6 +41,12 @@ class TimeMachineResult:
     verdict: str  # "FAVORABLE EDGE", "COIN FLIP", "UNFAVORABLE"
     confidence: float
     percentiles: Dict[str, float]
+    sample_paths: Optional[List[Dict[str, Any]]] = None
+    cone_bounds: Optional[Dict[str, List[float]]] = None
+    entry_price: float = 0.0
+    target_price: float = 0.0
+    stop_price: float = 0.0
+    horizon_steps: int = 30
 
 
 @dataclass
@@ -257,26 +264,48 @@ class DayTraderSuite:
         neither = 0
         terminal_prices = []
 
-        np.random.seed(19)  # Deterministic seed for consistency
-        for _ in range(num_replays):
-            # Sample returns with replacement
-            sampled_rets = np.random.choice(bar_returns, size=horizon, replace=True)
+        path_matrix = np.zeros((num_replays, horizon + 1))
+        path_matrix[:, 0] = entry
+
+        target_paths = []
+        stop_paths = []
+        neutral_paths = []
+
+        # Use time-seeded random generator so live animations evolve as market moves
+        rng = np.random.default_rng(int(time.time() * 1000) % 2**32)
+
+        for i in range(num_replays):
+            # Sample empirical returns with replacement
+            sampled_rets = rng.choice(bar_returns, size=horizon, replace=True)
             path = entry * np.cumprod(1 + sampled_rets)
+            path_matrix[i, 1:] = path
 
             hit_target = np.where(path >= target)[0]
             hit_stop = np.where(path <= stop)[0]
 
+            full_path = [round(float(x), 2) for x in path_matrix[i]]
+
             if len(hit_target) > 0 and len(hit_stop) > 0:
                 if hit_target[0] < hit_stop[0]:
                     target_first += 1
+                    if len(target_paths) < 10:
+                        target_paths.append(full_path)
                 else:
                     stop_first += 1
+                    if len(stop_paths) < 8:
+                        stop_paths.append(full_path)
             elif len(hit_target) > 0:
                 target_first += 1
+                if len(target_paths) < 10:
+                    target_paths.append(full_path)
             elif len(hit_stop) > 0:
                 stop_first += 1
+                if len(stop_paths) < 8:
+                    stop_paths.append(full_path)
             else:
                 neither += 1
+                if len(neutral_paths) < 4:
+                    neutral_paths.append(full_path)
 
             terminal_prices.append(path[-1])
 
@@ -303,6 +332,24 @@ class DayTraderSuite:
             "p90": float(np.percentile(terminal_prices, 90))
         }
 
+        # Step-by-step percentile envelopes across all 30 forward steps
+        cone_bounds = {
+            "p10": [round(float(x), 2) for x in np.percentile(path_matrix, 10, axis=0)],
+            "p25": [round(float(x), 2) for x in np.percentile(path_matrix, 25, axis=0)],
+            "p50": [round(float(x), 2) for x in np.percentile(path_matrix, 50, axis=0)],
+            "p75": [round(float(x), 2) for x in np.percentile(path_matrix, 75, axis=0)],
+            "p90": [round(float(x), 2) for x in np.percentile(path_matrix, 90, axis=0)]
+        }
+
+        # Representative sample paths tagged by outcome for visual canvas
+        sample_paths = []
+        for p in target_paths:
+            sample_paths.append({"type": "target", "points": p})
+        for p in stop_paths:
+            sample_paths.append({"type": "stop", "points": p})
+        for p in neutral_paths:
+            sample_paths.append({"type": "neutral", "points": p})
+
         return TimeMachineResult(
             replays=num_replays,
             target_first_pct=round(target_pct, 1),
@@ -311,24 +358,141 @@ class DayTraderSuite:
             expected_r=round(expected_r, 2),
             verdict=verdict,
             confidence=round(confidence, 2),
-            percentiles=percentiles
+            percentiles=percentiles,
+            sample_paths=sample_paths,
+            cone_bounds=cone_bounds,
+            entry_price=round(entry, 2),
+            target_price=round(target, 2),
+            stop_price=round(stop, 2),
+            horizon_steps=horizon
         )
 
     # -------------------------------------------------------------------------
-    # 4. BUDGET SKILL: Risk-Based Position Sizing
+    # 4. LIVE MARKET TRENDS & MOMENTUM CONFLUENCE
+    # -------------------------------------------------------------------------
+    def compute_market_trends(self, df: pd.DataFrame, current_price: float) -> Dict[str, Any]:
+        """Compute live multi-timeframe trend momentum, volume surges, and volatility regimes."""
+        if df.empty or len(df) < 20:
+            return {
+                "trend_direction": "NEUTRAL",
+                "trend_strength_pct": 50,
+                "trend_label": "INITIALIZING MARKET",
+                "trend_class": "neutral",
+                "volatility_regime": "STABLE",
+                "volume_surge_ratio": 1.0,
+                "ema_spread_usd": 0.0,
+                "ema_spread_pct": 0.0,
+                "multi_timeframe": []
+            }
+
+        curr = df.iloc[-1]
+        price = current_price or float(curr["close"])
+        ema9 = float(curr.get("ema_fast", price))
+        ema21 = float(curr.get("ema_slow", price))
+        rsi = float(curr.get("rsi", 50.0))
+        ma20 = float(curr.get("bb_middle", price))
+
+        # 1. EMA Spread & Momentum Velocity
+        ema_spread = ema9 - ema21
+        ema_spread_pct = (ema_spread / price) * 100 if price > 0 else 0.0
+
+        # 2. Volume Surge Ratio vs 20-period average
+        vol_curr = float(curr.get("volume", 0))
+        vol_avg = float(df["volume"].tail(20).mean()) if "volume" in df.columns else 1.0
+        vol_surge = round(vol_curr / max(0.001, vol_avg), 2)
+
+        # 3. Trend Direction & Strength Score (0 to 100)
+        bull_score = 50
+        if price > ema9: bull_score += 15
+        else: bull_score -= 15
+        if ema9 > ema21: bull_score += 15
+        else: bull_score -= 15
+        if price > ma20: bull_score += 10
+        else: bull_score -= 10
+        if rsi >= 55: bull_score += 10
+        elif rsi <= 45: bull_score -= 10
+        bull_score = max(5, min(95, bull_score))
+
+        if bull_score >= 70:
+            trend_dir = "STRONG BULLISH"
+            trend_label = "BULLISH EXPANSION"
+            trend_class = "bull"
+        elif bull_score >= 55:
+            trend_dir = "MILD BULLISH"
+            trend_label = "MODERATE UPTREND"
+            trend_class = "bull"
+        elif bull_score <= 30:
+            trend_dir = "STRONG BEARISH"
+            trend_label = "BEARISH ACCELERATION"
+            trend_class = "bear"
+        elif bull_score <= 45:
+            trend_dir = "MILD BEARISH"
+            trend_label = "MODERATE DOWNTREND"
+            trend_class = "bear"
+        else:
+            trend_dir = "NEUTRAL"
+            trend_label = "SIDEWAYS COMPRESSION"
+            trend_class = "neutral"
+
+        # 4. Volatility Regime
+        atr = float(curr.get("atr", price * 0.005))
+        atr_avg = float(df["atr"].tail(20).mean()) if "atr" in df.columns else atr
+        if atr > atr_avg * 1.25:
+            vol_regime = "HIGH VOLATILITY EXPANSION"
+        elif atr < atr_avg * 0.75:
+            vol_regime = "LOW VOLATILITY SQUEEZE"
+        else:
+            vol_regime = "STABLE REGIME"
+
+        # 5. Multi-Timeframe Trend Confluence (1m, 3m, 5m, 15m)
+        t_1m = "BULL" if price >= ema9 else "BEAR"
+        c_3m_ago = float(df.iloc[-4]["close"]) if len(df) >= 4 else price
+        t_3m = "BULL" if price >= c_3m_ago else "BEAR"
+        c_5m_ago = float(df.iloc[-6]["close"]) if len(df) >= 6 else price
+        t_5m = "BULL" if price >= c_5m_ago else "BEAR"
+        c_15m_ago = float(df.iloc[-16]["close"]) if len(df) >= 16 else price
+        t_15m = "BULL" if price >= c_15m_ago else "BEAR"
+
+        multi_tf = [
+            {"tf": "1m", "name": "Micro Scalp", "trend": t_1m, "class": "bull" if t_1m == "BULL" else "bear"},
+            {"tf": "3m", "name": "Fast Momentum", "trend": t_3m, "class": "bull" if t_3m == "BULL" else "bear"},
+            {"tf": "5m", "name": "Session Trend", "trend": t_5m, "class": "bull" if t_5m == "BULL" else "bear"},
+            {"tf": "15m", "name": "Macro Filter", "trend": t_15m, "class": "bull" if t_15m == "BULL" else "bear"}
+        ]
+
+        return {
+            "trend_direction": trend_dir,
+            "trend_strength_pct": bull_score,
+            "trend_label": trend_label,
+            "trend_class": trend_class,
+            "volatility_regime": vol_regime,
+            "volume_surge_ratio": vol_surge,
+            "ema_spread_usd": round(ema_spread, 2),
+            "ema_spread_pct": round(ema_spread_pct, 3),
+            "multi_timeframe": multi_tf
+        }
+
+    # -------------------------------------------------------------------------
+    # 5. BUDGET SKILL: Risk-Based Position Sizing
     # -------------------------------------------------------------------------
     def size_position(self, plan: TradePlan, available_cash: float) -> Tuple[float, float]:
         """
-        Sizes position so that max loss at stop equals max_loss_per_trade.
-        Formula: Units = Max Risk USD / (Entry Price - Stop Loss Price)
+        Sizes position so that max loss at stop equals max_loss_per_trade,
+        strictly capped by trade_amount_usdt (default $500) and available cash.
         """
+        max_trade_budget = self.config.get("trade_amount_usdt", 500.0)
         max_loss_usd = self.config.get("max_loss_per_trade_usd", 50.0)
         risk_per_unit = plan.risk_per_unit
 
-        if risk_per_unit <= 0:
-            units = (self.config.get("trade_amount_usdt", 500.0)) / plan.entry_price
+        if risk_per_unit <= 0 or plan.entry_price <= 0:
+            units = max_trade_budget / plan.entry_price
         else:
             units = max_loss_usd / risk_per_unit
+
+        # Strict cap: Do not exceed user-configured trade amount ($500)
+        max_units_by_budget = max_trade_budget / plan.entry_price
+        if units > max_units_by_budget:
+            units = max_units_by_budget
 
         # Cap by available cash with 10% buffer
         cash_buffer = self.config.get("cash_buffer_pct", 10.0) / 100.0
@@ -336,7 +500,7 @@ class DayTraderSuite:
         if units * plan.entry_price > max_spend:
             units = max_spend / plan.entry_price
 
-        # Minimum order sanity check
+        # Minimum order sanity check ($15)
         min_order_usd = 15.0
         if units * plan.entry_price < min_order_usd:
             units = min_order_usd / plan.entry_price

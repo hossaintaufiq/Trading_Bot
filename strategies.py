@@ -178,9 +178,12 @@ class OversoldBounceStrategy(BaseStrategy):
                 )
             return Signal("HOLD", price, f"Monitoring RSI: Currently {rsi:.1f} (Waiting for oversold dip <= 30)", 0.0, metrics)
         else:
-            if rsi >= 65 or price >= ma20:
-                return Signal("SELL", price, f"Mean Reversion Target Reached (RSI: {rsi:.1f})", 0.85, "Bounce Target", metrics=metrics)
-            return Signal("HOLD", price, "Riding oversold bounce to 20-MA", 0.0, metrics)
+            entry_price = float(position.get("entry_price", price))
+            gain_pct = ((price - entry_price) / entry_price) * 100
+            # Target hit with real profit (> +1.5% or RSI >= 68 with positive gain)
+            if gain_pct >= 1.5 or (rsi >= 68 and gain_pct > 0.5):
+                return Signal("SELL", price, f"Oversold Bounce Target Hit (+{gain_pct:.2f}%)", 0.85, "Bounce Target", metrics=metrics)
+            return Signal("HOLD", price, f"Holding oversold bounce (PnL: {gain_pct:+.2f}%)", 0.0, metrics)
 
 
 class MAReclaimStrategy(BaseStrategy):
@@ -219,9 +222,13 @@ class MAReclaimStrategy(BaseStrategy):
                 )
             return Signal("HOLD", price, f"Below 20-MA: Price ${price:,.1f} vs MA20 ${ma20:,.1f}", 0.0, metrics)
         else:
-            if price < ma20 * 0.995:
+            entry_price = float(position.get("entry_price", price))
+            gain_pct = ((price - entry_price) / entry_price) * 100
+            if gain_pct >= 2.0:
+                return Signal("SELL", price, f"20-MA Target Reached (+{gain_pct:.2f}%)", 0.88, "MA Target", metrics=metrics)
+            elif price < ma20 * 0.99 and gain_pct < -0.5:
                 return Signal("SELL", price, "Lost 20-MA support level", 0.88, "MA Lost", metrics=metrics)
-            return Signal("HOLD", price, "Holding above 20-MA support", 0.0, metrics)
+            return Signal("HOLD", price, f"Holding 20-MA position (PnL: {gain_pct:+.2f}%)", 0.0, metrics)
 
 
 class EMARSIStrategy(BaseStrategy):
@@ -298,12 +305,14 @@ class EMARSIStrategy(BaseStrategy):
 
 class NeptuneFleetStrategy(BaseStrategy):
     """
-    🔱 Neptune Autonomous Fleet Strategy.
-    Runs ALL 4 day-trading bots concurrently (ORB, Bull Flag, Oversold Bounce, 20-MA Reclaim, EMA Trend).
+    🌐 Neptune Autonomous Fleet Strategy.
+    Runs ALL 5 day-trading bots concurrently (ORB, Bull Flag, Oversold Bounce, 20-MA Reclaim, EMA Trend).
     Evaluates every setup every second, picking the highest-confidence setup.
+    Dynamically applies Bayesian learned weights from local trading memory.
     """
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: Dict[str, Any], learning_engine: Optional[Any] = None):
         super().__init__("neptune_fleet", config.get("strategies", {}))
+        self.learning_engine = learning_engine
         self.sub_bots: List[BaseStrategy] = [
             ORBStrategy(self.params.get("orb", {})),
             BullFlagStrategy(self.params.get("bull_flag", {})),
@@ -313,39 +322,94 @@ class NeptuneFleetStrategy(BaseStrategy):
         ]
 
     def evaluate(self, df: pd.DataFrame, position: Optional[Dict[str, Any]] = None) -> Signal:
-        # If position is active, check exit rules
+        # If position is active: Let the position run to its 2R Target, Stop Loss, or matching setup exit
         if position is not None and position.get("quantity", 0) > 0:
+            pos_reason = str(position.get("reason", "")).lower()
             for bot in self.sub_bots:
-                sig = bot.evaluate(df, position)
-                if sig.action == "SELL":
-                    return sig
-            return Signal("HOLD", float(df.iloc[-1]["close"]), "Fleet holding active trade (Stops & Targets engaged)", 0.0)
+                # Only check exit of the bot that opened the trade
+                if (bot.name in pos_reason) or (bot.name == "reclaim_ma20" and "20-ma" in pos_reason) or (bot.name == "oversold_bounce" and "oversold" in pos_reason):
+                    sig = bot.evaluate(df, position)
+                    if sig.action == "SELL":
+                        return sig
+            return Signal("HOLD", float(df.iloc[-1]["close"]), "🌐 Fleet position running (Guarded by 1R Stop & 2R Target)", 0.0)
 
         # In entry mode: Evaluate all bots and pick best active BUY signal
         buy_signals = []
         for bot in self.sub_bots:
             sig = bot.evaluate(df, None)
             if sig.action == "BUY":
+                # Apply adaptive Bayesian learned weight if learning engine is present
+                learned_weight = 1.0
+                if self.learning_engine:
+                    learned_weight = self.learning_engine.get_setup_weight(bot.name)
+                weighted_confidence = round(min(1.0, sig.confidence * learned_weight), 2)
+                sig.confidence = weighted_confidence
+                sig.metrics["learned_weight"] = learned_weight
                 buy_signals.append(sig)
 
         if buy_signals:
             # Sort by confidence
             buy_signals.sort(key=lambda x: x.confidence, reverse=True)
             best = buy_signals[0]
-            best.reason = f"[🔱 FLEET ALERT] {best.reason}"
+            best.reason = f"[🌐 FLEET ALERT] {best.reason}"
             return best
 
         curr_price = float(df.iloc[-1]["close"])
         return Signal(
             action="HOLD",
             price=curr_price,
-            reason="🔱 Neptune Fleet scanning 5 quantitative setups simultaneously (Awaiting confirmation trigger)",
+            reason="Neptune Fleet scanning 5 quantitative setups simultaneously (Awaiting confirmation trigger)",
             confidence=0.0,
             setup_name="Fleet Radar"
         )
 
+    def get_fleet_status(self, df: pd.DataFrame, position: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Return real-time diagnostic status and feedback from each sub-bot."""
+        status_list = []
+        bot_meta = [
+            ("orb", "ORB Breakout Bot", "Opening Range"),
+            ("bull_flag", "Bull Flag Momentum", "Impulse & Channel"),
+            ("oversold_bounce", "Oversold Bounce Bot", "RSI Mean Reversion"),
+            ("reclaim_ma20", "20-MA Reclaim Bot", "Moving Average Reclaim"),
+            ("ema_rsi", "EMA 9/21 Trend Bot", "Trend & Pullback")
+        ]
 
-def get_strategy(strategy_name: str, config: Dict[str, Any]) -> BaseStrategy:
+        for bot, (bot_id, bot_name, setup_type) in zip(self.sub_bots, bot_meta):
+            learned_w = 1.0
+            if self.learning_engine:
+                learned_w = self.learning_engine.get_setup_weight(bot_id)
+
+            if df.empty or len(df) < 20:
+                status_list.append({
+                    "id": bot_id,
+                    "name": bot_name,
+                    "type": setup_type,
+                    "status": "INITIALIZING",
+                    "signal": "HOLD",
+                    "feedback": "Loading market candles...",
+                    "confidence": 0.0,
+                    "learned_weight": learned_w
+                })
+                continue
+
+            sig = bot.evaluate(df, position)
+            state_status = "TRIGGERED" if sig.action in ("BUY", "SELL") else ("ACTIVE" if sig.confidence > 0.5 else "SCANNING")
+
+            status_list.append({
+                "id": bot_id,
+                "name": bot_name,
+                "type": setup_type,
+                "status": state_status,
+                "signal": sig.action,
+                "feedback": sig.reason,
+                "confidence": round(sig.confidence * 100),
+                "learned_weight": learned_w
+            })
+
+        return status_list
+
+
+def get_strategy(strategy_name: str, config: Dict[str, Any], learning_engine: Optional[Any] = None) -> BaseStrategy:
     """Factory function for Neptune Bot strategies."""
     strat_configs = config.get("strategies", {})
     if strategy_name == "orb":
@@ -357,6 +421,6 @@ def get_strategy(strategy_name: str, config: Dict[str, Any]) -> BaseStrategy:
     elif strategy_name == "reclaim_ma20":
         return MAReclaimStrategy(strat_configs.get("reclaim_ma20", {}))
     elif strategy_name == "neptune_fleet":
-        return NeptuneFleetStrategy(config)
+        return NeptuneFleetStrategy(config, learning_engine=learning_engine)
     else:
         return EMARSIStrategy(strat_configs.get("ema_rsi", {}))
