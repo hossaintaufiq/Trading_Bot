@@ -40,6 +40,7 @@ class CentralizedRiskManager:
         self.config: Dict[str, Any] = {}
         if isinstance(config_or_path, dict):
             self.config = config_or_path
+            self._apply_config_defaults()
         else:
             self.load_config()
 

@@ -20,6 +20,7 @@ from day_trader_skills import DayTraderSuite, TradePlan, TimeMachineResult, Risk
 from paper_exchange import PaperExchange
 from binance_service import BinanceService
 from money_manager import MoneyManager
+from risk_manager import CentralizedRiskManager
 
 logger = logging.getLogger("bot_engine")
 
@@ -94,8 +95,9 @@ class BotEngine:
         self.last_closed_candle_time: Dict[str, int] = {}
         self.max_correlated_positions = int(self.config.get("max_correlated_positions", 2))
 
-        # Money Management & Capital Allocation Subsystem
+        # Money Management & Centralized Risk Subsystems
         self.money_manager = MoneyManager(self.config)
+        self.risk_manager = CentralizedRiskManager(self.config)
         self.max_open_positions = self.money_manager.max_open_positions
 
         # Subsystems
@@ -706,9 +708,10 @@ class BotEngine:
             if pnl_val < 0:
                 self.daily_loss_so_far += abs(pnl_val)
 
-            # Inform Money Manager of closed trade result
+            # Inform Money Manager and Centralized Risk Manager of closed trade result
             self.money_manager.record_closed_trade_pnl(pnl_val)
-            if self.money_manager.circuit_breaker_tripped:
+            self.risk_manager.record_trade_outcome(pnl_val)
+            if self.money_manager.circuit_breaker_tripped or self.risk_manager.circuit_breaker_tripped:
                 self.is_running = False
                 self.status = "CIRCUIT_BREAKER_HALTED"
                 self.log("RISK", f"🚨 MAX SESSION LOSS LIMIT REACHED (${self.money_manager.session_realized_loss:,.2f}). CIRCUIT BREAKER ENGAGED. Halting entries to protect capital!")
@@ -768,11 +771,12 @@ class BotEngine:
         initial = float(self.config.get("paper_initial_balance", 10000.0))
         self.paper_exchange.reset_wallet(initial)
         self.money_manager.reset_session_loss()
+        self.risk_manager.reset_daily_metrics()
         self.chart_markers = []
         self.daily_loss_so_far = 0.0
         self.status = "RUNNING"
         self.is_running = True
-        self.log("INFO", f"🔄 Paper wallet reset to ${initial:,.2f} USDT. Money Manager circuit breaker reset.")
+        self.log("INFO", f"🔄 Paper wallet reset to ${initial:,.2f} USDT. Centralized Risk Manager and Money Manager circuit breakers reset.")
 
     async def manual_buy(self, symbol: Optional[str] = None, amount_usdt: Optional[float] = None) -> Dict[str, Any]:
         """Manually trigger an immediate trade for testing and verification."""
