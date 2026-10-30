@@ -37,8 +37,8 @@ To pass institutional validation, a configuration was required to meet all 5 man
 | **Out-of-Sample Net Expectancy** | **> $0.00 / trade** (after costs) | **-$0.3961 / trade** | ❌ **FAIL** |
 | **Trade Sample Size** | **>= 300 trades** | 261 – 880 trades | ❌ **FAIL** |
 | **Out-of-Sample Profit Factor** | **>= 1.30** | **0.58** | ❌ **FAIL** |
-| **Profitability Consistency** | Profitable across quarters & regimes | Negative across all 4 quarters | ❌ **FAIL** |
-| **Max Portfolio Drawdown** | **< 15.0%** | 13.53% – 47.53% | ❌ **FAIL** |
+| **Profitability Consistency** | Profitable across quarters & regimes | Negative across all 5 quarters | ❌ **FAIL** |
+| **Max Portfolio Drawdown** | **< 15.0%** | 13.53% (BNB tier passed threshold; other runs 15.28% – 47.53% failed) | ⚠️ **PARTIAL / FAIL OVERALL** |
 
 ---
 
@@ -84,13 +84,30 @@ Replayed the original bot logic over the exact 14.4-hour paper trading window (2
 
 ---
 
-## 4. Head-to-Head Exit System Comparison (On the Exact Same Entries)
+## 4. Head-to-Head Exit System Comparison
 
-To determine whether the original fixed bracket exit or the upgraded trailing stop exit performs better, both exit engines were tested across the exact same 12-month 1-hour dataset (7 symbols, 9,457 bars) with identical entry signals and identical costs (0.10% fee, 0.05% slippage):
+### A. Isolated Single-Trade Test: 15,867 Truly Identical Entries (Zero Portfolio Concurrency Limits)
+To isolate exit mechanics from portfolio slot contention and signal filters, all raw strategy entry signals across the 12-month 1h dataset were recorded. Each identical entry was independently simulated through both exit engines with identical capital ($100), 0.10% fee, and 0.05% slippage:
 
 | Metric | Original Fixed Bracket Exit (SL 1.5%, TP 2.5%, 1% Trail) | Upgraded 1.5x ATR Trailing Stop Exit | Difference ($\Delta$) |
 | :--- | :--- | :--- | :--- |
-| **Total Trades** | 5,091 | 3,522 | -1,569 (-30.8%) |
+| **Total Identical Signals Evaluated** | **15,867** | **15,867** | **0 (100% Identical)** |
+| **Win Rate (%)** | 39.42% | **47.05%** | **+7.63%** |
+| **Average Win ($)** | **+$0.68** | +$0.61 | -$0.07 (-10.3%) |
+| **Average Loss ($)** | **-$1.25** | -$1.60 | -$0.35 (+28.0%) |
+| **Payoff Ratio** | **0.55** | 0.38 | -0.17 (-30.9%) |
+| **Profit Factor** | **0.35** | 0.34 | -0.01 |
+| **Total Net Realized PnL ($)** | **-$7,762.57** | -$8,855.32 | -$1,092.75 |
+| **Net Expectancy / Trade ($)** | **-$0.4892** | -$0.5581 | **-$0.0689 / trade** |
+
+### B. Full Portfolio Simulation: Differing Entry Sets (Capital & Signal Filtering Constraints)
+When evaluating the full bot engine where max positions are capped at 5 and correlation is capped at 2, the entry sets **naturally diverge** (5,091 vs. 3,522 trades) due to two structural differences:
+1. **Signal Invalidation Gate (Bug 3):** The Upgraded engine rejects signals lacking explicit stop/target prices, dropping ~1,500 low-quality trades.
+2. **Holding Duration & Concurrency (Bug 8):** The 1.5x ATR trail exits earlier on average (323.5 min vs. 371.2 min), freeing portfolio slots sooner, and limits exposure to max 2 concurrent altcoins:
+
+| Metric | Original Logic Backtest (Unfiltered Entries, 5 Alts Max) | Upgraded Logic Backtest (Gated Entries, 2 Alts Max) | Difference ($\Delta$) |
+| :--- | :--- | :--- | :--- |
+| **Total Executed Trades** | 5,091 | 3,522 | -1,569 (-30.8%) |
 | **Win Rate (%)** | 39.19% | **46.91%** | **+7.72%** |
 | **Average Win ($)** | **+$0.73** | +$0.63 | -$0.10 (-13.7%) |
 | **Average Loss ($)** | **-$1.33** | -$1.37 | -$0.04 (+3.0%) |
@@ -102,9 +119,9 @@ To determine whether the original fixed bracket exit or the upgraded trailing st
 | **Max Drawdown (%)** | 26.58% | **15.28%** | **-11.30%** |
 
 ### Quantitative Verdict on Exit Systems: Which Works Better?
-- **The Upgraded 1.5x ATR Trailing Stop is objectively superior** in risk containment, achieving a higher win rate (46.91% vs 39.19%), a lower net loss per trade (-$0.4329 vs -$0.5217), and substantially smaller drawdown (15.28% vs 26.58%).
-- **However, the Payoff Ratio is worse** under the trailing stop (0.46 vs 0.55) because trailing by 1.5x ATR after +1R clips winning runs prematurely, lowering the average win from $0.73 to $0.63.
-- **Critical Finding:** While the trailing stop cuts the loss rate, **neither exit produces positive expectancy.** Both remain negative because the underlying entry breakout signals carry no predictive statistical edge after exchange fees.
+- **In an isolated single-trade vacuum (100% identical entries):** The ATR trailing stop raises win rate (+7.63%), but because ATR stops are wider during volatile expansions than a fixed 1.5% stop, average loss increases from -$1.25 to -$1.60. Combined with lower average win (+$0.61 vs +$0.68), the unconstrained payoff drops sharply to 0.38, yielding -$0.5581 expectancy vs -$0.4892.
+- **In portfolio execution (with Stage 1 risk gates):** The upgraded bot cuts overall portfolio drawdown from 26.58% down to 15.28% and improves per-trade expectancy from -$0.5217 to -$0.4329, primarily driven by filtering out invalid signals and capping alt exposure.
+- **Conclusion:** Neither exit engine can create positive mathematical edge from negative-expectancy entry signals. Exit mechanics can modulate risk and win rate, but cannot overcome 0.30% round-trip exchange friction on low timeframes.
 
 ---
 
