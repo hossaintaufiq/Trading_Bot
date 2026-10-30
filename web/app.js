@@ -124,7 +124,7 @@ function initChart() {
     width: getContainerWidth(),
     height: getContainerHeight(),
     layout: {
-      background: { type: 'solid', color: '#090d16' },
+      background: { type: 'solid', color: '#000000' },
       textColor: '#94a3b8',
       fontFamily: "'JetBrains Mono', monospace",
       fontSize: 11
@@ -2096,10 +2096,7 @@ function drawTimeMachineCanvas() {
   ctx.clearRect(0, 0, width, height);
 
   // Background
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-  bgGrad.addColorStop(0, '#060a12');
-  bgGrad.addColorStop(1, '#090e18');
-  ctx.fillStyle = bgGrad;
+  ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, width, height);
 
   const padLeft = 45 * dpr;
@@ -2600,7 +2597,7 @@ function renderEquityCurveChart(history) {
   ctx.scale(dpr, dpr);
 
   // Background
-  ctx.fillStyle = '#080d18';
+  ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, width, height);
 
   // Parse history points
