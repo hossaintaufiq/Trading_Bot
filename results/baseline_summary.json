@@ -1,0 +1,1314 @@
+[
+  {
+    "total_trades": 5091,
+    "wins": 1995,
+    "losses": 3096,
+    "win_rate_pct": 39.19,
+    "loss_rate_pct": 60.81,
+    "net_pnl_usd": -2655.89,
+    "gross_profit_usd": 1461.93,
+    "gross_loss_usd": 4117.82,
+    "fees_paid_usd": 1016.14,
+    "avg_win_usd": 0.73,
+    "avg_loss_usd": 1.33,
+    "payoff_ratio": 0.55,
+    "profit_factor": 0.36,
+    "expectancy_per_trade_usd": -0.5217,
+    "max_drawdown_pct": 26.58,
+    "max_drawdown_usd": 2659.14,
+    "sharpe_ratio": -14.85,
+    "avg_hold_minutes": 371.2,
+    "avg_hold_bars": 7.2,
+    "breakdown_by_strategy": {
+      "bollinger_reversion": {
+        "trades": 17,
+        "wins": 6,
+        "win_rate_pct": 35.3,
+        "net_pnl": -12.58,
+        "profit_factor": 0.21,
+        "fees_paid": 3.39
+      },
+      "bull_flag": {
+        "trades": 207,
+        "wins": 65,
+        "win_rate_pct": 31.4,
+        "net_pnl": -120.31,
+        "profit_factor": 0.27,
+        "fees_paid": 41.3
+      },
+      "ema_rsi": {
+        "trades": 1205,
+        "wins": 403,
+        "win_rate_pct": 33.4,
+        "net_pnl": -700.84,
+        "profit_factor": 0.29,
+        "fees_paid": 240.44
+      },
+      "orb": {
+        "trades": 220,
+        "wins": 89,
+        "win_rate_pct": 40.5,
+        "net_pnl": -87.04,
+        "profit_factor": 0.46,
+        "fees_paid": 43.94
+      },
+      "oversold_bounce": {
+        "trades": 3043,
+        "wins": 1264,
+        "win_rate_pct": 41.5,
+        "net_pnl": -1572.81,
+        "profit_factor": 0.37,
+        "fees_paid": 607.39
+      },
+      "reclaim_ma20": {
+        "trades": 399,
+        "wins": 168,
+        "win_rate_pct": 42.1,
+        "net_pnl": -162.31,
+        "profit_factor": 0.46,
+        "fees_paid": 79.68
+      }
+    },
+    "breakdown_by_symbol": {
+      "BNB/USDT": {
+        "trades": 680,
+        "wins": 263,
+        "win_rate_pct": 38.7,
+        "net_pnl": -342.69,
+        "fees_paid": 135.74
+      },
+      "BTC/USDT": {
+        "trades": 629,
+        "wins": 253,
+        "win_rate_pct": 40.2,
+        "net_pnl": -326.79,
+        "fees_paid": 125.55
+      },
+      "DOGE/USDT": {
+        "trades": 638,
+        "wins": 245,
+        "win_rate_pct": 38.4,
+        "net_pnl": -350.46,
+        "fees_paid": 127.33
+      },
+      "ETH/USDT": {
+        "trades": 870,
+        "wins": 365,
+        "win_rate_pct": 42.0,
+        "net_pnl": -418.74,
+        "fees_paid": 173.68
+      },
+      "SOL/USDT": {
+        "trades": 947,
+        "wins": 371,
+        "win_rate_pct": 39.2,
+        "net_pnl": -496.4,
+        "fees_paid": 189.02
+      },
+      "SUI/USDT": {
+        "trades": 520,
+        "wins": 197,
+        "win_rate_pct": 37.9,
+        "net_pnl": -273.96,
+        "fees_paid": 103.79
+      },
+      "XRP/USDT": {
+        "trades": 807,
+        "wins": 301,
+        "win_rate_pct": 37.3,
+        "net_pnl": -446.85,
+        "fees_paid": 161.05
+      }
+    },
+    "run_label": "ORIGINAL_1h_Fee0.10",
+    "timeframe": "1h",
+    "fee_pct": 0.1,
+    "slippage_pct": 0.05,
+    "logic_version": "ORIGINAL",
+    "breakdown_by_quarter": {
+      "2025Q4": {
+        "trades": 1442,
+        "wins": 559,
+        "win_rate_pct": 38.8,
+        "net_pnl": -786.53,
+        "fees": 287.78
+      },
+      "2026Q1": {
+        "trades": 1361,
+        "wins": 522,
+        "win_rate_pct": 38.4,
+        "net_pnl": -745.57,
+        "fees": 271.61
+      },
+      "2026Q2": {
+        "trades": 1038,
+        "wins": 393,
+        "win_rate_pct": 37.9,
+        "net_pnl": -579.21,
+        "fees": 207.14
+      },
+      "2026Q3": {
+        "trades": 952,
+        "wins": 416,
+        "win_rate_pct": 43.7,
+        "net_pnl": -346.22,
+        "fees": 190.16
+      },
+      "2026Q4": {
+        "trades": 298,
+        "wins": 105,
+        "win_rate_pct": 35.2,
+        "net_pnl": -198.37,
+        "fees": 59.44
+      }
+    }
+  },
+  {
+    "total_trades": 5091,
+    "wins": 2113,
+    "losses": 2978,
+    "win_rate_pct": 41.5,
+    "loss_rate_pct": 58.5,
+    "net_pnl_usd": -2402.37,
+    "gross_profit_usd": 1565.13,
+    "gross_loss_usd": 3967.5,
+    "fees_paid_usd": 762.17,
+    "avg_win_usd": 0.74,
+    "avg_loss_usd": 1.33,
+    "payoff_ratio": 0.56,
+    "profit_factor": 0.39,
+    "expectancy_per_trade_usd": -0.4719,
+    "max_drawdown_pct": 24.05,
+    "max_drawdown_usd": 2405.84,
+    "sharpe_ratio": -13.52,
+    "avg_hold_minutes": 371.2,
+    "avg_hold_bars": 7.2,
+    "breakdown_by_strategy": {
+      "bollinger_reversion": {
+        "trades": 17,
+        "wins": 6,
+        "win_rate_pct": 35.3,
+        "net_pnl": -11.73,
+        "profit_factor": 0.24,
+        "fees_paid": 2.54
+      },
+      "bull_flag": {
+        "trades": 207,
+        "wins": 71,
+        "win_rate_pct": 34.3,
+        "net_pnl": -110.01,
+        "profit_factor": 0.3,
+        "fees_paid": 30.98
+      },
+      "ema_rsi": {
+        "trades": 1205,
+        "wins": 430,
+        "win_rate_pct": 35.7,
+        "net_pnl": -640.87,
+        "profit_factor": 0.32,
+        "fees_paid": 180.35
+      },
+      "orb": {
+        "trades": 220,
+        "wins": 96,
+        "win_rate_pct": 43.6,
+        "net_pnl": -76.07,
+        "profit_factor": 0.51,
+        "fees_paid": 32.96
+      },
+      "oversold_bounce": {
+        "trades": 3043,
+        "wins": 1328,
+        "win_rate_pct": 43.6,
+        "net_pnl": -1421.26,
+        "profit_factor": 0.41,
+        "fees_paid": 455.58
+      },
+      "reclaim_ma20": {
+        "trades": 399,
+        "wins": 182,
+        "win_rate_pct": 45.6,
+        "net_pnl": -142.42,
+        "profit_factor": 0.51,
+        "fees_paid": 59.77
+      }
+    },
+    "breakdown_by_symbol": {
+      "BNB/USDT": {
+        "trades": 680,
+        "wins": 277,
+        "win_rate_pct": 40.7,
+        "net_pnl": -308.82,
+        "fees_paid": 101.81
+      },
+      "BTC/USDT": {
+        "trades": 629,
+        "wins": 262,
+        "win_rate_pct": 41.7,
+        "net_pnl": -295.47,
+        "fees_paid": 94.17
+      },
+      "DOGE/USDT": {
+        "trades": 638,
+        "wins": 258,
+        "win_rate_pct": 40.4,
+        "net_pnl": -318.7,
+        "fees_paid": 95.5
+      },
+      "ETH/USDT": {
+        "trades": 870,
+        "wins": 386,
+        "win_rate_pct": 44.4,
+        "net_pnl": -375.4,
+        "fees_paid": 130.27
+      },
+      "SOL/USDT": {
+        "trades": 947,
+        "wins": 392,
+        "win_rate_pct": 41.4,
+        "net_pnl": -449.24,
+        "fees_paid": 141.77
+      },
+      "SUI/USDT": {
+        "trades": 520,
+        "wins": 219,
+        "win_rate_pct": 42.1,
+        "net_pnl": -248.07,
+        "fees_paid": 77.85
+      },
+      "XRP/USDT": {
+        "trades": 807,
+        "wins": 319,
+        "win_rate_pct": 39.5,
+        "net_pnl": -406.68,
+        "fees_paid": 120.8
+      }
+    },
+    "run_label": "ORIGINAL_1h_Fee0.075_BNB",
+    "timeframe": "1h",
+    "fee_pct": 0.075,
+    "slippage_pct": 0.05,
+    "logic_version": "ORIGINAL",
+    "breakdown_by_quarter": {
+      "2025Q4": {
+        "trades": 1442,
+        "wins": 592,
+        "win_rate_pct": 41.1,
+        "net_pnl": -714.74,
+        "fees": 215.86
+      },
+      "2026Q1": {
+        "trades": 1361,
+        "wins": 546,
+        "win_rate_pct": 40.1,
+        "net_pnl": -677.81,
+        "fees": 203.73
+      },
+      "2026Q2": {
+        "trades": 1038,
+        "wins": 419,
+        "win_rate_pct": 40.4,
+        "net_pnl": -527.54,
+        "fees": 155.37
+      },
+      "2026Q3": {
+        "trades": 952,
+        "wins": 444,
+        "win_rate_pct": 46.6,
+        "net_pnl": -298.73,
+        "fees": 142.64
+      },
+      "2026Q4": {
+        "trades": 298,
+        "wins": 112,
+        "win_rate_pct": 37.6,
+        "net_pnl": -183.55,
+        "fees": 44.58
+      }
+    }
+  },
+  {
+    "total_trades": 3522,
+    "wins": 1652,
+    "losses": 1870,
+    "win_rate_pct": 46.91,
+    "loss_rate_pct": 53.09,
+    "net_pnl_usd": -1524.7,
+    "gross_profit_usd": 1041.82,
+    "gross_loss_usd": 2566.52,
+    "fees_paid_usd": 703.2,
+    "avg_win_usd": 0.63,
+    "avg_loss_usd": 1.37,
+    "payoff_ratio": 0.46,
+    "profit_factor": 0.41,
+    "expectancy_per_trade_usd": -0.4329,
+    "max_drawdown_pct": 15.28,
+    "max_drawdown_usd": 1528.35,
+    "sharpe_ratio": -12.71,
+    "avg_hold_minutes": 323.5,
+    "avg_hold_bars": 6.4,
+    "breakdown_by_strategy": {
+      "bollinger_reversion": {
+        "trades": 19,
+        "wins": 8,
+        "win_rate_pct": 42.1,
+        "net_pnl": -11.5,
+        "profit_factor": 0.23,
+        "fees_paid": 3.79
+      },
+      "bull_flag": {
+        "trades": 173,
+        "wins": 66,
+        "win_rate_pct": 38.2,
+        "net_pnl": -87.58,
+        "profit_factor": 0.26,
+        "fees_paid": 34.53
+      },
+      "ema_rsi": {
+        "trades": 808,
+        "wins": 365,
+        "win_rate_pct": 45.2,
+        "net_pnl": -423.34,
+        "profit_factor": 0.31,
+        "fees_paid": 161.25
+      },
+      "orb": {
+        "trades": 176,
+        "wins": 95,
+        "win_rate_pct": 54.0,
+        "net_pnl": -35.52,
+        "profit_factor": 0.65,
+        "fees_paid": 35.18
+      },
+      "oversold_bounce": {
+        "trades": 2070,
+        "wins": 988,
+        "win_rate_pct": 47.7,
+        "net_pnl": -869.43,
+        "profit_factor": 0.44,
+        "fees_paid": 413.32
+      },
+      "reclaim_ma20": {
+        "trades": 276,
+        "wins": 130,
+        "win_rate_pct": 47.1,
+        "net_pnl": -97.34,
+        "profit_factor": 0.43,
+        "fees_paid": 55.13
+      }
+    },
+    "breakdown_by_symbol": {
+      "BNB/USDT": {
+        "trades": 451,
+        "wins": 207,
+        "win_rate_pct": 45.9,
+        "net_pnl": -186.87,
+        "fees_paid": 90.05
+      },
+      "BTC/USDT": {
+        "trades": 955,
+        "wins": 442,
+        "win_rate_pct": 46.3,
+        "net_pnl": -369.66,
+        "fees_paid": 190.72
+      },
+      "DOGE/USDT": {
+        "trades": 179,
+        "wins": 76,
+        "win_rate_pct": 42.5,
+        "net_pnl": -104.52,
+        "fees_paid": 35.71
+      },
+      "ETH/USDT": {
+        "trades": 815,
+        "wins": 392,
+        "win_rate_pct": 48.1,
+        "net_pnl": -354.33,
+        "fees_paid": 162.72
+      },
+      "SOL/USDT": {
+        "trades": 738,
+        "wins": 353,
+        "win_rate_pct": 47.8,
+        "net_pnl": -334.51,
+        "fees_paid": 147.33
+      },
+      "SUI/USDT": {
+        "trades": 135,
+        "wins": 65,
+        "win_rate_pct": 48.1,
+        "net_pnl": -68.2,
+        "fees_paid": 26.95
+      },
+      "XRP/USDT": {
+        "trades": 249,
+        "wins": 117,
+        "win_rate_pct": 47.0,
+        "net_pnl": -106.6,
+        "fees_paid": 49.72
+      }
+    },
+    "run_label": "FIXED_1h_Fee0.10",
+    "timeframe": "1h",
+    "fee_pct": 0.1,
+    "slippage_pct": 0.05,
+    "logic_version": "STAGE_1_FIXED",
+    "breakdown_by_quarter": {
+      "2025Q4": {
+        "trades": 838,
+        "wins": 403,
+        "win_rate_pct": 48.1,
+        "net_pnl": -392.63,
+        "fees": 167.29
+      },
+      "2026Q1": {
+        "trades": 844,
+        "wins": 392,
+        "win_rate_pct": 46.4,
+        "net_pnl": -418.84,
+        "fees": 168.46
+      },
+      "2026Q2": {
+        "trades": 792,
+        "wins": 355,
+        "win_rate_pct": 44.8,
+        "net_pnl": -363.97,
+        "fees": 158.11
+      },
+      "2026Q3": {
+        "trades": 799,
+        "wins": 388,
+        "win_rate_pct": 48.6,
+        "net_pnl": -240.36,
+        "fees": 159.63
+      },
+      "2026Q4": {
+        "trades": 249,
+        "wins": 114,
+        "win_rate_pct": 45.8,
+        "net_pnl": -108.9,
+        "fees": 49.71
+      }
+    }
+  },
+  {
+    "total_trades": 3522,
+    "wins": 1660,
+    "losses": 1862,
+    "win_rate_pct": 47.13,
+    "loss_rate_pct": 52.87,
+    "net_pnl_usd": -1349.2,
+    "gross_profit_usd": 1125.21,
+    "gross_loss_usd": 2474.41,
+    "fees_paid_usd": 527.47,
+    "avg_win_usd": 0.68,
+    "avg_loss_usd": 1.33,
+    "payoff_ratio": 0.51,
+    "profit_factor": 0.45,
+    "expectancy_per_trade_usd": -0.3831,
+    "max_drawdown_pct": 13.53,
+    "max_drawdown_usd": 1353.62,
+    "sharpe_ratio": -11.29,
+    "avg_hold_minutes": 323.5,
+    "avg_hold_bars": 6.4,
+    "breakdown_by_strategy": {
+      "bollinger_reversion": {
+        "trades": 19,
+        "wins": 8,
+        "win_rate_pct": 42.1,
+        "net_pnl": -10.55,
+        "profit_factor": 0.27,
+        "fees_paid": 2.84
+      },
+      "bull_flag": {
+        "trades": 173,
+        "wins": 66,
+        "win_rate_pct": 38.2,
+        "net_pnl": -78.97,
+        "profit_factor": 0.3,
+        "fees_paid": 25.9
+      },
+      "ema_rsi": {
+        "trades": 808,
+        "wins": 366,
+        "win_rate_pct": 45.3,
+        "net_pnl": -383.11,
+        "profit_factor": 0.35,
+        "fees_paid": 120.95
+      },
+      "orb": {
+        "trades": 176,
+        "wins": 95,
+        "win_rate_pct": 54.0,
+        "net_pnl": -26.73,
+        "profit_factor": 0.72,
+        "fees_paid": 26.39
+      },
+      "oversold_bounce": {
+        "trades": 2070,
+        "wins": 994,
+        "win_rate_pct": 48.0,
+        "net_pnl": -766.27,
+        "profit_factor": 0.49,
+        "fees_paid": 310.03
+      },
+      "reclaim_ma20": {
+        "trades": 276,
+        "wins": 131,
+        "win_rate_pct": 47.5,
+        "net_pnl": -83.57,
+        "profit_factor": 0.49,
+        "fees_paid": 41.35
+      }
+    },
+    "breakdown_by_symbol": {
+      "BNB/USDT": {
+        "trades": 451,
+        "wins": 208,
+        "win_rate_pct": 46.1,
+        "net_pnl": -164.39,
+        "fees_paid": 67.55
+      },
+      "BTC/USDT": {
+        "trades": 955,
+        "wins": 445,
+        "win_rate_pct": 46.6,
+        "net_pnl": -322.06,
+        "fees_paid": 143.06
+      },
+      "DOGE/USDT": {
+        "trades": 179,
+        "wins": 79,
+        "win_rate_pct": 44.1,
+        "net_pnl": -95.61,
+        "fees_paid": 26.79
+      },
+      "ETH/USDT": {
+        "trades": 815,
+        "wins": 393,
+        "win_rate_pct": 48.2,
+        "net_pnl": -313.72,
+        "fees_paid": 122.06
+      },
+      "SOL/USDT": {
+        "trades": 738,
+        "wins": 353,
+        "win_rate_pct": 47.8,
+        "net_pnl": -297.74,
+        "fees_paid": 110.52
+      },
+      "SUI/USDT": {
+        "trades": 135,
+        "wins": 65,
+        "win_rate_pct": 48.1,
+        "net_pnl": -61.47,
+        "fees_paid": 20.21
+      },
+      "XRP/USDT": {
+        "trades": 249,
+        "wins": 117,
+        "win_rate_pct": 47.0,
+        "net_pnl": -94.19,
+        "fees_paid": 37.29
+      }
+    },
+    "run_label": "FIXED_1h_Fee0.075_BNB",
+    "timeframe": "1h",
+    "fee_pct": 0.075,
+    "slippage_pct": 0.05,
+    "logic_version": "STAGE_1_FIXED",
+    "breakdown_by_quarter": {
+      "2025Q4": {
+        "trades": 838,
+        "wins": 404,
+        "win_rate_pct": 48.2,
+        "net_pnl": -350.89,
+        "fees": 125.48
+      },
+      "2026Q1": {
+        "trades": 844,
+        "wins": 392,
+        "win_rate_pct": 46.4,
+        "net_pnl": -376.81,
+        "fees": 126.36
+      },
+      "2026Q2": {
+        "trades": 792,
+        "wins": 356,
+        "win_rate_pct": 44.9,
+        "net_pnl": -324.51,
+        "fees": 118.6
+      },
+      "2026Q3": {
+        "trades": 799,
+        "wins": 393,
+        "win_rate_pct": 49.2,
+        "net_pnl": -200.5,
+        "fees": 119.74
+      },
+      "2026Q4": {
+        "trades": 249,
+        "wins": 115,
+        "win_rate_pct": 46.2,
+        "net_pnl": -96.49,
+        "fees": 37.29
+      }
+    }
+  },
+  {
+    "total_trades": 8201,
+    "wins": 3193,
+    "losses": 5008,
+    "win_rate_pct": 38.93,
+    "loss_rate_pct": 61.07,
+    "net_pnl_usd": -4097.64,
+    "gross_profit_usd": 2517.02,
+    "gross_loss_usd": 6614.66,
+    "fees_paid_usd": 1637.06,
+    "avg_win_usd": 0.79,
+    "avg_loss_usd": 1.32,
+    "payoff_ratio": 0.6,
+    "profit_factor": 0.38,
+    "expectancy_per_trade_usd": -0.4997,
+    "max_drawdown_pct": 41.09,
+    "max_drawdown_usd": 4116.77,
+    "sharpe_ratio": -17.4,
+    "avg_hold_minutes": 305.1,
+    "avg_hold_bars": 21.3,
+    "breakdown_by_strategy": {
+      "bollinger_reversion": {
+        "trades": 29,
+        "wins": 16,
+        "win_rate_pct": 55.2,
+        "net_pnl": -6.99,
+        "profit_factor": 0.57,
+        "fees_paid": 5.8
+      },
+      "bull_flag": {
+        "trades": 679,
+        "wins": 183,
+        "win_rate_pct": 27.0,
+        "net_pnl": -288.82,
+        "profit_factor": 0.33,
+        "fees_paid": 135.58
+      },
+      "ema_rsi": {
+        "trades": 1538,
+        "wins": 439,
+        "win_rate_pct": 28.5,
+        "net_pnl": -792.32,
+        "profit_factor": 0.29,
+        "fees_paid": 306.97
+      },
+      "orb": {
+        "trades": 667,
+        "wins": 228,
+        "win_rate_pct": 34.2,
+        "net_pnl": -343.11,
+        "profit_factor": 0.35,
+        "fees_paid": 133.13
+      },
+      "oversold_bounce": {
+        "trades": 4861,
+        "wins": 2176,
+        "win_rate_pct": 44.8,
+        "net_pnl": -2391.65,
+        "profit_factor": 0.42,
+        "fees_paid": 970.4
+      },
+      "reclaim_ma20": {
+        "trades": 427,
+        "wins": 151,
+        "win_rate_pct": 35.4,
+        "net_pnl": -274.75,
+        "profit_factor": 0.31,
+        "fees_paid": 85.18
+      }
+    },
+    "breakdown_by_symbol": {
+      "BNB/USDT": {
+        "trades": 1040,
+        "wins": 439,
+        "win_rate_pct": 42.2,
+        "net_pnl": -420.17,
+        "fees_paid": 207.7
+      },
+      "BTC/USDT": {
+        "trades": 996,
+        "wins": 399,
+        "win_rate_pct": 40.1,
+        "net_pnl": -429.67,
+        "fees_paid": 198.89
+      },
+      "DOGE/USDT": {
+        "trades": 966,
+        "wins": 347,
+        "win_rate_pct": 35.9,
+        "net_pnl": -535.14,
+        "fees_paid": 192.78
+      },
+      "ETH/USDT": {
+        "trades": 1482,
+        "wins": 593,
+        "win_rate_pct": 40.0,
+        "net_pnl": -718.3,
+        "fees_paid": 295.85
+      },
+      "SOL/USDT": {
+        "trades": 1641,
+        "wins": 636,
+        "win_rate_pct": 38.8,
+        "net_pnl": -850.06,
+        "fees_paid": 327.54
+      },
+      "SUI/USDT": {
+        "trades": 757,
+        "wins": 280,
+        "win_rate_pct": 37.0,
+        "net_pnl": -431.21,
+        "fees_paid": 151.06
+      },
+      "XRP/USDT": {
+        "trades": 1319,
+        "wins": 499,
+        "win_rate_pct": 37.8,
+        "net_pnl": -713.09,
+        "fees_paid": 263.24
+      }
+    },
+    "run_label": "ORIGINAL_15m_Fee0.10",
+    "timeframe": "15m",
+    "fee_pct": 0.1,
+    "slippage_pct": 0.05,
+    "logic_version": "ORIGINAL",
+    "breakdown_by_quarter": {
+      "2025Q4": {
+        "trades": 2403,
+        "wins": 914,
+        "win_rate_pct": 38.0,
+        "net_pnl": -1273.73,
+        "fees": 479.61
+      },
+      "2026Q1": {
+        "trades": 2257,
+        "wins": 837,
+        "win_rate_pct": 37.1,
+        "net_pnl": -1248.56,
+        "fees": 450.42
+      },
+      "2026Q2": {
+        "trades": 1608,
+        "wins": 595,
+        "win_rate_pct": 37.0,
+        "net_pnl": -858.75,
+        "fees": 320.93
+      },
+      "2026Q3": {
+        "trades": 1498,
+        "wins": 685,
+        "win_rate_pct": 45.7,
+        "net_pnl": -492.7,
+        "fees": 299.28
+      },
+      "2026Q4": {
+        "trades": 435,
+        "wins": 162,
+        "win_rate_pct": 37.2,
+        "net_pnl": -223.9,
+        "fees": 86.83
+      }
+    }
+  },
+  {
+    "total_trades": 8201,
+    "wins": 3304,
+    "losses": 4897,
+    "win_rate_pct": 40.29,
+    "loss_rate_pct": 59.71,
+    "net_pnl_usd": -3689.15,
+    "gross_profit_usd": 2680.78,
+    "gross_loss_usd": 6369.93,
+    "fees_paid_usd": 1227.9,
+    "avg_win_usd": 0.81,
+    "avg_loss_usd": 1.3,
+    "payoff_ratio": 0.62,
+    "profit_factor": 0.42,
+    "expectancy_per_trade_usd": -0.4498,
+    "max_drawdown_pct": 37.03,
+    "max_drawdown_usd": 3711.28,
+    "sharpe_ratio": -15.79,
+    "avg_hold_minutes": 305.1,
+    "avg_hold_bars": 21.3,
+    "breakdown_by_strategy": {
+      "bollinger_reversion": {
+        "trades": 29,
+        "wins": 17,
+        "win_rate_pct": 58.6,
+        "net_pnl": -5.54,
+        "profit_factor": 0.64,
+        "fees_paid": 4.35
+      },
+      "bull_flag": {
+        "trades": 679,
+        "wins": 192,
+        "win_rate_pct": 28.3,
+        "net_pnl": -254.98,
+        "profit_factor": 0.38,
+        "fees_paid": 101.7
+      },
+      "ema_rsi": {
+        "trades": 1538,
+        "wins": 467,
+        "win_rate_pct": 30.4,
+        "net_pnl": -715.73,
+        "profit_factor": 0.33,
+        "fees_paid": 230.26
+      },
+      "orb": {
+        "trades": 667,
+        "wins": 232,
+        "win_rate_pct": 34.8,
+        "net_pnl": -309.89,
+        "profit_factor": 0.39,
+        "fees_paid": 99.86
+      },
+      "oversold_bounce": {
+        "trades": 4861,
+        "wins": 2238,
+        "win_rate_pct": 46.0,
+        "net_pnl": -2149.49,
+        "profit_factor": 0.46,
+        "fees_paid": 727.85
+      },
+      "reclaim_ma20": {
+        "trades": 427,
+        "wins": 158,
+        "win_rate_pct": 37.0,
+        "net_pnl": -253.51,
+        "profit_factor": 0.34,
+        "fees_paid": 63.89
+      }
+    },
+    "breakdown_by_symbol": {
+      "BNB/USDT": {
+        "trades": 1040,
+        "wins": 443,
+        "win_rate_pct": 42.6,
+        "net_pnl": -368.31,
+        "fees_paid": 155.79
+      },
+      "BTC/USDT": {
+        "trades": 996,
+        "wins": 405,
+        "win_rate_pct": 40.7,
+        "net_pnl": -380.03,
+        "fees_paid": 149.18
+      },
+      "DOGE/USDT": {
+        "trades": 966,
+        "wins": 366,
+        "win_rate_pct": 37.9,
+        "net_pnl": -487.05,
+        "fees_paid": 144.6
+      },
+      "ETH/USDT": {
+        "trades": 1482,
+        "wins": 618,
+        "win_rate_pct": 41.7,
+        "net_pnl": -644.47,
+        "fees_paid": 221.91
+      },
+      "SOL/USDT": {
+        "trades": 1641,
+        "wins": 663,
+        "win_rate_pct": 40.4,
+        "net_pnl": -768.34,
+        "fees_paid": 245.68
+      },
+      "SUI/USDT": {
+        "trades": 757,
+        "wins": 291,
+        "win_rate_pct": 38.4,
+        "net_pnl": -393.53,
+        "fees_paid": 113.3
+      },
+      "XRP/USDT": {
+        "trades": 1319,
+        "wins": 518,
+        "win_rate_pct": 39.3,
+        "net_pnl": -647.42,
+        "fees_paid": 197.45
+      }
+    },
+    "run_label": "ORIGINAL_15m_Fee0.075_BNB",
+    "timeframe": "15m",
+    "fee_pct": 0.075,
+    "slippage_pct": 0.05,
+    "logic_version": "ORIGINAL",
+    "breakdown_by_quarter": {
+      "2025Q4": {
+        "trades": 2403,
+        "wins": 955,
+        "win_rate_pct": 39.7,
+        "net_pnl": -1154.07,
+        "fees": 359.74
+      },
+      "2026Q1": {
+        "trades": 2257,
+        "wins": 878,
+        "win_rate_pct": 38.9,
+        "net_pnl": -1136.2,
+        "fees": 337.84
+      },
+      "2026Q2": {
+        "trades": 1608,
+        "wins": 605,
+        "win_rate_pct": 37.6,
+        "net_pnl": -778.68,
+        "fees": 240.72
+      },
+      "2026Q3": {
+        "trades": 1498,
+        "wins": 701,
+        "win_rate_pct": 46.8,
+        "net_pnl": -417.96,
+        "fees": 224.48
+      },
+      "2026Q4": {
+        "trades": 435,
+        "wins": 165,
+        "win_rate_pct": 37.9,
+        "net_pnl": -202.23,
+        "fees": 65.13
+      }
+    }
+  },
+  {
+    "total_trades": 13265,
+    "wins": 5462,
+    "losses": 7803,
+    "win_rate_pct": 41.18,
+    "loss_rate_pct": 58.82,
+    "net_pnl_usd": -4749.93,
+    "gross_profit_usd": 1479.98,
+    "gross_loss_usd": 6229.91,
+    "fees_paid_usd": 2649.44,
+    "avg_win_usd": 0.27,
+    "avg_loss_usd": 0.8,
+    "payoff_ratio": 0.34,
+    "profit_factor": 0.24,
+    "expectancy_per_trade_usd": -0.3581,
+    "max_drawdown_pct": 47.53,
+    "max_drawdown_usd": 4753.51,
+    "sharpe_ratio": -36.58,
+    "avg_hold_minutes": 89.6,
+    "avg_hold_bars": 7.0,
+    "breakdown_by_strategy": {
+      "bollinger_reversion": {
+        "trades": 104,
+        "wins": 41,
+        "win_rate_pct": 39.4,
+        "net_pnl": -37.69,
+        "profit_factor": 0.18,
+        "fees_paid": 20.77
+      },
+      "bull_flag": {
+        "trades": 751,
+        "wins": 286,
+        "win_rate_pct": 38.1,
+        "net_pnl": -305.74,
+        "profit_factor": 0.21,
+        "fees_paid": 149.96
+      },
+      "ema_rsi": {
+        "trades": 2942,
+        "wins": 1120,
+        "win_rate_pct": 38.1,
+        "net_pnl": -1065.51,
+        "profit_factor": 0.23,
+        "fees_paid": 587.61
+      },
+      "orb": {
+        "trades": 881,
+        "wins": 379,
+        "win_rate_pct": 43.0,
+        "net_pnl": -318.35,
+        "profit_factor": 0.23,
+        "fees_paid": 175.96
+      },
+      "oversold_bounce": {
+        "trades": 7574,
+        "wins": 3203,
+        "win_rate_pct": 42.3,
+        "net_pnl": -2692.98,
+        "profit_factor": 0.25,
+        "fees_paid": 1512.78
+      },
+      "reclaim_ma20": {
+        "trades": 1013,
+        "wins": 433,
+        "win_rate_pct": 42.7,
+        "net_pnl": -329.66,
+        "profit_factor": 0.23,
+        "fees_paid": 202.36
+      }
+    },
+    "breakdown_by_symbol": {
+      "BNB/USDT": {
+        "trades": 1528,
+        "wins": 617,
+        "win_rate_pct": 40.4,
+        "net_pnl": -508.08,
+        "fees_paid": 305.22
+      },
+      "BTC/USDT": {
+        "trades": 3667,
+        "wins": 1420,
+        "win_rate_pct": 38.7,
+        "net_pnl": -1261.7,
+        "fees_paid": 732.46
+      },
+      "DOGE/USDT": {
+        "trades": 629,
+        "wins": 237,
+        "win_rate_pct": 37.7,
+        "net_pnl": -250.22,
+        "fees_paid": 125.61
+      },
+      "ETH/USDT": {
+        "trades": 3179,
+        "wins": 1344,
+        "win_rate_pct": 42.3,
+        "net_pnl": -1108.37,
+        "fees_paid": 634.98
+      },
+      "SOL/USDT": {
+        "trades": 2781,
+        "wins": 1218,
+        "win_rate_pct": 43.8,
+        "net_pnl": -1040.5,
+        "fees_paid": 555.4
+      },
+      "SUI/USDT": {
+        "trades": 534,
+        "wins": 236,
+        "win_rate_pct": 44.2,
+        "net_pnl": -222.84,
+        "fees_paid": 106.63
+      },
+      "XRP/USDT": {
+        "trades": 947,
+        "wins": 390,
+        "win_rate_pct": 41.2,
+        "net_pnl": -358.22,
+        "fees_paid": 189.13
+      }
+    },
+    "run_label": "FIXED_15m_Fee0.10",
+    "timeframe": "15m",
+    "fee_pct": 0.1,
+    "slippage_pct": 0.05,
+    "logic_version": "STAGE_1_FIXED",
+    "breakdown_by_quarter": {
+      "2025Q4": {
+        "trades": 3139,
+        "wins": 1309,
+        "win_rate_pct": 41.7,
+        "net_pnl": -1211.06,
+        "fees": 626.87
+      },
+      "2026Q1": {
+        "trades": 3025,
+        "wins": 1265,
+        "win_rate_pct": 41.8,
+        "net_pnl": -1155.02,
+        "fees": 604.11
+      },
+      "2026Q2": {
+        "trades": 3091,
+        "wins": 1246,
+        "win_rate_pct": 40.3,
+        "net_pnl": -1110.98,
+        "fees": 617.37
+      },
+      "2026Q3": {
+        "trades": 3070,
+        "wins": 1270,
+        "win_rate_pct": 41.4,
+        "net_pnl": -963.54,
+        "fees": 613.31
+      },
+      "2026Q4": {
+        "trades": 940,
+        "wins": 372,
+        "win_rate_pct": 39.6,
+        "net_pnl": -309.32,
+        "fees": 187.77
+      }
+    }
+  },
+  {
+    "total_trades": 13265,
+    "wins": 5510,
+    "losses": 7755,
+    "win_rate_pct": 41.54,
+    "loss_rate_pct": 58.46,
+    "net_pnl_usd": -4088.43,
+    "gross_profit_usd": 1755.32,
+    "gross_loss_usd": 5843.75,
+    "fees_paid_usd": 1987.34,
+    "avg_win_usd": 0.32,
+    "avg_loss_usd": 0.75,
+    "payoff_ratio": 0.42,
+    "profit_factor": 0.3,
+    "expectancy_per_trade_usd": -0.3082,
+    "max_drawdown_pct": 40.91,
+    "max_drawdown_usd": 4092.24,
+    "sharpe_ratio": -32.0,
+    "avg_hold_minutes": 89.6,
+    "avg_hold_bars": 7.0,
+    "breakdown_by_strategy": {
+      "bollinger_reversion": {
+        "trades": 104,
+        "wins": 42,
+        "win_rate_pct": 40.4,
+        "net_pnl": -32.5,
+        "profit_factor": 0.24,
+        "fees_paid": 15.58
+      },
+      "bull_flag": {
+        "trades": 751,
+        "wins": 287,
+        "win_rate_pct": 38.2,
+        "net_pnl": -268.31,
+        "profit_factor": 0.27,
+        "fees_paid": 112.49
+      },
+      "ema_rsi": {
+        "trades": 2942,
+        "wins": 1145,
+        "win_rate_pct": 38.9,
+        "net_pnl": -918.79,
+        "profit_factor": 0.29,
+        "fees_paid": 440.76
+      },
+      "orb": {
+        "trades": 881,
+        "wins": 381,
+        "win_rate_pct": 43.2,
+        "net_pnl": -274.42,
+        "profit_factor": 0.29,
+        "fees_paid": 131.99
+      },
+      "oversold_bounce": {
+        "trades": 7574,
+        "wins": 3217,
+        "win_rate_pct": 42.5,
+        "net_pnl": -2315.28,
+        "profit_factor": 0.31,
+        "fees_paid": 1134.73
+      },
+      "reclaim_ma20": {
+        "trades": 1013,
+        "wins": 438,
+        "win_rate_pct": 43.2,
+        "net_pnl": -279.13,
+        "profit_factor": 0.31,
+        "fees_paid": 151.79
+      }
+    },
+    "breakdown_by_symbol": {
+      "BNB/USDT": {
+        "trades": 1528,
+        "wins": 625,
+        "win_rate_pct": 40.9,
+        "net_pnl": -431.87,
+        "fees_paid": 228.95
+      },
+      "BTC/USDT": {
+        "trades": 3667,
+        "wins": 1435,
+        "win_rate_pct": 39.1,
+        "net_pnl": -1078.84,
+        "fees_paid": 549.42
+      },
+      "DOGE/USDT": {
+        "trades": 629,
+        "wins": 248,
+        "win_rate_pct": 39.4,
+        "net_pnl": -218.86,
+        "fees_paid": 94.22
+      },
+      "ETH/USDT": {
+        "trades": 3179,
+        "wins": 1354,
+        "win_rate_pct": 42.6,
+        "net_pnl": -949.82,
+        "fees_paid": 476.3
+      },
+      "SOL/USDT": {
+        "trades": 2781,
+        "wins": 1220,
+        "win_rate_pct": 43.9,
+        "net_pnl": -901.82,
+        "fees_paid": 416.61
+      },
+      "SUI/USDT": {
+        "trades": 534,
+        "wins": 237,
+        "win_rate_pct": 44.4,
+        "net_pnl": -196.22,
+        "fees_paid": 79.98
+      },
+      "XRP/USDT": {
+        "trades": 947,
+        "wins": 391,
+        "win_rate_pct": 41.3,
+        "net_pnl": -311.0,
+        "fees_paid": 141.86
+      }
+    },
+    "run_label": "FIXED_15m_Fee0.075_BNB",
+    "timeframe": "15m",
+    "fee_pct": 0.075,
+    "slippage_pct": 0.05,
+    "logic_version": "STAGE_1_FIXED",
+    "breakdown_by_quarter": {
+      "2025Q4": {
+        "trades": 3139,
+        "wins": 1316,
+        "win_rate_pct": 41.9,
+        "net_pnl": -1054.57,
+        "fees": 470.21
+      },
+      "2026Q1": {
+        "trades": 3025,
+        "wins": 1269,
+        "win_rate_pct": 42.0,
+        "net_pnl": -1004.2,
+        "fees": 453.14
+      },
+      "2026Q2": {
+        "trades": 3091,
+        "wins": 1257,
+        "win_rate_pct": 40.7,
+        "net_pnl": -956.85,
+        "fees": 463.08
+      },
+      "2026Q3": {
+        "trades": 3070,
+        "wins": 1288,
+        "win_rate_pct": 42.0,
+        "net_pnl": -810.37,
+        "fees": 460.04
+      },
+      "2026Q4": {
+        "trades": 940,
+        "wins": 380,
+        "win_rate_pct": 40.4,
+        "net_pnl": -262.43,
+        "fees": 140.85
+      }
+    }
+  }
+]
