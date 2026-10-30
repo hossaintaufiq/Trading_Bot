@@ -1,0 +1,257 @@
+{
+  "status": "FAILED",
+  "best_configuration": {
+    "trades": 1920.0,
+    "win_rate": 38.07,
+    "payoff": 1.54,
+    "profit_factor": 0.95,
+    "gross_pnl": 367.39,
+    "fees_paid": 383.98,
+    "slippage_paid": 191.9,
+    "net_pnl": -208.49,
+    "expectancy": -0.1086,
+    "max_drawdown": 6.93,
+    "ema": 150.0,
+    "entry": 55.0,
+    "exit": 10.0,
+    "stop_atr": 3.0,
+    "trail_atr": 2.5,
+    "config_id": 26.0
+  },
+  "criteria": [
+    {
+      "Criterion": "1. Net Expectancy > $0.00",
+      "Required": "> $0.00",
+      "Measured": "$-0.2283",
+      "Pass": false
+    },
+    {
+      "Criterion": "2. Sample Size >= 200 trades",
+      "Required": ">= 200",
+      "Measured": "766",
+      "Pass": true
+    },
+    {
+      "Criterion": "3. Profit Factor >= 1.30",
+      "Required": ">= 1.30",
+      "Measured": "0.85",
+      "Pass": false
+    },
+    {
+      "Criterion": "4. Max Drawdown < 25%",
+      "Required": "< 25.0%",
+      "Measured": "2.66%",
+      "Pass": true
+    },
+    {
+      "Criterion": "5. Positive in >= 60% of years",
+      "Required": ">= 60.0%",
+      "Measured": "25.0% (2/8 yrs)",
+      "Pass": false
+    },
+    {
+      "Criterion": "6. Beats Random by > 2.0 sigma",
+      "Required": "> 2.0 sigma",
+      "Measured": "1.37 sigma",
+      "Pass": false
+    }
+  ],
+  "oos_summary_010": {
+    "trades": 766,
+    "win_rate": 34.46,
+    "payoff": 1.62,
+    "profit_factor": 0.85,
+    "gross_pnl": 54.72,
+    "fees_paid": 153.1,
+    "slippage_paid": 76.51,
+    "net_pnl": -174.89,
+    "expectancy": -0.2283,
+    "max_drawdown": 2.66
+  },
+  "oos_summary_0075": {
+    "trades": 766,
+    "win_rate": 35.12,
+    "payoff": 1.63,
+    "profit_factor": 0.88,
+    "gross_pnl": 54.58,
+    "fees_paid": 114.84,
+    "slippage_paid": 76.53,
+    "net_pnl": -136.8,
+    "expectancy": -0.1786,
+    "max_drawdown": 2.46
+  },
+  "btc_benchmark": {
+    "start_price": 59306.72,
+    "end_price": 78235.15,
+    "return_pct": 31.92,
+    "net_pnl_on_10k": 3191.62,
+    "max_drawdown_pct": 53.45
+  },
+  "random_benchmark": {
+    "mean_trades": 1603.5,
+    "mean_win_rate": 32.58,
+    "mean_profit_factor": 0.66,
+    "mean_net_pnl": -506.05,
+    "mean_expectancy": -0.3157,
+    "std_expectancy": 0.0638,
+    "spread_expectancy": [
+      -0.4601,
+      -0.1171
+    ]
+  },
+  "yearly_breakdown": [
+    {
+      "year": 2019,
+      "trades": 246,
+      "win_rate": 41.5,
+      "profit_factor": 0.92,
+      "net_pnl": -44.02,
+      "expectancy": -0.1789,
+      "is_positive": false
+    },
+    {
+      "year": 2020,
+      "trades": 348,
+      "win_rate": 43.4,
+      "profit_factor": 1.04,
+      "net_pnl": 24.13,
+      "expectancy": 0.0693,
+      "is_positive": true
+    },
+    {
+      "year": 2021,
+      "trades": 506,
+      "win_rate": 39.9,
+      "profit_factor": 1.23,
+      "net_pnl": 286.16,
+      "expectancy": 0.5655,
+      "is_positive": true
+    },
+    {
+      "year": 2022,
+      "trades": 252,
+      "win_rate": 33.7,
+      "profit_factor": 0.56,
+      "net_pnl": -192.59,
+      "expectancy": -0.7643,
+      "is_positive": false
+    },
+    {
+      "year": 2023,
+      "trades": 370,
+      "win_rate": 33.5,
+      "profit_factor": 0.74,
+      "net_pnl": -158.63,
+      "expectancy": -0.4287,
+      "is_positive": false
+    },
+    {
+      "year": 2024,
+      "trades": 431,
+      "win_rate": 37.4,
+      "profit_factor": 0.86,
+      "net_pnl": -97.53,
+      "expectancy": -0.2263,
+      "is_positive": false
+    },
+    {
+      "year": 2025,
+      "trades": 263,
+      "win_rate": 32.7,
+      "profit_factor": 0.81,
+      "net_pnl": -83.23,
+      "expectancy": -0.3164,
+      "is_positive": false
+    },
+    {
+      "year": 2026,
+      "trades": 270,
+      "win_rate": 31.1,
+      "profit_factor": 0.67,
+      "net_pnl": -117.67,
+      "expectancy": -0.4358,
+      "is_positive": false
+    }
+  ],
+  "neighbor_robustness": [
+    {
+      "trades": 1980,
+      "win_rate": 39.14,
+      "payoff": 1.3,
+      "profit_factor": 0.84,
+      "gross_pnl": -41.24,
+      "fees_paid": 395.56,
+      "slippage_paid": 197.68,
+      "net_pnl": -634.48,
+      "expectancy": -0.3204,
+      "max_drawdown": 8.24,
+      "variation": "Stop ATR -20%"
+    },
+    {
+      "trades": 1882,
+      "win_rate": 37.25,
+      "payoff": 1.68,
+      "profit_factor": 0.99,
+      "gross_pnl": 544.15,
+      "fees_paid": 376.57,
+      "slippage_paid": 188.19,
+      "net_pnl": -20.61,
+      "expectancy": -0.011,
+      "max_drawdown": 6.4,
+      "variation": "Stop ATR +20%"
+    },
+    {
+      "trades": 2018,
+      "win_rate": 37.86,
+      "payoff": 1.52,
+      "profit_factor": 0.93,
+      "gross_pnl": 309.27,
+      "fees_paid": 403.51,
+      "slippage_paid": 201.65,
+      "net_pnl": -295.89,
+      "expectancy": -0.1466,
+      "max_drawdown": 7.64,
+      "variation": "Trail ATR -20%"
+    },
+    {
+      "trades": 1874,
+      "win_rate": 37.94,
+      "payoff": 1.54,
+      "profit_factor": 0.94,
+      "gross_pnl": 343.32,
+      "fees_paid": 374.77,
+      "slippage_paid": 187.29,
+      "net_pnl": -218.74,
+      "expectancy": -0.1167,
+      "max_drawdown": 6.91,
+      "variation": "Trail ATR +20%"
+    },
+    {
+      "trades": 2051,
+      "win_rate": 38.18,
+      "payoff": 1.51,
+      "profit_factor": 0.93,
+      "gross_pnl": 348.78,
+      "fees_paid": 410.14,
+      "slippage_paid": 204.97,
+      "net_pnl": -266.33,
+      "expectancy": -0.1299,
+      "max_drawdown": 7.54,
+      "variation": "Entry Window -20%"
+    },
+    {
+      "trades": 1810,
+      "win_rate": 38.62,
+      "payoff": 1.56,
+      "profit_factor": 0.98,
+      "gross_pnl": 470.6,
+      "fees_paid": 362.11,
+      "slippage_paid": 180.96,
+      "net_pnl": -72.47,
+      "expectancy": -0.04,
+      "max_drawdown": 6.1,
+      "variation": "Entry Window +20%"
+    }
+  ],
+  "total_configs_tested": 62
+}
