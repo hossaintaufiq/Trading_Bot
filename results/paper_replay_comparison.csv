@@ -1,0 +1,10 @@
+metric,paper_actual,backtest_replay_original,backtest_replay_fixed
+Total Closed Trades,74.0,59.0,299.0
+Win Rate (%),31.1,38.98,29.43
+Average Win ($),1.48,0.75,0.11
+Average Loss ($),1.02,1.39,0.46
+Payoff Ratio,1.45,0.54,0.23
+Total Fees Paid ($),14.84,11.77,59.74
+Net Realized PnL ($),-18.14,-32.61,-87.66
+Profit Factor,0.65,0.35,0.1
+Expectancy / Trade ($),-0.245,-0.5528,-0.2932

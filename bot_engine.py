@@ -100,6 +100,7 @@ class BotEngine:
 
         # Subsystems
         self.paper_exchange = PaperExchange(
+            state_file=self.config.get("paper_state_path", "paper_state.json"),
             initial_balance=self.config.get("paper_initial_balance", 10000.0),
             fee_pct=self.config.get("taker_fee_pct", 0.1),
             slippage_pct=self.config.get("slippage_pct", 0.05)
@@ -340,7 +341,7 @@ class BotEngine:
         })
 
     async def handle_candle_update(self, symbol: str, candle: Dict[str, Any]):
-        """Triggered on candle tick / closure. Recomputes indicators & strategies across watchlist."""
+        """Triggered on candle tick / closure. Evaluates closed candles for entries, manages open positions intrabar."""
         if symbol not in self.markets:
             return
 
@@ -349,11 +350,47 @@ class BotEngine:
         if kdf.empty or len(kdf) < 15:
             return
 
+        is_closed = candle.get("is_closed", False)
+        candle_time = int(candle.get("time", 0))
+        current_price = float(candle.get("close", mkt.get("current_price", self.current_price)))
+
+        # Evaluate real-time Risk Management on open position during intrabar ticks
+        pos = self.paper_exchange.positions.get(symbol)
+        if self.is_running and self.status == "RUNNING" and pos is not None:
+            curr_atr = float(kdf.iloc[-1].get("atr", current_price * 0.01)) if not kdf.empty else current_price * 0.01
+            exit_reason = self.evaluate_position_exit(symbol, pos, current_price, curr_atr, kdf)
+            if exit_reason:
+                self.log("RISK", f"🚨 [{symbol}] EXIT TRIGGERED: {exit_reason}")
+                await self._execute_sell(symbol, current_price, exit_reason)
+                return
+
+        # Bug 5 Fix: Entry signals must use CLOSED candles only, deduplicated by candle timestamp
+        if not is_closed:
+            return
+
+        last_closed = self.last_closed_candle_time.get(symbol, 0)
+        if candle_time <= last_closed:
+            return
+
+        self.last_closed_candle_time[symbol] = candle_time
+
+        # Update or append closed candle to klines dataframe
+        last_idx = kdf.index[-1]
+        if candle_time == int(kdf.loc[last_idx, "time"]):
+            for col in ["open", "high", "low", "close", "volume"]:
+                if col in candle:
+                    kdf.loc[last_idx, col] = candle[col]
+        elif candle_time > int(kdf.loc[last_idx, "time"]):
+            new_row = pd.DataFrame([candle])
+            kdf = pd.concat([kdf, new_row], ignore_index=True)
+            if len(kdf) > 150:
+                kdf = kdf.iloc[-150:].reset_index(drop=True)
+
         strat_params = self.config.get("strategies", {}).get(self.active_strategy_name, {})
         kdf = enrich_dataframe(kdf, strat_params)
         mkt["klines_df"] = kdf
 
-        # Evaluate Strategy for this coin
+        # Evaluate Strategy for this coin on confirmed closed candle
         pos = self.paper_exchange.positions.get(symbol)
         signal = self.strategy.evaluate(kdf, pos)
         mkt["latest_signal"] = signal
@@ -390,61 +427,111 @@ class BotEngine:
         if self.is_running and self.status == "RUNNING":
             await self._process_strategy_signal_for_symbol(symbol, signal, kdf)
 
+    def evaluate_position_exit(
+        self,
+        symbol: str,
+        pos: Dict[str, Any],
+        current_price: float,
+        current_atr: float = 0.0,
+        df: Optional[pd.DataFrame] = None
+    ) -> Optional[str]:
+        """
+        Centralized Risk & Position Exit Evaluator (Bugs 6 & 7).
+        Strict Priority Order:
+        1. Hard Stop-Loss Hit / Setup Invalidation Hit
+        2. Take-Profit Target Hit
+        3. ATR-based Trailing Stop & Break-Even Ratchet (+1R activation, non-decreasing)
+        4. Max Holding Duration Exceeded
+        5. Strategy Custom Exit Signal (if df provided and strategy emits SELL)
+        """
+        entry_price = float(pos.get("entry_price", current_price))
+        pnl_pct = ((current_price - entry_price) / entry_price) * 100 if entry_price > 0 else 0.0
+
+        # 1. Hard Stop-Loss Hit / Setup Invalidation Hit
+        stop_loss_price = pos.get("stop_loss_price")
+        if stop_loss_price is not None and current_price <= stop_loss_price:
+            if pos.get("trailing_active") or (pos.get("initial_stop_price") and stop_loss_price > pos.get("initial_stop_price")):
+                return f"🛡️ ATR Trailing Stop Hit at ${current_price:,.2f} (Locked Stop: ${stop_loss_price:,.2f}, PnL: {pnl_pct:+.2f}%)"
+            return f"🚨 Stop-Loss Hit at ${current_price:,.2f} (Stop: ${stop_loss_price:,.2f}, PnL: {pnl_pct:+.2f}%)"
+
+        invalidation_price = pos.get("invalidation_price")
+        if invalidation_price is not None and current_price <= invalidation_price:
+            return f"🚨 Setup Invalidation Hit at ${current_price:,.2f} (Inv: ${invalidation_price:,.2f}, PnL: {pnl_pct:+.2f}%)"
+
+        # 2. Take-Profit Target Hit
+        take_profit_price = pos.get("take_profit_price")
+        if take_profit_price is not None and current_price >= take_profit_price:
+            return f"🎯 Take-Profit Target Hit at ${current_price:,.2f} (+{pnl_pct:.2f}%)"
+
+        # 3. ATR-based Trailing Stop & Break-Even Ratchet (Bug 6)
+        highest_seen = max(float(pos.get("highest_price", entry_price)), current_price)
+        pos["highest_price"] = round(highest_seen, 4)
+
+        initial_stop = pos.get("initial_stop_price") or pos.get("stop_loss_price") or (entry_price - (1.5 * current_atr if current_atr > 0 else entry_price * 0.015))
+        r_dist = max(0.0001, entry_price - initial_stop)
+
+        trailing_enabled = self.config.get("trailing_stop_enabled", True)
+        if trailing_enabled and (highest_seen - entry_price) >= r_dist:
+            pos["trailing_active"] = True
+
+            # Step A: Ratchet stop to break-even net of round-trip costs (taker 0.1%*2 + slip 0.05%*2 = 0.30%)
+            fee_slip_buffer_pct = float(self.config.get("fee_slippage_buffer_pct", 0.30)) / 100.0
+            be_price = round(entry_price * (1.0 + fee_slip_buffer_pct), 4)
+
+            current_stop = pos.get("stop_loss_price") or 0.0
+            if current_stop < be_price:
+                pos["stop_loss_price"] = be_price
+                self.log("TRADE", f"🔒 [{symbol}] Stop ratcheted to Break-Even + fees (${be_price:,.2f}) after +1R gain")
+
+            # Step B: Trail by ATR below highest price seen
+            if current_atr > 0:
+                trail_mult = float(self.config.get("atr_trail_multiplier", 1.5))
+                trail_stop = round(highest_seen - (trail_mult * current_atr), 4)
+                # Monotonically non-decreasing stop
+                if trail_stop > pos["stop_loss_price"]:
+                    pos["stop_loss_price"] = trail_stop
+
+            # Check if ratcheted stop is hit
+            if current_price <= pos["stop_loss_price"]:
+                return f"🛡️ ATR Trailing Stop Hit at ${current_price:,.2f} (Locked Stop: ${pos['stop_loss_price']:,.2f}, PnL: {pnl_pct:+.2f}%)"
+
+        # 4. Max Holding Duration Exceeded
+        max_bars = pos.get("max_holding_bars")
+        entry_time = pos.get("entry_time", 0)
+        if max_bars and entry_time > 0:
+            timeframe_sec = 60
+            if "15m" in self.timeframe:
+                timeframe_sec = 900
+            elif "5m" in self.timeframe:
+                timeframe_sec = 300
+            elif "1h" in self.timeframe:
+                timeframe_sec = 3600
+            bars_held = int((time.time() * 1000 - entry_time) / (timeframe_sec * 1000))
+            if bars_held >= max_bars:
+                return f"⏰ Max Holding Bars Exceeded ({bars_held}/{max_bars} bars, PnL: {pnl_pct:+.2f}%)"
+
+        # 5. Strategy Custom Exit Signal
+        if df is not None and not df.empty and len(df) >= 15:
+            strat_signal = self.strategy.evaluate(df, pos)
+            if strat_signal.action == "SELL":
+                return f"Strategy Exit: {strat_signal.reason}"
+
+        return None
+
     async def _check_risk_management_for_symbol(self, symbol: str, current_price: float):
-        """Evaluate hard Stop-Loss, Take-Profit, and Trailing Stop for a specific open position."""
+        """Evaluate centralized risk management for an open position."""
         pos = self.paper_exchange.positions.get(symbol)
         if not pos:
             return
 
-        entry_price = pos["entry_price"]
-        pnl_pct = ((current_price - entry_price) / entry_price) * 100
+        mkt = self.markets.get(symbol, {})
+        kdf = mkt.get("klines_df", pd.DataFrame())
+        curr_atr = float(kdf.iloc[-1].get("atr", current_price * 0.01)) if not kdf.empty else current_price * 0.01
 
-        sl_pct = self.config.get("stop_loss_pct", 1.5)
-        tp_pct = self.config.get("take_profit_pct", 3.0)
-
-        # Check bracket stop loss price if specified
-        bracket_stop = pos.get("stop_loss_price")
-        if bracket_stop and current_price <= bracket_stop:
-            self.log("RISK", f"🚨 [{symbol}] BRACKET STOP-LOSS HIT at ${current_price:,.2f} (Target Stop: ${bracket_stop:,.2f})")
-            await self._execute_sell(symbol, current_price, f"Bracket Stop Exit (${bracket_stop:,.2f})")
-            return
-
-        # Check bracket take profit price if specified
-        bracket_tp = pos.get("take_profit_price")
-        if bracket_tp and current_price >= bracket_tp:
-            self.log("TRADE", f"🎯 [{symbol}] BRACKET 2R TAKE-PROFIT HIT at ${current_price:,.2f} (+{pnl_pct:.2f}%)")
-            await self._execute_sell(symbol, current_price, f"2R Target Reached (${bracket_tp:,.2f})")
-            return
-
-        # Standard SL
-        if pnl_pct <= -sl_pct:
-            self.log("RISK", f"🚨 [{symbol}] STOP-LOSS TRIGGERED at {pnl_pct:.2f}% (Price: ${current_price:,.2f})")
-            await self._execute_sell(symbol, current_price, f"Stop-Loss Exit ({pnl_pct:.2f}%)")
-            return
-
-        # Standard TP
-        if pnl_pct >= tp_pct:
-            self.log("TRADE", f"🎯 [{symbol}] TAKE-PROFIT HIT at +{pnl_pct:.2f}% (Price: ${current_price:,.2f})")
-            await self._execute_sell(symbol, current_price, f"Take-Profit Target (+{pnl_pct:.2f}%)")
-            return
-
-        # Trailing Stop
-        trailing_enabled = self.config.get("trailing_stop_enabled", True)
-        if trailing_enabled and pnl_pct > 1.0:
-            highest_seen = pos.get("highest_price", entry_price)
-            pullback_pct = ((highest_seen - current_price) / highest_seen) * 100
-            trailing_threshold = self.config.get("trailing_stop_pct", 1.0)
-            if pullback_pct >= trailing_threshold:
-                self.log("RISK", f"🛡️ [{symbol}] TRAILING STOP TRIGGERED: Pullback of {pullback_pct:.2f}% from ${highest_seen:,.2f}")
-                await self._execute_sell(symbol, current_price, f"Trailing Stop Exit (-{pullback_pct:.2f}%)")
-                return
-
-        # Money Management: Break-Even Stop Lock Check
-        be_stop = self.money_manager.check_breakeven_adjustment(pos, current_price)
-        if be_stop:
-            pos["stop_loss_price"] = be_stop
-            self.log("TRADE", f"🔒 [{symbol}] BREAK-EVEN STOP LOCKED at ${be_stop:,.4f} (+0.25% fee buffer). Profit protected!")
-            self.paper_exchange.save_state()
+        exit_reason = self.evaluate_position_exit(symbol, pos, current_price, curr_atr, kdf)
+        if exit_reason:
+            self.log("RISK", f"🚨 [{symbol}] EXIT TRIGGERED: {exit_reason}")
+            await self._execute_sell(symbol, current_price, exit_reason)
 
     async def _process_strategy_signal_for_symbol(self, symbol: str, signal: Signal, df: pd.DataFrame):
         """Execute buy/sell on a specific symbol when strategy condition triggers."""
@@ -452,11 +539,28 @@ class BotEngine:
         current_px = self.markets.get(symbol, {}).get("current_price", self.current_price)
 
         if signal.action == "BUY" and not has_pos:
+            # Bug 3 Gate: Every strategy must define its own valid stop, target, invalidation, and max holding time.
+            if (
+                signal.stop_price is None or signal.stop_price <= 0 or
+                signal.target_price is None or signal.target_price <= 0 or
+                signal.stop_price >= current_px or
+                signal.target_price <= current_px
+            ):
+                self.log("RISK", f"🛑 [{symbol}] BUY SIGNAL REJECTED: Strategy must define valid stop_price (< px) and target_price (> px). Given stop={signal.stop_price}, target={signal.target_price}")
+                return
+
+            # Bug 8 Fix: Correlation / exposure cap on correlated altcoin positions
+            if symbol != "BTC/USDT":
+                alt_positions = [s for s in self.paper_exchange.positions if s != "BTC/USDT"]
+                if len(alt_positions) >= self.max_correlated_positions:
+                    self.log("RISK", f"🛑 [{symbol}] ENTRY REJECTED: Correlated altcoin exposure cap reached ({len(alt_positions)}/{self.max_correlated_positions} active alt positions)")
+                    return
+
             # 1. Money Manager Capital Allocation & Total Budget Check
             coin_atr = float(df.iloc[-1].get("atr_pct", 1.0)) if not df.empty else 1.0
             setup_w = 1.0
             if self.paper_exchange.learning_engine:
-                setup_w = self.paper_exchange.learning_engine.get_setup_weight(signal.setup_name)
+                setup_w = self.paper_exchange.learning_engine.get_setup_weight(signal.setup_id or signal.setup_name)
 
             alloc = self.money_manager.calculate_trade_allocation(
                 symbol=symbol,
@@ -480,14 +584,12 @@ class BotEngine:
                 entry_price=current_px,
                 df=df
             )
-            # Override plan with signal specific stops if present
-            if signal.stop_price:
-                plan.stop_loss = signal.stop_price
-                plan.risk_per_unit = max(0.01, current_px - signal.stop_price)
-            if signal.target_price:
-                plan.take_profit = signal.target_price
-                plan.reward_per_unit = max(0.01, signal.target_price - current_px)
-                plan.reward_risk_ratio = round(plan.reward_per_unit / plan.risk_per_unit, 2)
+            # Override plan with signal specific stops
+            plan.stop_loss = signal.stop_price
+            plan.risk_per_unit = max(0.01, current_px - signal.stop_price)
+            plan.take_profit = signal.target_price
+            plan.reward_per_unit = max(0.01, signal.target_price - current_px)
+            plan.reward_risk_ratio = round(plan.reward_per_unit / plan.risk_per_unit, 2)
 
             risk_check = self.day_trader.check_risk_gate(plan, trade_amount, self.daily_loss_so_far)
 
@@ -496,13 +598,34 @@ class BotEngine:
                 return
 
             self.log("SIGNAL", f"🟢 [{symbol}] BUY SIGNAL: {signal.reason} | Stop ${plan.stop_loss:,.2f}, Target ${plan.take_profit:,.2f} [Allocated: ${trade_amount:,.2f}]")
-            await self._execute_buy(symbol, current_px, trade_amount, signal.reason, plan.stop_loss, plan.take_profit)
+            await self._execute_buy(
+                symbol=symbol,
+                market_price=current_px,
+                amount_usdt=trade_amount,
+                reason=signal.reason,
+                stop_price=plan.stop_loss,
+                tp_price=plan.take_profit,
+                setup_id=signal.setup_id or "generic",
+                invalidation_price=signal.invalidation_price,
+                max_holding_bars=signal.max_holding_bars
+            )
 
         elif signal.action == "SELL" and has_pos:
             self.log("SIGNAL", f"🔴 [{symbol}] SELL SIGNAL: {signal.reason}")
             await self._execute_sell(symbol, current_px, signal.reason)
 
-    async def _execute_buy(self, symbol: str, market_price: float, amount_usdt: float, reason: str, stop_price: Optional[float] = None, tp_price: Optional[float] = None):
+    async def _execute_buy(
+        self,
+        symbol: str,
+        market_price: float,
+        amount_usdt: float,
+        reason: str,
+        stop_price: Optional[float] = None,
+        tp_price: Optional[float] = None,
+        setup_id: str = "generic",
+        invalidation_price: Optional[float] = None,
+        max_holding_bars: Optional[int] = None
+    ):
         """Execute buy order in Live Real Money, Testnet, or Paper Exchange."""
         if self.mode == "BINANCE_LIVE" and self.binance_service.ccxt_live:
             self.log("TRADE", f"Executing LIVE REAL MONEY BUY: ${amount_usdt:,.2f} of {symbol}...")
@@ -512,18 +635,30 @@ class BotEngine:
                 return
             else:
                 self.log("TRADE", f"Live Order Filled: {res.get('order', {}).get('id')}")
-                result = self.paper_exchange.execute_buy(symbol, market_price, amount_usdt, f"[LIVE] {reason}", stop_price, tp_price, self.max_open_positions)
+                result = self.paper_exchange.execute_buy(
+                    symbol, market_price, amount_usdt, f"[LIVE] {reason}", stop_price, tp_price,
+                    self.max_open_positions, setup_id, invalidation_price, max_holding_bars
+                )
         elif self.mode == "BINANCE_TESTNET" and self.binance_service.ccxt_testnet:
             self.log("TRADE", f"Executing Testnet BUY: ${amount_usdt:,.2f} of {symbol}...")
             res = await self.binance_service.testnet_create_order(symbol, "BUY", amount_usdt, market_price)
             if not res.get("success"):
                 self.log("ERROR", f"Testnet Order Failed: {res.get('error')}. Falling back to paper simulation.")
-                result = self.paper_exchange.execute_buy(symbol, market_price, amount_usdt, reason, stop_price, tp_price, self.max_open_positions)
+                result = self.paper_exchange.execute_buy(
+                    symbol, market_price, amount_usdt, reason, stop_price, tp_price,
+                    self.max_open_positions, setup_id, invalidation_price, max_holding_bars
+                )
             else:
                 self.log("TRADE", f"Testnet Order Filled: {res.get('order', {}).get('id')}")
-                result = self.paper_exchange.execute_buy(symbol, market_price, amount_usdt, f"[TESTNET] {reason}", stop_price, tp_price, self.max_open_positions)
+                result = self.paper_exchange.execute_buy(
+                    symbol, market_price, amount_usdt, f"[TESTNET] {reason}", stop_price, tp_price,
+                    self.max_open_positions, setup_id, invalidation_price, max_holding_bars
+                )
         else:
-            result = self.paper_exchange.execute_buy(symbol, market_price, amount_usdt, reason, stop_price, tp_price, self.max_open_positions)
+            result = self.paper_exchange.execute_buy(
+                symbol, market_price, amount_usdt, reason, stop_price, tp_price,
+                self.max_open_positions, setup_id, invalidation_price, max_holding_bars
+            )
 
         if result.get("success"):
             trade = result["trade"]

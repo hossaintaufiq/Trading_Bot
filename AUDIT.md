@@ -175,9 +175,30 @@ The Neptune Trading Bot is an asynchronous algorithmic trading application desig
 
 ---
 
-## 5. Stage 1 Action Plan
+## 5. Stage 1 Verification & Regression Test Results
 
-1. Implement targeted fixes for Bugs 1–8 across `learning_engine.py`, `strategies.py`, `bot_engine.py`, `paper_exchange.py`, and `money_manager.py`.
-2. Construct comprehensive pytest regression tests in `tests/test_stage1_fixes.py` verifying each fix individually.
-3. Execute the test suite and verify 100% pass rate.
-4. Stop at Stage 1 GATE and report verified findings before proceeding to Stage 2.
+Targeted fixes for Bugs 1–8 were implemented across `learning_engine.py`, `strategies.py`, `bot_engine.py`, `paper_exchange.py`, and `config.json`.
+The regression suite in `tests/test_stage1_fixes.py` tests each bug directly.
+
+### Regression Test Execution Output:
+```
+============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\fist7\AppData\Local\Programs\Python\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Project 2026\Trading_bot
+plugins: anyio-4.12.1
+collecting ... collected 8 items
+
+tests/test_stage1_fixes.py::test_bug1_setup_id_tracking PASSED           [ 12%]
+tests/test_stage1_fixes.py::test_bug2_fleet_exit_routing PASSED          [ 25%]
+tests/test_stage1_fixes.py::test_bug3_signal_exit_parameters_and_gate PASSED [ 37%]
+tests/test_stage1_fixes.py::test_bug4_orb_session_anchor_and_reset PASSED [ 50%]
+tests/test_stage1_fixes.py::test_bug5_closed_candle_deduplication PASSED [ 62%]
+tests/test_stage1_fixes.py::test_bug6_atr_trailing_stop_ratchet PASSED   [ 75%]
+tests/test_stage1_fixes.py::test_bug7_centralized_exit_priority PASSED   [ 87%]
+tests/test_stage1_fixes.py::test_bug8_correlation_exposure_cap PASSED    [100%]
+
+============================== 8 passed in 2.14s ==============================
+```
+
+All 8 regression tests passed. Stage 1 fixes are complete and verified.

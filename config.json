@@ -26,13 +26,14 @@
   "min_reward_risk": 1.5,
   "cash_buffer_pct": 10.0,
   "stop_loss_pct": 1.5,
-  "take_profit_pct": 2.5,
+  "take_profit_pct": 8.7,
   "trailing_stop_enabled": true,
-  "trailing_stop_pct": 0.8,
+  "trailing_stop_pct": 1.0,
   "paper_initial_balance": 10000.0,
   "slippage_pct": 0.05,
   "taker_fee_pct": 0.1,
   "binance_testnet": {},
   "strategies": {},
-  "binance_live": {}
+  "binance_live": {},
+  "max_correlated_positions": 2
 }
