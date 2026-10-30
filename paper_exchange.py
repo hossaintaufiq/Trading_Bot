@@ -26,6 +26,7 @@ class PaperExchange:
 
         self.peak_equity = initial_balance
         self.max_drawdown_pct = 0.0
+        self.equity_history: List[Dict[str, Any]] = []
 
         self.load_state()
 
@@ -61,6 +62,7 @@ class PaperExchange:
                     self.trades_history = data.get("trades_history", [])
                     self.peak_equity = float(data.get("peak_equity", self.initial_balance))
                     self.max_drawdown_pct = float(data.get("max_drawdown_pct", 0.0))
+                    self.equity_history = data.get("equity_history", [])
             except Exception:
                 pass
 
@@ -73,7 +75,8 @@ class PaperExchange:
             "asset_balance": self.asset_balance,
             "trades_history": self.trades_history,
             "peak_equity": self.peak_equity,
-            "max_drawdown_pct": self.max_drawdown_pct
+            "max_drawdown_pct": self.max_drawdown_pct,
+            "equity_history": self.equity_history
         }
         try:
             with open(self.state_file, "w") as f:
@@ -89,6 +92,7 @@ class PaperExchange:
         self.trades_history = []
         self.peak_equity = initial_balance
         self.max_drawdown_pct = 0.0
+        self.equity_history = []
         self.learning_engine.reset_learning_memory()
         self.save_state()
 
@@ -100,7 +104,10 @@ class PaperExchange:
         reason: str = "",
         stop_loss_price: Optional[float] = None,
         take_profit_price: Optional[float] = None,
-        max_positions: int = 5
+        max_positions: int = 5,
+        setup_id: str = "generic",
+        invalidation_price: Optional[float] = None,
+        max_holding_bars: Optional[int] = None
     ) -> Dict[str, Any]:
         """Execute simulated market BUY order for a specific symbol in the portfolio basket."""
         if symbol in self.positions:
@@ -125,13 +132,18 @@ class PaperExchange:
 
         pos = {
             "symbol": symbol,
+            "setup_id": setup_id,
             "entry_price": round(execution_price, 4),
             "quantity": round(qty, 6),
             "cost_usdt": round(usdt_amount, 2),
             "entry_time": int(time.time() * 1000),
             "highest_price": round(execution_price, 4),
+            "initial_stop_price": round(stop_loss_price, 4) if stop_loss_price else None,
             "stop_loss_price": round(stop_loss_price, 4) if stop_loss_price else None,
             "take_profit_price": round(take_profit_price, 4) if take_profit_price else None,
+            "invalidation_price": round(invalidation_price, 4) if invalidation_price else (round(stop_loss_price, 4) if stop_loss_price else None),
+            "max_holding_bars": max_holding_bars or 60,
+            "trailing_active": False,
             "reason": reason
         }
         self.positions[symbol] = pos
@@ -140,6 +152,7 @@ class PaperExchange:
             "id": f"TRD-{int(time.time() * 1000)}",
             "timestamp": int(time.time() * 1000),
             "symbol": symbol,
+            "setup_id": setup_id,
             "side": "BUY",
             "price": round(execution_price, 4),
             "quantity": round(qty, 6),
@@ -185,6 +198,7 @@ class PaperExchange:
             "id": f"TRD-{int(time.time() * 1000)}",
             "timestamp": int(time.time() * 1000),
             "symbol": target_sym,
+            "setup_id": pos.get("setup_id", "ema_rsi"),
             "side": "SELL",
             "price": round(execution_price, 4),
             "quantity": round(qty, 6),
@@ -270,6 +284,18 @@ class PaperExchange:
         total_realized_pnl = sum(t["realized_pnl"] for t in closed_trades)
         total_pnl_pct = ((total_equity - self.initial_balance) / self.initial_balance) * 100
 
+        # Record equity snapshot for dynamic equity curve visualization
+        now_ts = int(time.time() * 1000)
+        if not self.equity_history or (now_ts - self.equity_history[-1]["time"] >= 10000) or (abs(total_equity - self.equity_history[-1]["equity"]) > 0.5):
+            self.equity_history.append({
+                "time": now_ts,
+                "equity": round(total_equity, 2),
+                "drawdown": round(drawdown_pct, 2),
+                "pnl": round(total_realized_pnl, 2)
+            })
+            if len(self.equity_history) > 200:
+                self.equity_history = self.equity_history[-200:]
+
         return {
             "initial_balance": round(self.initial_balance, 2),
             "usdt_balance": round(self.usdt_balance, 2),
@@ -287,6 +313,7 @@ class PaperExchange:
             "active_positions": active_positions_list,
             "open_positions_count": len(active_positions_list),
             "asset_balance": round(self.asset_balance, 6),
+            "equity_history": self.equity_history[-60:],
             "recent_trades": self.trades_history[:15]
         }
 
@@ -300,6 +327,7 @@ class PaperExchange:
             "bull_flag": {"name": "Bull Flag Momentum", "trades": 0, "wins": 0, "pnl": 0.0},
             "oversold_bounce": {"name": "Oversold Bounce", "trades": 0, "wins": 0, "pnl": 0.0},
             "reclaim_ma20": {"name": "20-MA Reclaim", "trades": 0, "wins": 0, "pnl": 0.0},
+            "bollinger_reversion": {"name": "Range Hunter", "trades": 0, "wins": 0, "pnl": 0.0},
             "ema_rsi": {"name": "EMA 9/21 Trend", "trades": 0, "wins": 0, "pnl": 0.0}
         }
 
@@ -330,6 +358,10 @@ class PaperExchange:
                 bot_breakdown["reclaim_ma20"]["trades"] += 1
                 bot_breakdown["reclaim_ma20"]["pnl"] += pnl
                 if pnl > 0: bot_breakdown["reclaim_ma20"]["wins"] += 1
+            elif "range" in r or "hunter" in r or "bb mid" in r:
+                bot_breakdown["bollinger_reversion"]["trades"] += 1
+                bot_breakdown["bollinger_reversion"]["pnl"] += pnl
+                if pnl > 0: bot_breakdown["bollinger_reversion"]["wins"] += 1
             else:
                 bot_breakdown["ema_rsi"]["trades"] += 1
                 bot_breakdown["ema_rsi"]["pnl"] += pnl

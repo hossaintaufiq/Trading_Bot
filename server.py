@@ -143,16 +143,92 @@ async def close_position(payload: ClosePositionPayload):
     return {"success": True, "symbol": payload.symbol}
 
 
+class TimeMachinePayload(BaseModel):
+    symbol: Optional[str] = None
+    replays: Optional[int] = 1000
+    horizon: Optional[int] = 30
+    target_mode: Optional[str] = "2R"
+
+
 @app.post("/api/bot/time-machine/run")
-async def run_time_machine():
-    """Trigger on-demand Monte Carlo Time Machine simulation."""
+async def run_time_machine(payload: Optional[TimeMachinePayload] = None):
+    """Trigger dynamic Monte Carlo Time Machine simulation with customizable parameters."""
     if not engine:
         raise HTTPException(status_code=503, detail="Engine initializing")
-    engine._run_skills_scan()
+    sym = payload.symbol if payload else None
+    replays = payload.replays if payload and payload.replays else 1000
+    horizon = payload.horizon if payload and payload.horizon else 30
+    target_mode = payload.target_mode if payload and payload.target_mode else "2R"
+
+    res = engine.run_custom_time_machine(
+        symbol=sym,
+        replays=replays,
+        horizon=horizon,
+        target_mode=target_mode
+    )
+    return res
+
+
+class MoneyManagementPayload(BaseModel):
+    total_budget_limit_usd: Optional[float] = None
+    budget_allocation_mode: Optional[str] = None
+    max_open_positions: Optional[int] = None
+    max_session_loss_usd: Optional[float] = None
+    breakeven_lock_enabled: Optional[bool] = None
+    breakeven_trigger_pct: Optional[float] = None
+
+
+@app.post("/api/money-management/update")
+async def update_money_management(payload: MoneyManagementPayload):
+    """Update dynamic money management parameters (total budget, slot division, loss limit)."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+
+    updates = {k: v for k, v in payload.model_dump().items() if v is not None}
+    engine.config.update(updates)
+    engine.money_manager.update_config(engine.config)
+    engine.max_open_positions = engine.money_manager.max_open_positions
+    engine.save_config()
+
+    summary = engine.money_manager.get_summary(engine.paper_exchange.positions, engine.paper_exchange.usdt_balance)
+    engine.log("INFO", f"💰 Money Management updated: Total Budget ${summary['total_budget_limit_usd']:,.2f} | Mode: {summary['allocation_mode']} | Slots: {summary['max_open_positions']} (${summary['per_slot_budget_usd']:,.2f}/slot)")
+    return {"success": True, "money_management": summary}
+
+
+@app.post("/api/money-management/reset-circuit-breaker")
+async def reset_circuit_breaker():
+    """Reset session loss circuit breaker and allow new entries."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    engine.money_manager.reset_session_loss()
+    if engine.status == "CIRCUIT_BREAKER_HALTED":
+        engine.status = "RUNNING"
+        engine.is_running = True
+    engine.log("INFO", "🔄 Circuit breaker manually reset by user. Trading resumed.")
+    return {"success": True, "status": engine.status}
+
+
+@app.get("/api/reports/sub-bots")
+async def get_sub_bots_report():
+    """Get performance analytics breakdown for all 6 sub-bots and equity history."""
+    if not engine:
+        raise HTTPException(status_code=503, detail="Engine initializing")
+    report = engine.paper_exchange.get_daily_report()
+    summary = engine.paper_exchange.get_portfolio_summary({engine.symbol: engine.current_price})
+    bots_dict = report.get("bot_breakdown", {})
+    regime = getattr(engine, "current_regime", {
+        "regime": "RANGING_CHOP",
+        "adx": 18.0,
+        "description": "Sideways market consolidation"
+    })
     return {
         "success": True,
-        "plan": engine.latest_plan.__dict__ if engine.latest_plan else None,
-        "timemachine": engine.latest_timemachine.__dict__ if engine.latest_timemachine else None
+        "sub_bots": bots_dict,
+        "bot_breakdown": bots_dict,
+        "market_regime": regime,
+        "equity_history": summary.get("equity_history", []),
+        "win_rate_pct": summary.get("win_rate_pct", 0.0),
+        "total_realized_pnl": summary.get("total_realized_pnl", 0.0)
     }
 
 
@@ -217,7 +293,12 @@ class ConfigPayload(BaseModel):
     symbol: str = "BTC/USDT"
     timeframe: str = "1m"
     active_strategy: str = "neptune_fleet"
-    trade_amount_usdt: float = 500.0
+    trade_amount_usdt: float = 100.0
+    total_budget_limit_usd: Optional[float] = 200.0
+    budget_allocation_mode: Optional[str] = "EQUAL_SPLIT"
+    max_open_positions: Optional[int] = 4
+    max_session_loss_usd: Optional[float] = 25.0
+    breakeven_lock_enabled: Optional[bool] = True
     stop_loss_pct: float = 1.5
     take_profit_pct: float = 3.0
     trailing_stop_enabled: bool = False

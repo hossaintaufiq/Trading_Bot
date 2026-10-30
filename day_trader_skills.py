@@ -48,6 +48,8 @@ class TimeMachineResult:
     target_price: float = 0.0
     stop_price: float = 0.0
     horizon_steps: int = 30
+    return_distribution: Optional[List[Dict[str, Any]]] = None
+    symbol: str = "BTC/USDT"
 
 
 @dataclass
@@ -164,6 +166,21 @@ class DayTraderSuite:
                 "detail": f"Reclaimed 20-period Moving Average at ${ma20:,.1f}"
             })
 
+        # --- Setup 5: Bollinger Range Hunter (Chop Reversion) ---
+        bb_lower = float(curr.get("bb_lower", price))
+        stoch_k = float(curr.get("stoch_k", 50.0))
+        adx = float(curr.get("adx", 20.0))
+        if adx <= 25 and (float(prev["low"]) <= bb_lower * 1.002 or float(curr["low"]) <= bb_lower * 1.001) and float(curr["close"]) > float(curr["open"]):
+            setups.append({
+                "setup": "RANGE_HUNTER",
+                "name": "Range Hunter Reversal",
+                "badge": "RANGE",
+                "active": True,
+                "confidence": 0.84,
+                "level": round(bb_lower, 2),
+                "detail": f"Bounced off Lower Bollinger Band (${bb_lower:,.1f}) in ranging chop"
+            })
+
         return setups
 
     # -------------------------------------------------------------------------
@@ -183,6 +200,26 @@ class DayTraderSuite:
         - Stop: 'or-mid', 'atr:1.5', or 'pct:1.5'
         - Target: '2R' (twice the risk) or '1R'
         """
+        if df.empty:
+            atr = entry_price * 0.008 if entry_price > 0 else 10.0
+            stop_loss = entry_price * 0.985 if entry_price > 0 else 98.5
+            take_profit = entry_price * 1.03 if entry_price > 0 else 103.0
+            risk_per_unit = max(0.01, entry_price - stop_loss)
+            reward_per_unit = max(0.01, take_profit - entry_price)
+            return TradePlan(
+                symbol=symbol,
+                setup_name=setup_name,
+                entry_price=round(entry_price, 4),
+                stop_loss=round(stop_loss, 4),
+                take_profit=round(take_profit, 4),
+                risk_per_unit=round(risk_per_unit, 4),
+                reward_per_unit=round(reward_per_unit, 4),
+                reward_risk_ratio=2.0,
+                stop_rule=stop_mode,
+                target_rule=target_mode,
+                timestamp=int(time.time() * 1000)
+            )
+
         curr = df.iloc[-1]
         atr = float(curr.get("atr", entry_price * 0.008))
 
@@ -231,13 +268,16 @@ class DayTraderSuite:
         self,
         plan: TradePlan,
         df: pd.DataFrame,
-        num_replays: int = 1000
+        num_replays: int = 1000,
+        horizon: int = 30,
+        symbol: Optional[str] = None
     ) -> TimeMachineResult:
         """
-        Replays the remaining session 1,000 times using the empirical distribution
-        of the asset's own recent 5-minute bar returns.
-        Computes Target First %, Stop First %, Neither %, and Expected R.
+        Replays the remaining session dynamic N times using the empirical distribution
+        of the asset's own recent bar returns.
+        Computes Target First %, Stop First %, Neither %, Expected R, and Terminal Return Distribution.
         """
+        sym = symbol or plan.symbol
         if len(df) < 30:
             return TimeMachineResult(
                 replays=0,
@@ -247,7 +287,9 @@ class DayTraderSuite:
                 expected_r=0.0,
                 verdict="COIN FLIP (LIMITED DATA)",
                 confidence=0.5,
-                percentiles={"p10": plan.stop_loss, "p50": plan.entry_price, "p90": plan.take_profit}
+                percentiles={"p10": plan.stop_loss, "p50": plan.entry_price, "p90": plan.take_profit},
+                horizon_steps=horizon,
+                symbol=sym
             )
 
         # Compute empirical bar-by-bar percentage returns
@@ -258,8 +300,9 @@ class DayTraderSuite:
         target = plan.take_profit
         stop = plan.stop_loss
 
-        # Horizon: next 30 bars (e.g. 30 minutes in 1m timeframe)
-        horizon = 30
+        horizon = max(5, min(120, int(horizon)))
+        num_replays = max(100, min(10000, int(num_replays)))
+
         target_first = 0
         stop_first = 0
         neither = 0
@@ -284,28 +327,28 @@ class DayTraderSuite:
             hit_target = np.where(path >= target)[0]
             hit_stop = np.where(path <= stop)[0]
 
-            full_path = [round(float(x), 2) for x in path_matrix[i]]
+            full_path = [round(float(x), 4) for x in path_matrix[i]]
 
             if len(hit_target) > 0 and len(hit_stop) > 0:
                 if hit_target[0] < hit_stop[0]:
                     target_first += 1
-                    if len(target_paths) < 10:
+                    if len(target_paths) < 12:
                         target_paths.append(full_path)
                 else:
                     stop_first += 1
-                    if len(stop_paths) < 8:
+                    if len(stop_paths) < 10:
                         stop_paths.append(full_path)
             elif len(hit_target) > 0:
                 target_first += 1
-                if len(target_paths) < 10:
+                if len(target_paths) < 12:
                     target_paths.append(full_path)
             elif len(hit_stop) > 0:
                 stop_first += 1
-                if len(stop_paths) < 8:
+                if len(stop_paths) < 10:
                     stop_paths.append(full_path)
             else:
                 neither += 1
-                if len(neutral_paths) < 4:
+                if len(neutral_paths) < 6:
                     neutral_paths.append(full_path)
 
             terminal_prices.append(path[-1])
@@ -318,7 +361,7 @@ class DayTraderSuite:
         expected_r = (target_first * plan.reward_risk_ratio - stop_first * 1.0) / num_replays
 
         # Verdict
-        if target_pct >= 58.0 and expected_r >= 0.25:
+        if target_pct >= 56.0 and expected_r >= 0.20:
             verdict = "FAVORABLE EDGE"
         elif target_pct <= 42.0 or expected_r < -0.1:
             verdict = "POOR ODDS (AVOID)"
@@ -333,14 +376,30 @@ class DayTraderSuite:
             "p90": float(np.percentile(terminal_prices, 90))
         }
 
-        # Step-by-step percentile envelopes across all 30 forward steps
+        # Step-by-step percentile envelopes across forward steps
         cone_bounds = {
-            "p10": [round(float(x), 2) for x in np.percentile(path_matrix, 10, axis=0)],
-            "p25": [round(float(x), 2) for x in np.percentile(path_matrix, 25, axis=0)],
-            "p50": [round(float(x), 2) for x in np.percentile(path_matrix, 50, axis=0)],
-            "p75": [round(float(x), 2) for x in np.percentile(path_matrix, 75, axis=0)],
-            "p90": [round(float(x), 2) for x in np.percentile(path_matrix, 90, axis=0)]
+            "p10": [round(float(x), 4) for x in np.percentile(path_matrix, 10, axis=0)],
+            "p25": [round(float(x), 4) for x in np.percentile(path_matrix, 25, axis=0)],
+            "p50": [round(float(x), 4) for x in np.percentile(path_matrix, 50, axis=0)],
+            "p75": [round(float(x), 4) for x in np.percentile(path_matrix, 75, axis=0)],
+            "p90": [round(float(x), 4) for x in np.percentile(path_matrix, 90, axis=0)]
         }
+
+        # Calculate Terminal Return Distribution Histogram Bins
+        term_rets = ((np.array(terminal_prices) - entry) / entry) * 100.0
+        bins = [
+            {"label": "< -2%", "min": -999.0, "max": -2.0, "type": "stop"},
+            {"label": "-2% to -1%", "min": -2.0, "max": -1.0, "type": "stop"},
+            {"label": "-1% to 0%", "min": -1.0, "max": 0.0, "type": "neutral"},
+            {"label": "0% to +1%", "min": 0.0, "max": 1.0, "type": "neutral"},
+            {"label": "+1% to +2%", "min": 1.0, "max": 2.0, "type": "target"},
+            {"label": "> +2%", "min": 2.0, "max": 999.0, "type": "target"}
+        ]
+        ret_dist = []
+        for b in bins:
+            cnt = int(np.sum((term_rets >= b["min"]) & (term_rets < b["max"])))
+            pct = round((cnt / num_replays) * 100, 1)
+            ret_dist.append({"label": b["label"], "count": cnt, "pct": pct, "type": b["type"]})
 
         # Representative sample paths tagged by outcome for visual canvas
         sample_paths = []
@@ -362,10 +421,12 @@ class DayTraderSuite:
             percentiles=percentiles,
             sample_paths=sample_paths,
             cone_bounds=cone_bounds,
-            entry_price=round(entry, 2),
-            target_price=round(target, 2),
-            stop_price=round(stop, 2),
-            horizon_steps=horizon
+            entry_price=round(entry, 4),
+            target_price=round(target, 4),
+            stop_price=round(stop, 4),
+            horizon_steps=horizon,
+            return_distribution=ret_dist,
+            symbol=sym
         )
 
     # -------------------------------------------------------------------------

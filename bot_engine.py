@@ -19,6 +19,7 @@ from strategies import get_strategy, Signal
 from day_trader_skills import DayTraderSuite, TradePlan, TimeMachineResult, RiskVerdict
 from paper_exchange import PaperExchange
 from binance_service import BinanceService
+from money_manager import MoneyManager
 
 logger = logging.getLogger("bot_engine")
 
@@ -90,6 +91,12 @@ class BotEngine:
         self.last_scan_time = 0
         self.pulse_interval_sec = 15  # 15s scan pulse
         self.daily_loss_so_far = 0.0
+        self.last_closed_candle_time: Dict[str, int] = {}
+        self.max_correlated_positions = int(self.config.get("max_correlated_positions", 2))
+
+        # Money Management & Capital Allocation Subsystem
+        self.money_manager = MoneyManager(self.config)
+        self.max_open_positions = self.money_manager.max_open_positions
 
         # Subsystems
         self.paper_exchange = PaperExchange(
@@ -432,17 +439,41 @@ class BotEngine:
                 await self._execute_sell(symbol, current_price, f"Trailing Stop Exit (-{pullback_pct:.2f}%)")
                 return
 
+        # Money Management: Break-Even Stop Lock Check
+        be_stop = self.money_manager.check_breakeven_adjustment(pos, current_price)
+        if be_stop:
+            pos["stop_loss_price"] = be_stop
+            self.log("TRADE", f"🔒 [{symbol}] BREAK-EVEN STOP LOCKED at ${be_stop:,.4f} (+0.25% fee buffer). Profit protected!")
+            self.paper_exchange.save_state()
+
     async def _process_strategy_signal_for_symbol(self, symbol: str, signal: Signal, df: pd.DataFrame):
         """Execute buy/sell on a specific symbol when strategy condition triggers."""
         has_pos = symbol in self.paper_exchange.positions
-        open_count = len(self.paper_exchange.positions)
         current_px = self.markets.get(symbol, {}).get("current_price", self.current_price)
 
         if signal.action == "BUY" and not has_pos:
-            if open_count >= self.max_open_positions:
-                return  # Fleet basket is full (e.g. 5 open positions)
+            # 1. Money Manager Capital Allocation & Total Budget Check
+            coin_atr = float(df.iloc[-1].get("atr_pct", 1.0)) if not df.empty else 1.0
+            setup_w = 1.0
+            if self.paper_exchange.learning_engine:
+                setup_w = self.paper_exchange.learning_engine.get_setup_weight(signal.setup_name)
 
-            # Plan bracket exit & run Risk Gate before buying
+            alloc = self.money_manager.calculate_trade_allocation(
+                symbol=symbol,
+                current_price=current_px,
+                active_positions=self.paper_exchange.positions,
+                wallet_usdt_balance=self.paper_exchange.usdt_balance,
+                setup_weight=setup_w,
+                coin_atr_pct=coin_atr
+            )
+
+            if not alloc.approved:
+                self.log("RISK", f"🛑 [{symbol}] ENTRY SUPPRESSED BY MONEY MANAGER: {alloc.reason}")
+                return
+
+            trade_amount = alloc.trade_amount_usdt
+
+            # 2. Plan bracket exit & run Risk Gate before buying
             plan = self.day_trader.plan_bracket_exit(
                 symbol=symbol,
                 setup_name=signal.setup_name,
@@ -458,14 +489,13 @@ class BotEngine:
                 plan.reward_per_unit = max(0.01, signal.target_price - current_px)
                 plan.reward_risk_ratio = round(plan.reward_per_unit / plan.risk_per_unit, 2)
 
-            trade_amount = float(self.config.get("trade_amount_usdt", 100.0))
             risk_check = self.day_trader.check_risk_gate(plan, trade_amount, self.daily_loss_so_far)
 
             if not risk_check.passed:
                 self.log("RISK", f"🛑 [{symbol}] TRADE BLOCKED BY RISK GATE: {risk_check.reason}")
                 return
 
-            self.log("SIGNAL", f"🟢 [{symbol}] BUY SIGNAL: {signal.reason} | Stop ${plan.stop_loss:,.2f}, 2R Target ${plan.take_profit:,.2f}")
+            self.log("SIGNAL", f"🟢 [{symbol}] BUY SIGNAL: {signal.reason} | Stop ${plan.stop_loss:,.2f}, Target ${plan.take_profit:,.2f} [Allocated: ${trade_amount:,.2f}]")
             await self._execute_buy(symbol, current_px, trade_amount, signal.reason, plan.stop_loss, plan.take_profit)
 
         elif signal.action == "SELL" and has_pos:
@@ -537,9 +567,16 @@ class BotEngine:
 
         if result.get("success"):
             trade = result["trade"]
-            pnl_val = trade.get("realized_pnl", 0.0)
+            pnl_val = float(trade.get("realized_pnl", 0.0))
             if pnl_val < 0:
                 self.daily_loss_so_far += abs(pnl_val)
+
+            # Inform Money Manager of closed trade result
+            self.money_manager.record_closed_trade_pnl(pnl_val)
+            if self.money_manager.circuit_breaker_tripped:
+                self.is_running = False
+                self.status = "CIRCUIT_BREAKER_HALTED"
+                self.log("RISK", f"🚨 MAX SESSION LOSS LIMIT REACHED (${self.money_manager.session_realized_loss:,.2f}). CIRCUIT BREAKER ENGAGED. Halting entries to protect capital!")
 
             pnl_str = f"+${trade['realized_pnl']:,.2f} (+{trade['realized_pnl_pct']}%)" if trade['realized_pnl'] >= 0 else f"-${abs(trade['realized_pnl']):,.2f} ({trade['realized_pnl_pct']}%)"
             base_sym = symbol.split('/')[0]
@@ -566,6 +603,9 @@ class BotEngine:
 
     def start_bot(self):
         """Activate algorithmic execution."""
+        if self.money_manager.circuit_breaker_tripped:
+            self.log("WARNING", "⚠️ Cannot start bot: Circuit Breaker is active. Reset session loss first.")
+            return
         self.is_running = True
         self.status = "RUNNING"
         self.log("INFO", f"▶️ Neptune Bot active in [{self.mode}] mode. Strategy: [{self.active_strategy_name}]. Monitoring {len(self.watchlist)} coins...")
@@ -592,9 +632,12 @@ class BotEngine:
         """Reset virtual wallet to clean starting state."""
         initial = float(self.config.get("paper_initial_balance", 10000.0))
         self.paper_exchange.reset_wallet(initial)
+        self.money_manager.reset_session_loss()
         self.chart_markers = []
         self.daily_loss_so_far = 0.0
-        self.log("INFO", f"🔄 Paper wallet reset to ${initial:,.2f} USDT.")
+        self.status = "RUNNING"
+        self.is_running = True
+        self.log("INFO", f"🔄 Paper wallet reset to ${initial:,.2f} USDT. Money Manager circuit breaker reset.")
 
     async def manual_buy(self, symbol: Optional[str] = None, amount_usdt: Optional[float] = None) -> Dict[str, Any]:
         """Manually trigger an immediate trade for testing and verification."""
@@ -665,6 +708,9 @@ class BotEngine:
         self.timeframe = self.config.get("timeframe", "1m")
         self.active_strategy_name = self.config.get("active_strategy", "neptune_fleet")
 
+        self.money_manager.update_config(self.config)
+        self.max_open_positions = self.money_manager.max_open_positions
+
         self.strategy = get_strategy(self.active_strategy_name, self.config, learning_engine=self.paper_exchange.learning_engine)
         self.day_trader.config = self.config
         self.binance_service.config = self.config
@@ -734,6 +780,7 @@ class BotEngine:
             "active_strategy": self.active_strategy_name,
             "current_price": self.current_price,
             "portfolio": portfolio,
+            "money_management": self.money_manager.get_summary(self.paper_exchange.positions, self.paper_exchange.usdt_balance),
             "config": self.config,
             "indicators": {
                 "rsi": round(curr_rsi, 2),
@@ -760,3 +807,45 @@ class BotEngine:
             "logs": self.logs[:50]
         }
         return sanitize_json_val(snapshot)
+
+    def run_custom_time_machine(
+        self,
+        symbol: Optional[str] = None,
+        replays: int = 1000,
+        horizon: int = 30,
+        target_mode: str = "2R"
+    ) -> Dict[str, Any]:
+        """Execute on-demand dynamic Monte Carlo simulation with user-chosen coin, horizon, replays, and target mode."""
+        sym = symbol or self.symbol
+        mkt = self.markets.get(sym, {})
+        kdf = mkt.get("klines_df", pd.DataFrame())
+        px = mkt.get("current_price", self.current_price)
+
+        if kdf.empty or len(kdf) < 25:
+            kdf = self.klines_df
+            px = self.current_price
+
+        plan = self.day_trader.plan_bracket_exit(
+            symbol=sym,
+            setup_name="Dynamic Simulation",
+            entry_price=px,
+            df=kdf,
+            target_mode=target_mode
+        )
+        tm_result = self.day_trader.run_time_machine(
+            plan=plan,
+            df=kdf,
+            num_replays=replays,
+            horizon=horizon,
+            symbol=sym
+        )
+        if sym == self.symbol:
+            self.latest_timemachine = tm_result
+            self.latest_plan = plan
+
+        return sanitize_json_val({
+            "success": True,
+            "symbol": sym,
+            "plan": plan.__dict__,
+            "timemachine": tm_result.__dict__
+        })

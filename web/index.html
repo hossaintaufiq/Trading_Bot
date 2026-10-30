@@ -255,14 +255,146 @@
       </div>
     </section>
 
+    <!-- INSTITUTIONAL MONEY MANAGEMENT & CAPITAL ALLOCATION ENGINE -->
+    <section class="money-management-section glass-card" id="money-management-section">
+      <div class="mm-header">
+        <div class="mm-title-wrap">
+          <span class="mm-header-icon">
+            <svg class="panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          </span>
+          <div>
+            <h3 class="mm-main-title">MONEY MANAGEMENT &amp; CAPITAL ALLOCATION</h3>
+            <span class="mm-subtitle">Total Budget Hard Cap &bull; Dynamic Slot Division &bull; Drawdown Circuit Breaker &bull; Break-Even Stop Lock</span>
+          </div>
+        </div>
+        <div class="mm-status-cluster">
+          <span id="mm-status-badge" class="mm-status-pill active">BUDGET ENFORCED</span>
+          <button type="button" id="btn-reset-circuit-breaker" class="btn-xs-action hidden" title="Reset circuit breaker">Reset Circuit Breaker</button>
+        </div>
+      </div>
+
+      <div class="mm-body-grid">
+        <!-- Col 1: Total Budget Limit Control -->
+        <div class="mm-card-col">
+          <div class="mm-col-header">
+            <span class="mm-col-label">TOTAL CAPITAL BUDGET LIMIT</span>
+            <span class="mm-hint-tag">HARD CAP</span>
+          </div>
+          <div class="mm-input-row">
+            <span class="mm-currency-prefix">$</span>
+            <input type="number" id="input-total-budget" class="mm-input mono" min="10" max="100000" step="10" value="200.00" />
+            <button type="button" id="btn-save-budget" class="btn-apply-mm">APPLY</button>
+          </div>
+          <div class="mm-presets-row">
+            <span class="presets-label">PRESETS:</span>
+            <button type="button" class="mm-preset-btn" data-budget="50">$50</button>
+            <button type="button" class="mm-preset-btn" data-budget="100">$100</button>
+            <button type="button" class="mm-preset-btn active" data-budget="200">$200</button>
+            <button type="button" class="mm-preset-btn" data-budget="500">$500</button>
+            <button type="button" class="mm-preset-btn" data-budget="1000">$1k</button>
+          </div>
+        </div>
+
+        <!-- Col 2: Capital Utilization & Division Meter -->
+        <div class="mm-card-col mm-col-meter">
+          <div class="mm-col-header">
+            <span class="mm-col-label">PORTFOLIO UTILIZATION</span>
+            <span id="mm-utilization-pct" class="mm-pct-badge mono">0.0% DEPLOYED</span>
+          </div>
+          <div class="mm-progress-bar-wrap">
+            <div id="mm-progress-fill" class="mm-progress-fill" style="width: 0%;"></div>
+          </div>
+          <div class="mm-meter-breakdown">
+            <div class="meter-stat">
+              <span class="meter-stat-label">Invested:</span>
+              <strong id="mm-stat-deployed" class="mono font-bold">$0.00</strong>
+            </div>
+            <div class="meter-stat">
+              <span class="meter-stat-label">Available:</span>
+              <strong id="mm-stat-available" class="mono success font-bold">$200.00</strong>
+            </div>
+            <div class="meter-stat">
+              <span class="meter-stat-label">Per Slot:</span>
+              <strong id="mm-stat-per-slot" class="mono cyan font-bold">~$50.00</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 3: Strategy Division & Safety Controls -->
+        <div class="mm-card-col">
+          <div class="mm-col-header">
+            <span class="mm-col-label">ALLOCATION &amp; RISK LIMITS</span>
+            <span class="mm-hint-tag">DYNAMIC</span>
+          </div>
+          <div class="mm-controls-grid">
+            <div class="mm-ctrl-item">
+              <label for="select-allocation-mode" class="mm-field-label">Division Mode:</label>
+              <select id="select-allocation-mode" class="mm-select">
+                <option value="EQUAL_SPLIT" selected>Equal Split (Total / Slots)</option>
+                <option value="CONFIDENCE_WEIGHTED">Bayesian Kelly (Setup Win Rate)</option>
+                <option value="VOLATILITY_PARITY">Volatility Balanced (Risk Parity)</option>
+              </select>
+            </div>
+            <div class="mm-ctrl-item">
+              <label for="input-max-slots" class="mm-field-label">Max Slots:</label>
+              <div class="mm-mini-input-wrap">
+                <input type="number" id="input-max-slots" class="mm-mini-input mono" min="1" max="8" value="4" />
+                <span class="mm-mini-unit">Slots</span>
+              </div>
+            </div>
+            <div class="mm-ctrl-item">
+              <label for="input-session-max-loss" class="mm-field-label">Circuit Breaker Loss:</label>
+              <div class="mm-mini-input-wrap">
+                <span class="mm-mini-unit">$</span>
+                <input type="number" id="input-session-max-loss" class="mm-mini-input mono" min="5" max="500" value="25.00" />
+              </div>
+            </div>
+            <div class="mm-ctrl-item mm-toggle-item">
+              <label class="mm-switch-label">
+                <input type="checkbox" id="toggle-breakeven-lock" checked />
+                <span class="mm-switch-slider"></span>
+                <span class="mm-switch-text">Lock Stop at Break-Even (+1.0%)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- MAIN TRADING INTERFACE -->
     <main class="main-layout">
       <!-- LEFT COLUMN: Live Candlestick Chart, Signal HUD & Day Trader Radar -->
       <div class="left-column">
         <!-- Main Chart Section -->
         <section class="chart-section glass-card">
+          <!-- Dynamic Graph View Switcher Bar -->
+          <div class="graph-switcher-bar">
+            <div class="graph-switcher-label">
+              <svg class="svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+              <span>CHOOSE GRAPH VIEW:</span>
+            </div>
+            <div class="graph-switcher-tabs">
+              <button type="button" class="graph-tab-btn active" id="tab-graph-price" data-view="price">
+                <svg class="svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                <span>CANDLESTICK PRICE</span>
+              </button>
+              <button type="button" class="graph-tab-btn" id="tab-graph-equity" data-view="equity">
+                <svg class="svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <span>EQUITY &amp; DRAWDOWN</span>
+              </button>
+              <button type="button" class="graph-tab-btn" id="tab-graph-subbots" data-view="subbots">
+                <svg class="svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"></path></svg>
+                <span>SUB-BOT ANALYTICS</span>
+              </button>
+              <button type="button" class="graph-tab-btn" id="tab-graph-fleet" data-view="fleet">
+                <svg class="svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"></path></svg>
+                <span>FLEET RADAR</span>
+              </button>
+            </div>
+          </div>
+
           <!-- Multi-Coin Fleet Active Trade Tabs (Click any coin to display its graph) -->
-          <div class="chart-fleet-tabs-bar">
+          <div class="chart-fleet-tabs-bar" id="chart-fleet-tabs-bar">
             <div class="tabs-label">
               <span class="tabs-label-icon">
                 <svg class="svg-icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
@@ -275,7 +407,7 @@
           </div>
 
           <!-- Chart HUD Toolbar -->
-          <div class="chart-hud">
+          <div class="chart-hud" id="chart-hud-bar">
             <div class="hud-left">
               <div class="ticker-box">
                 <span id="hud-symbol" class="hud-symbol">BTC/USDT</span>
@@ -366,7 +498,54 @@
           </div>
 
           <!-- The Lightweight Charts Canvas Container -->
-          <div id="tv-chart-container" class="chart-canvas"></div>
+          <div id="tv-chart-container" class="chart-canvas graph-panel-view active"></div>
+
+          <!-- Dynamic Graph 2: Equity & Drawdown Curve Canvas -->
+          <div id="equity-chart-container" class="graph-panel-view hidden">
+            <div class="equity-chart-header">
+              <div class="equity-metric-item">
+                <span class="eq-lbl">PEAK EQUITY:</span>
+                <strong id="eq-chart-peak" class="mono font-bold">$10,000.00</strong>
+              </div>
+              <div class="equity-metric-item">
+                <span class="eq-lbl">CURRENT EQUITY:</span>
+                <strong id="eq-chart-current" class="mono font-bold cyan">$10,000.00</strong>
+              </div>
+              <div class="equity-metric-item">
+                <span class="eq-lbl">MAX DRAWDOWN:</span>
+                <strong id="eq-chart-dd" class="mono font-bold danger">0.0%</strong>
+              </div>
+              <div class="equity-metric-item">
+                <span class="eq-lbl">ALL-TIME PNL:</span>
+                <strong id="eq-chart-pnl" class="mono font-bold neutral">+$0.00</strong>
+              </div>
+            </div>
+            <div class="equity-canvas-wrap">
+              <canvas id="equity-canvas" width="900" height="340"></canvas>
+            </div>
+          </div>
+
+          <!-- Dynamic Graph 3: Sub-Bot Algorithm Analytics -->
+          <div id="subbots-chart-container" class="graph-panel-view hidden">
+            <div class="subbots-chart-header">
+              <span class="subbots-header-title">6 SUB-BOT ALGORITHMS: WIN RATE &amp; REALIZED PNL COMPARISON</span>
+              <span class="subbots-header-tag">BAYESIAN REINFORCEMENT ACTIVE</span>
+            </div>
+            <div id="subbots-chart-content" class="subbots-cards-grid">
+              <!-- Dynamically populated sub-bot analytics cards with visual bars -->
+            </div>
+          </div>
+
+          <!-- Dynamic Graph 4: Multi-Coin Fleet Comparative Radar -->
+          <div id="fleet-chart-container" class="graph-panel-view hidden">
+            <div class="fleet-chart-header">
+              <span class="fleet-header-title">FLEET 8-COIN REAL-TIME PRICE &amp; VOLATILITY SPREAD</span>
+              <span class="fleet-header-tag">1-SECOND TICK TELEMETRY</span>
+            </div>
+            <div id="fleet-chart-content" class="fleet-bars-grid">
+              <!-- Dynamically populated comparative price & ATR movement bars -->
+            </div>
+          </div>
         </section>
 
         <!-- ACTIVE MULTI-COIN BASKET TRAY -->
@@ -396,45 +575,17 @@
               </span>
               <h3>BOT FLEET STATUS &amp; REAL-TIME DIAGNOSTIC FEEDBACK</h3>
             </div>
-            <span class="sub-header-tag">5 QUANTITATIVE ENGINES ACTIVE</span>
+            <span class="sub-header-tag">6 QUANTITATIVE ENGINES ACTIVE</span>
           </div>
           <div class="fleet-matrix" id="fleet-matrix-container">
             <!-- Bot items populated dynamically -->
-            <div class="fleet-bot-row" id="bot-card-orb">
-              <div class="bot-col-main">
-                <div class="bot-name-badge">
-                  <span class="badge-tag orb">ORB</span>
-                  <strong>Opening Range Breakout</strong>
-                </div>
-                <span class="bot-feedback-text" id="fb-orb">Waiting for 15-minute range completion...</span>
-              </div>
-              <div class="bot-col-stats">
-                <span class="bot-status-pill scanning" id="st-orb">SCANNING</span>
-                <span class="bot-action-pill hold" id="act-orb">HOLD</span>
-              </div>
-            </div>
-
-            <div class="fleet-bot-row" id="bot-card-bull_flag">
-              <div class="bot-col-main">
-                <div class="bot-name-badge">
-                  <span class="badge-tag flag">FLAG</span>
-                  <strong>Bull Flag Momentum</strong>
-                </div>
-                <span class="bot-feedback-text" id="fb-bull_flag">Scanning consolidation channel (&lt; 1.2% range)...</span>
-              </div>
-              <div class="bot-col-stats">
-                <span class="bot-status-pill scanning" id="st-bull_flag">SCANNING</span>
-                <span class="bot-action-pill hold" id="act-bull_flag">HOLD</span>
-              </div>
-            </div>
-
             <div class="fleet-bot-row" id="bot-card-oversold_bounce">
               <div class="bot-col-main">
                 <div class="bot-name-badge">
                   <span class="badge-tag bounce">BOUNCE</span>
-                  <strong>Oversold RSI Bounce</strong>
+                  <strong>Oversold RSI Bounce Bot</strong>
                 </div>
-                <span class="bot-feedback-text" id="fb-oversold_bounce">Monitoring RSI (Waiting for oversold dip &lt;= 30)...</span>
+                <span class="bot-feedback-text" id="fb-oversold_bounce">Capitulation detector active. Monitoring RSI oversold dips...</span>
               </div>
               <div class="bot-col-stats">
                 <span class="bot-status-pill scanning" id="st-oversold_bounce">MONITORING</span>
@@ -446,9 +597,9 @@
               <div class="bot-col-main">
                 <div class="bot-name-badge">
                   <span class="badge-tag reclaim">RECLAIM</span>
-                  <strong>20-MA Support Reclaim</strong>
+                  <strong>20-MA Support Reclaim Bot</strong>
                 </div>
-                <span class="bot-feedback-text" id="fb-reclaim_ma20">Tracking 20-period moving average support line...</span>
+                <span class="bot-feedback-text" id="fb-reclaim_ma20">Tracking 20-period moving average reclaim with volume...</span>
               </div>
               <div class="bot-col-stats">
                 <span class="bot-status-pill scanning" id="st-reclaim_ma20">TRACKING</span>
@@ -456,13 +607,55 @@
               </div>
             </div>
 
+            <div class="fleet-bot-row" id="bot-card-bollinger_reversion">
+              <div class="bot-col-main">
+                <div class="bot-name-badge">
+                  <span class="badge-tag range">RANGE</span>
+                  <strong>Bollinger Range Hunter Bot</strong>
+                </div>
+                <span class="bot-feedback-text" id="fb-bollinger_reversion">Active in chop/sideways regimes. Scanning lower band bounces...</span>
+              </div>
+              <div class="bot-col-stats">
+                <span class="bot-status-pill scanning" id="st-bollinger_reversion">SCANNING</span>
+                <span class="bot-action-pill hold" id="act-bollinger_reversion">HOLD</span>
+              </div>
+            </div>
+
+            <div class="fleet-bot-row" id="bot-card-orb">
+              <div class="bot-col-main">
+                <div class="bot-name-badge">
+                  <span class="badge-tag orb">BOX</span>
+                  <strong>Box Breakout Bot</strong>
+                </div>
+                <span class="bot-feedback-text" id="fb-orb">Scanning consolidation boxes for volume breakout...</span>
+              </div>
+              <div class="bot-col-stats">
+                <span class="bot-status-pill scanning" id="st-orb">SCANNING</span>
+                <span class="bot-action-pill hold" id="act-orb">HOLD</span>
+              </div>
+            </div>
+
+            <div class="fleet-bot-row" id="bot-card-bull_flag">
+              <div class="bot-col-main">
+                <div class="bot-name-badge">
+                  <span class="badge-tag flag">FLAG</span>
+                  <strong>Bull Flag Momentum Bot</strong>
+                </div>
+                <span class="bot-feedback-text" id="fb-bull_flag">Scanning impulse poles and consolidation flags...</span>
+              </div>
+              <div class="bot-col-stats">
+                <span class="bot-status-pill scanning" id="st-bull_flag">SCANNING</span>
+                <span class="bot-action-pill hold" id="act-bull_flag">HOLD</span>
+              </div>
+            </div>
+
             <div class="fleet-bot-row" id="bot-card-ema_rsi">
               <div class="bot-col-main">
                 <div class="bot-name-badge">
                   <span class="badge-tag trend">TREND</span>
-                  <strong>EMA 9/21 Trend Momentum</strong>
+                  <strong>EMA 9/21 Trend Rider Bot</strong>
                 </div>
-                <span class="bot-feedback-text" id="fb-ema_rsi">Fast EMA above Slow EMA. Awaiting pullback dip to EMA 9.</span>
+                <span class="bot-feedback-text" id="fb-ema_rsi">Regime-filtered trend follower with confirmed bounce trigger...</span>
               </div>
               <div class="bot-col-stats">
                 <span class="bot-status-pill active" id="st-ema_rsi">ARMED</span>
@@ -490,31 +683,88 @@
             </div>
           </div>
 
-          <!-- Card B: Time Machine Monte Carlo Simulator & Live Animated Pathways -->
+          <!-- Card B: Dynamic Time Machine Monte Carlo Simulator & Live Animated Pathways -->
           <div class="glass-card panel-card timemachine-card">
             <div class="panel-header">
               <div class="panel-title-wrap">
                 <span class="panel-icon">
                   <svg class="panel-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 </span>
-                <h3>TIME MACHINE (1,000 MONTE CARLO PATHWAYS)</h3>
+                <h3>DYNAMIC TIME MACHINE (<span id="tm-replays-label">1,000</span> MONTE CARLO PATHS)</h3>
               </div>
               <div class="tm-header-actions">
                 <span id="tm-sim-pulse" class="tm-live-pill" title="Pathways live-tracking price">
-                  <span class="tm-live-dot"></span> LIVE CONE
+                  <span class="tm-live-dot"></span> <span id="tm-view-badge">LIVE CONE</span>
                 </span>
-                <button id="btn-run-timemachine" class="btn-xs-action">Re-simulate</button>
+                <button id="btn-run-timemachine" class="btn-xs-action">Run Sim</button>
               </div>
             </div>
+
+            <!-- Dynamic Time Machine Controls Bar -->
+            <div class="tm-dynamic-controls-bar">
+              <div class="tm-ctrl-row">
+                <div class="tm-ctrl-subgroup">
+                  <span class="tm-ctrl-lbl">COIN:</span>
+                  <select id="tm-select-coin" class="tm-select-sm">
+                    <option value="BTC/USDT" selected>BTC</option>
+                    <option value="ETH/USDT">ETH</option>
+                    <option value="SOL/USDT">SOL</option>
+                    <option value="BNB/USDT">BNB</option>
+                    <option value="SUI/USDT">SUI</option>
+                    <option value="DOGE/USDT">DOGE</option>
+                    <option value="XRP/USDT">XRP</option>
+                    <option value="PEPE/USDT">PEPE</option>
+                  </select>
+                </div>
+
+                <div class="tm-ctrl-subgroup">
+                  <span class="tm-ctrl-lbl">HORIZON:</span>
+                  <div class="tm-btn-toggle-group">
+                    <button type="button" class="tm-pill-opt" data-horizon="15">15m</button>
+                    <button type="button" class="tm-pill-opt active" data-horizon="30">30m</button>
+                    <button type="button" class="tm-pill-opt" data-horizon="60">1h</button>
+                    <button type="button" class="tm-pill-opt" data-horizon="120">2h</button>
+                  </div>
+                </div>
+
+                <div class="tm-ctrl-subgroup">
+                  <span class="tm-ctrl-lbl">PATHS:</span>
+                  <div class="tm-btn-toggle-group">
+                    <button type="button" class="tm-pill-opt" data-replays="500">500</button>
+                    <button type="button" class="tm-pill-opt active" data-replays="1000">1k</button>
+                    <button type="button" class="tm-pill-opt" data-replays="2500">2.5k</button>
+                    <button type="button" class="tm-pill-opt" data-replays="5000">5k</button>
+                  </div>
+                </div>
+
+                <div class="tm-ctrl-subgroup">
+                  <span class="tm-ctrl-lbl">VIEW:</span>
+                  <div class="tm-btn-toggle-group">
+                    <button type="button" class="tm-pill-opt active" id="btn-tm-view-cone" title="Confidence Probability Cloud">Cone</button>
+                    <button type="button" class="tm-pill-opt" id="btn-tm-view-paths" title="Individual Sample Pathways">Paths</button>
+                    <button type="button" class="tm-pill-opt" id="btn-tm-view-dist" title="Outcome Return Distribution">Dist</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="timemachine-body">
               <!-- Live Animated Monte Carlo Canvas -->
-              <div class="tm-canvas-container">
+              <div class="tm-canvas-container" id="tm-canvas-wrapper">
                 <canvas id="timemachine-canvas" width="600" height="230"></canvas>
                 <div class="tm-canvas-legend">
                   <span class="tm-leg-item"><span class="tm-dot target"></span> 2R Target Paths</span>
                   <span class="tm-leg-item"><span class="tm-dot stop"></span> 1R Stop Paths</span>
                   <span class="tm-leg-item"><span class="tm-dot median"></span> Median P50</span>
                   <span class="tm-leg-item"><span class="tm-cone-box"></span> 80% Cone</span>
+                </div>
+              </div>
+
+              <!-- Terminal Return Distribution View (Visible when Dist view is active) -->
+              <div class="tm-dist-container hidden" id="tm-dist-wrapper">
+                <div class="tm-dist-title">TERMINAL OUTCOME RETURN PROBABILITY DISTRIBUTION:</div>
+                <div class="tm-dist-bars-grid" id="tm-dist-bars">
+                  <!-- Dynamically populated probability bars -->
                 </div>
               </div>
 
@@ -542,7 +792,7 @@
                 </div>
                 <div class="tm-stat-box">
                   <span class="tm-stat-name">SIMULATED PATHS</span>
-                  <span class="tm-stat-val mono">1,000</span>
+                  <span id="tm-paths-count" class="tm-stat-val mono">1,000</span>
                 </div>
                 <div class="tm-stat-box">
                   <span class="tm-stat-name">REWARD : RISK</span>
@@ -737,6 +987,23 @@
               </span>
               <h3>EXECUTION LOG</h3>
             </div>
+            <div class="trade-filters-pills">
+              <button type="button" class="trade-flt-btn active" data-tfilter="ALL">ALL</button>
+              <button type="button" class="trade-flt-btn" data-tfilter="WINS">WINS</button>
+              <button type="button" class="trade-flt-btn" data-tfilter="LOSSES">LOSSES</button>
+            </div>
+          </div>
+          <div class="trades-sub-filters">
+            <select id="trade-filter-bot" class="trade-filter-select">
+              <option value="ALL" selected>All Bots (6 Algos)</option>
+              <option value="oversold_bounce">Oversold Bounce</option>
+              <option value="reclaim_ma20">20-MA Reclaim</option>
+              <option value="bollinger_reversion">Range Hunter</option>
+              <option value="orb">Box Breakout</option>
+              <option value="bull_flag">Bull Flag</option>
+              <option value="ema_rsi">EMA Trend</option>
+            </select>
+            <button type="button" id="btn-toggle-trade-details" class="btn-xs-toggle" title="Toggle detailed columns (Fee, Hold, Reason)">Details: Normal</button>
           </div>
           <div class="trades-table-wrap">
             <table class="trades-table">

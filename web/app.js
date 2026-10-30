@@ -25,6 +25,18 @@ const state = {
   watchlist: [],
   prices: {},
   activePositions: [],
+  activeGraphView: 'price', // 'price' | 'equity' | 'subbots' | 'fleet'
+  moneyManagement: null,
+  equityHistory: [],
+  allTrades: [],
+  tmHorizon: 30,
+  tmReplays: 1000,
+  tmTargetMode: '2R',
+  tmSymbol: 'BTC/USDT',
+  tmViewMode: 'cone', // 'cone' | 'paths' | 'dist'
+  tradeFilterOutcome: 'ALL',
+  tradeFilterBot: 'ALL',
+  tradeDetailsMode: 'normal',
   priceLines: {
     entry: null,
     tp: null,
@@ -404,6 +416,19 @@ function loadInitialState(data) {
   // Portfolio & Indicators
   if (data.portfolio) {
     updatePortfolioUI(data.portfolio);
+    if (data.portfolio.equity_history) {
+      state.equityHistory = data.portfolio.equity_history;
+      if (state.activeGraphView === 'equity') renderEquityCurveChart(state.equityHistory);
+    }
+    if (data.portfolio.recent_trades) {
+      state.allTrades = data.portfolio.recent_trades;
+      filterAndRenderTrades();
+    }
+  }
+
+  // Money Management Engine Telemetry
+  if (data.money_management) {
+    updateMoneyManagementUI(data.money_management);
   }
   if (data.indicators) {
     updateIndicatorsHUD(data.indicators);
@@ -469,6 +494,11 @@ function handleTickerUpdate(data) {
   if (data.market_trends && isCurrent) {
     updateMarketTrendsUI(data.market_trends);
   }
+
+  // Update Fleet Radar live if currently visible
+  if (state.activeGraphView === 'fleet') {
+    renderFleetRadarChart();
+  }
 }
 
 function handleIndicatorsUpdate(data) {
@@ -504,8 +534,21 @@ function handleTradeExecuted(data) {
     }
   }
 
-  // Prepend trade to recent executions table
-  prependTradeRow(trade);
+  // Prepend trade to recent executions table and update internal trade store
+  if (trade) {
+    state.allTrades.unshift(trade);
+    if (state.allTrades.length > 200) state.allTrades.pop();
+    filterAndRenderTrades();
+  }
+
+  // Update Equity Chart if open
+  if (data.portfolio) {
+    updatePortfolioUI(data.portfolio);
+    if (data.portfolio.equity_history) {
+      state.equityHistory = data.portfolio.equity_history;
+      if (state.activeGraphView === 'equity') renderEquityCurveChart(state.equityHistory);
+    }
+  }
 }
 
 // ==========================================================================
@@ -898,8 +941,12 @@ function toggleOverlay(name) {
 async function switchMarket(symbol) {
   try {
     state.symbol = symbol;
+    state.tmSymbol = symbol;
     const pairSelect = document.getElementById('pair-select');
     if (pairSelect) pairSelect.value = symbol;
+
+    const tmSelect = document.getElementById('tm-select-coin');
+    if (tmSelect) tmSelect.value = symbol;
 
     // Immediately update tab highlights and position banner
     renderChartFleetTabs(state.watchlist, state.prices, state.symbol, state.activePositions);
@@ -990,7 +1037,8 @@ function updateDayTraderSuite(suite) {
       { setup: "ORB_BREAKOUT", name: "Opening Range Breakout", badge: "ORB", idle: "Awaiting 15m Range" },
       { setup: "BULL_FLAG", name: "Bull Flag Momentum", badge: "FLAG", idle: "Scanning Channel" },
       { setup: "OVERSOLD_BOUNCE", name: "Oversold RSI Bounce", badge: "BOUNCE", idle: "RSI > 30 (Normal)" },
-      { setup: "RECLAIM_MA20", name: "20-MA Support Reclaim", badge: "RECLAIM", idle: "Tracking 20 SMA" }
+      { setup: "RECLAIM_MA20", name: "20-MA Support Reclaim", badge: "RECLAIM", idle: "Tracking 20 SMA" },
+      { setup: "BOLLINGER_REVERSION", name: "Bollinger Range Hunter", badge: "RANGE", idle: "Within Bollinger Bands" }
     ];
 
     container.innerHTML = defaultSetups.map(def => {
@@ -1065,6 +1113,9 @@ function updateDayTraderSuite(suite) {
   // 6. Update Time Machine Animated Canvas Data
   if (suite.timemachine) {
     updateTimeMachineData(suite.timemachine);
+    if (suite.timemachine.return_distribution) {
+      renderTimeMachineDistribution(suite.timemachine.return_distribution);
+    }
   }
 }
 
@@ -1103,13 +1154,44 @@ function updateFleetMatrix(fleetStatus) {
   });
 }
 
-function prependTradeRow(t) {
+function filterAndRenderTrades() {
   const tbody = document.getElementById('trades-table-body');
   if (!tbody) return;
 
-  const emptyRow = tbody.querySelector('.empty-row');
-  if (emptyRow) emptyRow.remove();
+  const outcomeFilter = state.tradeFilterOutcome || 'ALL';
+  const botFilter = state.tradeFilterBot || 'ALL';
 
+  const filtered = (state.allTrades || []).filter(t => {
+    // 1. Outcome filter
+    if (outcomeFilter === 'WINS') {
+      if (t.side === 'BUY' || (t.realized_pnl !== undefined && t.realized_pnl <= 0)) return false;
+    } else if (outcomeFilter === 'LOSSES') {
+      if (t.side === 'BUY' || (t.realized_pnl !== undefined && t.realized_pnl > 0)) return false;
+    }
+
+    // 2. Sub-bot filter
+    if (botFilter !== 'ALL') {
+      const matchStrat = t.strategy === botFilter || t.setup_id === botFilter;
+      const matchReason = t.reason && t.reason.toLowerCase().includes(botFilter.toLowerCase());
+      if (!matchStrat && !matchReason) return false;
+    }
+
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No matching trades found for active filter.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  // Show up to 50 most recent matching trades
+  filtered.slice(0, 50).forEach(t => {
+    renderSingleTradeRow(tbody, t);
+  });
+}
+
+function renderSingleTradeRow(tbody, t) {
   const tr = document.createElement('tr');
   const d = new Date(t.timestamp || Date.now());
   const timeStr = d.toTimeString().split(' ')[0];
@@ -1122,30 +1204,64 @@ function prependTradeRow(t) {
     pnlCell = `<span class="${pnlClass}">${sign}$${t.realized_pnl.toFixed(2)} (${sign}${t.realized_pnl_pct}%)</span>`;
   }
 
-  tr.innerHTML = `
-    <td>${timeStr}</td>
-    <td><span class="trade-side-badge ${sideClass}">${t.side}</span></td>
-    <td>$${formatCurrency(t.price)}</td>
-    <td>${pnlCell}</td>
-  `;
+  const isDetailed = state.tradeDetailsMode === 'detailed';
+  const sym = t.symbol ? `<span class="trade-sym-tag">${t.symbol.split('/')[0]}</span>` : '';
+  const stratName = t.strategy ? `<span class="trade-strat-subtag">${t.strategy}</span>` : '';
 
-  tbody.insertBefore(tr, tbody.firstChild);
-  while (tbody.children.length > 20) {
-    tbody.removeChild(tbody.lastChild);
+  if (isDetailed) {
+    const feeStr = t.fee ? `Fee: $${t.fee.toFixed(2)}` : '';
+    const reasonStr = t.reason ? t.reason.replace(/\[.*?\]\s*/g, '').slice(0, 40) : '';
+    tr.innerHTML = `
+      <td>
+        <div>${timeStr}</div>
+        <div class="trade-meta-sub">${sym} ${stratName}</div>
+      </td>
+      <td>
+        <span class="trade-side-badge ${sideClass}">${t.side}</span>
+      </td>
+      <td>
+        <div>$${formatCurrency(t.price)}</div>
+        <div class="trade-meta-sub">${feeStr}</div>
+      </td>
+      <td>
+        <div>${pnlCell}</div>
+        <div class="trade-meta-sub muted" title="${escapeHtml(t.reason || '')}">${escapeHtml(reasonStr)}</div>
+      </td>
+    `;
+  } else {
+    tr.innerHTML = `
+      <td>${timeStr}</td>
+      <td><span class="trade-side-badge ${sideClass}">${t.side}</span></td>
+      <td>$${formatCurrency(t.price)}</td>
+      <td>${pnlCell}</td>
+    `;
+  }
+
+  tbody.appendChild(tr);
+}
+
+function toggleTradeDetails() {
+  state.tradeDetailsMode = state.tradeDetailsMode === 'normal' ? 'detailed' : 'normal';
+  const btn = document.getElementById('btn-toggle-trade-details');
+  if (btn) {
+    btn.textContent = state.tradeDetailsMode === 'detailed' ? 'Details: Verbose' : 'Details: Normal';
+  }
+  filterAndRenderTrades();
+}
+
+function prependTradeRow(t) {
+  if (t) {
+    state.allTrades.unshift(t);
+    if (state.allTrades.length > 200) state.allTrades.pop();
+    filterAndRenderTrades();
   }
 }
 
 function renderTradesTable(trades) {
-  const tbody = document.getElementById('trades-table-body');
-  if (!tbody) return;
-
-  if (trades.length === 0) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No trades executed yet.</td></tr>';
-    return;
+  if (Array.isArray(trades)) {
+    state.allTrades = trades;
+    filterAndRenderTrades();
   }
-
-  tbody.innerHTML = '';
-  trades.forEach(t => prependTradeRow(t));
 }
 
 function appendLog(log) {
@@ -1199,22 +1315,11 @@ function setupEventListeners() {
     });
   }
 
-  // Re-run Time Machine Button
+  // Re-run Dynamic Time Machine Button
   const btnRunTM = document.getElementById('btn-run-timemachine');
   if (btnRunTM) {
-    btnRunTM.addEventListener('click', async () => {
-      btnRunTM.textContent = 'Simulating...';
-      try {
-        const res = await fetch('/api/bot/time-machine/run', { method: 'POST' });
-        const d = await res.json();
-        if (d.success) {
-          updateDayTraderSuite(d);
-        }
-      } catch (e) {
-        console.error('Time machine run failed:', e);
-      } finally {
-        setTimeout(() => { btnRunTM.textContent = 'Re-run'; }, 800);
-      }
+    btnRunTM.addEventListener('click', () => {
+      runDynamicTimeMachine();
     });
   }
 
@@ -1595,6 +1700,138 @@ function setupEventListeners() {
       modal.classList.remove('hidden');
       if (btnEnvLive) btnEnvLive.click();
     });
+  }
+
+  // --- MONEY MANAGEMENT & CAPITAL ALLOCATION LISTENERS ---
+  const btnSaveBudget = document.getElementById('btn-save-budget');
+  if (btnSaveBudget) {
+    btnSaveBudget.addEventListener('click', applyMoneyManagementUpdate);
+  }
+
+  // Budget Input Enter key
+  const budgetInput = document.getElementById('input-total-budget');
+  if (budgetInput) {
+    budgetInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') applyMoneyManagementUpdate();
+    });
+  }
+
+  // Quick Preset Buttons ($50, $100, $200, $500, $1k)
+  document.querySelectorAll('.mm-preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (budgetInput) {
+        budgetInput.value = btn.dataset.budget;
+        applyMoneyManagementUpdate();
+      }
+    });
+  });
+
+  // Division Mode, Slots, Max Loss & Break-Even Stop Lock Change
+  const selAllocMode = document.getElementById('select-allocation-mode');
+  if (selAllocMode) selAllocMode.addEventListener('change', applyMoneyManagementUpdate);
+
+  const inputMaxSlots = document.getElementById('input-max-slots');
+  if (inputMaxSlots) inputMaxSlots.addEventListener('change', applyMoneyManagementUpdate);
+
+  const inputSessionLoss = document.getElementById('input-session-max-loss');
+  if (inputSessionLoss) inputSessionLoss.addEventListener('change', applyMoneyManagementUpdate);
+
+  const chkBreakeven = document.getElementById('toggle-breakeven-lock');
+  if (chkBreakeven) chkBreakeven.addEventListener('change', applyMoneyManagementUpdate);
+
+  // Circuit Breaker Reset
+  const btnResetCb = document.getElementById('btn-reset-circuit-breaker');
+  if (btnResetCb) {
+    btnResetCb.addEventListener('click', resetCircuitBreaker);
+  }
+
+  // --- DYNAMIC GRAPH SWITCHER TABS (Price, Equity, Sub-Bots, Fleet) ---
+  document.querySelectorAll('.graph-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.dataset.view;
+      if (view) switchGraphView(view);
+    });
+  });
+
+  // --- DYNAMIC TIME MACHINE CONTROLS ---
+  const tmCoinSelect = document.getElementById('tm-select-coin');
+  if (tmCoinSelect) {
+    tmCoinSelect.addEventListener('change', e => {
+      state.tmSymbol = e.target.value;
+      runDynamicTimeMachine();
+    });
+  }
+
+  // Horizon Pills (15m, 30m, 1h, 2h)
+  document.querySelectorAll('.tm-pill-opt[data-horizon]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tm-pill-opt[data-horizon]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.tmHorizon = parseInt(btn.dataset.horizon, 10);
+      runDynamicTimeMachine();
+    });
+  });
+
+  // Replay Pills (500, 1k, 2.5k, 5k)
+  document.querySelectorAll('.tm-pill-opt[data-replays]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tm-pill-opt[data-replays]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.tmReplays = parseInt(btn.dataset.replays, 10);
+      runDynamicTimeMachine();
+    });
+  });
+
+  // View Mode Pills (Cone, Paths, Dist)
+  const btnTmCone = document.getElementById('btn-tm-view-cone');
+  const btnTmPaths = document.getElementById('btn-tm-view-paths');
+  const btnTmDist = document.getElementById('btn-tm-view-dist');
+  const tmCanvasWrap = document.getElementById('tm-canvas-wrapper');
+  const tmDistWrap = document.getElementById('tm-dist-wrapper');
+
+  const setTmView = (mode) => {
+    state.tmViewMode = mode;
+    if (btnTmCone) btnTmCone.classList.toggle('active', mode === 'cone');
+    if (btnTmPaths) btnTmPaths.classList.toggle('active', mode === 'paths');
+    if (btnTmDist) btnTmDist.classList.toggle('active', mode === 'dist');
+
+    if (mode === 'dist') {
+      if (tmCanvasWrap) tmCanvasWrap.classList.add('hidden');
+      if (tmDistWrap) tmDistWrap.classList.remove('hidden');
+      if (currentTmData && currentTmData.return_distribution) {
+        renderTimeMachineDistribution(currentTmData.return_distribution);
+      }
+    } else {
+      if (tmCanvasWrap) tmCanvasWrap.classList.remove('hidden');
+      if (tmDistWrap) tmDistWrap.classList.add('hidden');
+    }
+  };
+
+  if (btnTmCone) btnTmCone.addEventListener('click', () => setTmView('cone'));
+  if (btnTmPaths) btnTmPaths.addEventListener('click', () => setTmView('paths'));
+  if (btnTmDist) btnTmDist.addEventListener('click', () => setTmView('dist'));
+
+  // --- EXECUTION LOG TRADE FILTERS ---
+  document.querySelectorAll('.trade-flt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.trade-flt-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.tradeFilterOutcome = btn.dataset.tfilter;
+      filterAndRenderTrades();
+    });
+  });
+
+  const selTradeBot = document.getElementById('trade-filter-bot');
+  if (selTradeBot) {
+    selTradeBot.addEventListener('change', e => {
+      state.tradeFilterBot = e.target.value;
+      filterAndRenderTrades();
+    });
+  }
+
+  const btnToggleTradeDetails = document.getElementById('btn-toggle-trade-details');
+  if (btnToggleTradeDetails) {
+    btnToggleTradeDetails.addEventListener('click', toggleTradeDetails);
   }
 
   // Periodic 25-second poll to keep session duration time updated
@@ -2141,5 +2378,604 @@ function updateMarketTrendsUI(tr) {
       regEl.textContent = tr.volatility_regime.replace(' VOLATILITY', '').slice(0, 11);
     }
   }
+}
+
+// ==========================================================================
+// MONEY MANAGEMENT & CAPITAL ALLOCATION ENGINE UI
+// ==========================================================================
+function updateMoneyManagementUI(mm) {
+  if (!mm) return;
+  state.moneyManagement = mm;
+
+  // 1. Status badge & Circuit Breaker Reset Button
+  const badge = document.getElementById('mm-status-badge');
+  const btnResetCb = document.getElementById('btn-reset-circuit-breaker');
+  if (badge) {
+    if (mm.circuit_breaker_tripped) {
+      badge.textContent = 'CIRCUIT BREAKER TRIPPED (HALTED)';
+      badge.className = 'mm-status-pill danger';
+    } else {
+      badge.textContent = `BUDGET ENFORCED ($${mm.total_budget_limit_usd.toFixed(0)})`;
+      badge.className = 'mm-status-pill active';
+    }
+  }
+  if (btnResetCb) {
+    btnResetCb.classList.toggle('hidden', !mm.circuit_breaker_tripped);
+  }
+
+  // 2. Total Budget Input (update only if user is not currently editing)
+  const budgetInput = document.getElementById('input-total-budget');
+  if (budgetInput && document.activeElement !== budgetInput) {
+    budgetInput.value = mm.total_budget_limit_usd.toFixed(2);
+  }
+
+  // Highlight active preset button if matched
+  document.querySelectorAll('.mm-preset-btn').forEach(btn => {
+    const val = parseFloat(btn.dataset.budget);
+    btn.classList.toggle('active', Math.abs(val - mm.total_budget_limit_usd) < 0.01);
+  });
+
+  // 3. Portfolio Utilization Meter & Stats
+  const utilPct = mm.utilization_pct !== undefined ? mm.utilization_pct : 0.0;
+  const utilBadge = document.getElementById('mm-utilization-pct');
+  if (utilBadge) {
+    utilBadge.textContent = `${utilPct.toFixed(1)}% DEPLOYED`;
+    utilBadge.className = 'mm-pct-badge mono ' + (utilPct >= 95 ? 'danger' : (utilPct >= 75 ? 'warning' : ''));
+  }
+
+  const fill = document.getElementById('mm-progress-fill');
+  if (fill) {
+    fill.style.width = `${Math.min(100, Math.max(0, utilPct))}%`;
+    fill.className = 'mm-progress-fill ' + (utilPct >= 95 ? 'danger' : (utilPct >= 75 ? 'warning' : ''));
+  }
+
+  const statDeployed = document.getElementById('mm-stat-deployed');
+  if (statDeployed) statDeployed.textContent = `$${formatCurrency(mm.allocated_budget_usd)}`;
+
+  const statAvail = document.getElementById('mm-stat-available');
+  if (statAvail) statAvail.textContent = `$${formatCurrency(mm.available_budget_usd)}`;
+
+  const statSlot = document.getElementById('mm-stat-per-slot');
+  if (statSlot) statSlot.textContent = `~$${formatCurrency(mm.per_slot_allocation_usd)}`;
+
+  // 4. Division Controls
+  const selMode = document.getElementById('select-allocation-mode');
+  if (selMode && document.activeElement !== selMode && mm.allocation_mode) {
+    selMode.value = mm.allocation_mode;
+  }
+
+  const inputSlots = document.getElementById('input-max-slots');
+  if (inputSlots && document.activeElement !== inputSlots && mm.max_open_positions !== undefined) {
+    inputSlots.value = mm.max_open_positions;
+  }
+
+  const inputLoss = document.getElementById('input-session-max-loss');
+  if (inputLoss && document.activeElement !== inputLoss && mm.max_session_loss_usd !== undefined) {
+    inputLoss.value = mm.max_session_loss_usd;
+  }
+
+  const chkBreakeven = document.getElementById('toggle-breakeven-lock');
+  if (chkBreakeven && mm.breakeven_lock_enabled !== undefined) {
+    chkBreakeven.checked = mm.breakeven_lock_enabled;
+  }
+}
+
+async function applyMoneyManagementUpdate() {
+  const budgetInput = document.getElementById('input-total-budget');
+  const selMode = document.getElementById('select-allocation-mode');
+  const inputSlots = document.getElementById('input-max-slots');
+  const inputLoss = document.getElementById('input-session-max-loss');
+  const chkBreakeven = document.getElementById('toggle-breakeven-lock');
+  const btnSave = document.getElementById('btn-save-budget');
+
+  const payload = {
+    total_budget_limit_usd: budgetInput ? (parseFloat(budgetInput.value) || 200.0) : 200.0,
+    allocation_mode: selMode ? selMode.value : 'EQUAL_SPLIT',
+    max_open_positions: inputSlots ? (parseInt(inputSlots.value, 10) || 4) : 4,
+    max_session_loss_usd: inputLoss ? (parseFloat(inputLoss.value) || 25.0) : 25.0,
+    breakeven_lock_enabled: chkBreakeven ? chkBreakeven.checked : true
+  };
+
+  if (btnSave) {
+    btnSave.textContent = 'SAVING...';
+    btnSave.disabled = true;
+  }
+
+  try {
+    const res = await fetch('/api/money-management/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.success && data.money_management) {
+      updateMoneyManagementUI(data.money_management);
+      if (btnSave) btnSave.textContent = '✓ APPLIED';
+    } else {
+      if (btnSave) btnSave.textContent = 'ERROR';
+    }
+  } catch (err) {
+    console.error('Failed to update money management:', err);
+    if (btnSave) btnSave.textContent = 'ERR';
+  } finally {
+    setTimeout(() => {
+      if (btnSave) {
+        btnSave.textContent = 'APPLY';
+        btnSave.disabled = false;
+      }
+    }, 1200);
+  }
+}
+
+async function resetCircuitBreaker() {
+  const btn = document.getElementById('btn-reset-circuit-breaker');
+  if (btn) {
+    btn.textContent = 'Resetting...';
+    btn.disabled = true;
+  }
+  try {
+    const res = await fetch('/api/money-management/reset-circuit-breaker', { method: 'POST' });
+    const data = await res.json();
+    if (data.success && data.money_management) {
+      updateMoneyManagementUI(data.money_management);
+    }
+  } catch (err) {
+    console.error('Failed to reset circuit breaker:', err);
+  } finally {
+    if (btn) {
+      btn.textContent = 'Reset Circuit Breaker';
+      btn.disabled = false;
+    }
+  }
+}
+
+// ==========================================================================
+// DYNAMIC MULTI-GRAPH VIEW CONTROLLER
+// ==========================================================================
+function switchGraphView(viewName) {
+  state.activeGraphView = viewName;
+
+  // Toggle Tab Button Active Class
+  document.querySelectorAll('.graph-tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === viewName);
+  });
+
+  // Toggle Container Visibility
+  const map = {
+    price: 'tv-chart-container',
+    equity: 'equity-chart-container',
+    subbots: 'subbots-chart-container',
+    fleet: 'fleet-chart-container'
+  };
+
+  Object.entries(map).forEach(([key, id]) => {
+    const el = document.getElementById(id);
+    if (el) {
+      if (key === viewName) {
+        el.classList.remove('hidden');
+        el.classList.add('active');
+      } else {
+        el.classList.add('hidden');
+        el.classList.remove('active');
+      }
+    }
+  });
+
+  // Trigger content render for active graph
+  if (viewName === 'price') {
+    if (chart && typeof chart.timeScale === 'function') {
+      setTimeout(() => {
+        chart.timeScale().fitContent();
+      }, 50);
+    }
+  } else if (viewName === 'equity') {
+    renderEquityCurveChart(state.equityHistory);
+  } else if (viewName === 'subbots') {
+    renderSubBotsChart();
+  } else if (viewName === 'fleet') {
+    renderFleetRadarChart();
+  }
+}
+
+// ==========================================================================
+// DYNAMIC GRAPH 2: EQUITY CURVE & DRAWDOWN CANVAS
+// ==========================================================================
+function renderEquityCurveChart(history) {
+  const canvas = document.getElementById('equity-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const rect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const width = rect.width > 0 ? rect.width : 900;
+  const height = 340;
+
+  canvas.width = Math.floor(width * dpr);
+  canvas.height = Math.floor(height * dpr);
+  canvas.style.width = '100%';
+  canvas.style.height = `${height}px`;
+
+  ctx.save();
+  ctx.scale(dpr, dpr);
+
+  // Background
+  ctx.fillStyle = '#080d18';
+  ctx.fillRect(0, 0, width, height);
+
+  // Parse history points
+  let points = Array.isArray(history) && history.length > 0 ? [...history] : [];
+  if (points.length < 2) {
+    const now = Date.now();
+    points = [
+      { timestamp: now - 3600000 * 12, equity: 10000.0, realized_pnl: 0, drawdown_pct: 0 },
+      { timestamp: now, equity: 10000.0, realized_pnl: 0, drawdown_pct: 0 }
+    ];
+  }
+
+  // Calculate statistics
+  let peak = 10000.0;
+  let maxDD = 0.0;
+  let currentEq = points[points.length - 1].equity;
+
+  points.forEach(p => {
+    if (p.equity > peak) peak = p.equity;
+    const dd = peak > 0 ? ((peak - p.equity) / peak) * 100 : 0;
+    if (dd > maxDD) maxDD = dd;
+  });
+
+  const totalPnL = currentEq - 10000.0;
+  const pnlSign = totalPnL >= 0 ? '+' : '';
+
+  // Update header metric displays
+  const peakEl = document.getElementById('eq-chart-peak');
+  if (peakEl) peakEl.textContent = `$${formatCurrency(peak)}`;
+
+  const curEl = document.getElementById('eq-chart-current');
+  if (curEl) curEl.textContent = `$${formatCurrency(currentEq)}`;
+
+  const ddEl = document.getElementById('eq-chart-dd');
+  if (ddEl) ddEl.textContent = `${maxDD.toFixed(1)}%`;
+
+  const pnlEl = document.getElementById('eq-chart-pnl');
+  if (pnlEl) {
+    pnlEl.textContent = `${pnlSign}$${totalPnL.toFixed(2)}`;
+    pnlEl.className = 'mono font-bold ' + (totalPnL >= 0 ? 'success' : 'danger');
+  }
+
+  // Margins
+  const padLeft = 70;
+  const padRight = 35;
+  const padTop = 30;
+  const padBottom = 35;
+  const plotW = width - padLeft - padRight;
+  const plotH = height - padTop - padBottom;
+
+  let minVal = Math.min(...points.map(p => p.equity));
+  let maxVal = Math.max(...points.map(p => p.equity));
+  if (Math.abs(maxVal - minVal) < 1.0) {
+    minVal -= 25;
+    maxVal += 25;
+  }
+  const range = (maxVal - minVal) * 1.25;
+  const midVal = (maxVal + minVal) / 2;
+  const adjMin = midVal - range / 2;
+  const adjMax = midVal + range / 2;
+
+  const getX = idx => padLeft + (idx / (points.length - 1)) * plotW;
+  const getY = val => padTop + plotH - ((val - adjMin) / (adjMax - adjMin)) * plotH;
+
+  // Gridlines & Labels
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+  ctx.lineWidth = 1;
+  const numGrid = 5;
+  for (let i = 0; i <= numGrid; i++) {
+    const yVal = adjMin + (i / numGrid) * (adjMax - adjMin);
+    const y = getY(yVal);
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(padLeft + plotW, y);
+    ctx.stroke();
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(`$${yVal.toFixed(0)}`, padLeft - 8, y + 3);
+  }
+
+  // Draw Initial $10,000 Baseline
+  const base10kY = getY(10000.0);
+  if (base10kY >= padTop && base10kY <= padTop + plotH) {
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = 'rgba(100, 116, 139, 0.45)';
+    ctx.beginPath();
+    ctx.moveTo(padLeft, base10kY);
+    ctx.lineTo(padLeft + plotW, base10kY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#64748b';
+    ctx.textAlign = 'right';
+    ctx.fillText('BASE $10k', padLeft + plotW - 4, base10kY - 6);
+  }
+
+  // Draw Gradient Fill under Equity Curve
+  const grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
+  grad.addColorStop(0, 'rgba(0, 245, 212, 0.28)');
+  grad.addColorStop(0.7, 'rgba(0, 245, 212, 0.05)');
+  grad.addColorStop(1, 'rgba(0, 245, 212, 0.0)');
+
+  ctx.beginPath();
+  ctx.moveTo(getX(0), getY(points[0].equity));
+  for (let i = 1; i < points.length; i++) {
+    const prevX = getX(i - 1);
+    const prevY = getY(points[i - 1].equity);
+    const currX = getX(i);
+    const currY = getY(points[i].equity);
+    ctx.bezierCurveTo((prevX + currX) / 2, prevY, (prevX + currX) / 2, currY, currX, currY);
+  }
+  ctx.lineTo(getX(points.length - 1), padTop + plotH);
+  ctx.lineTo(getX(0), padTop + plotH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Draw Neon Cyan Equity Line
+  ctx.beginPath();
+  ctx.moveTo(getX(0), getY(points[0].equity));
+  for (let i = 1; i < points.length; i++) {
+    const prevX = getX(i - 1);
+    const prevY = getY(points[i - 1].equity);
+    const currX = getX(i);
+    const currY = getY(points[i].equity);
+    ctx.bezierCurveTo((prevX + currX) / 2, prevY, (prevX + currX) / 2, currY, currX, currY);
+  }
+  ctx.strokeStyle = '#00f5d4';
+  ctx.lineWidth = 2.4;
+  ctx.shadowColor = 'rgba(0, 245, 212, 0.7)';
+  ctx.shadowBlur = 8;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // Draw End Dot
+  const lastX = getX(points.length - 1);
+  const lastY = getY(points[points.length - 1].equity);
+  ctx.fillStyle = '#00f5d4';
+  ctx.beginPath();
+  ctx.arc(lastX, lastY, 4.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Footer label
+  ctx.fillStyle = '#94a3b8';
+  ctx.textAlign = 'left';
+  ctx.font = '11px "Inter", sans-serif';
+  ctx.fillText(`Checkpoints: ${points.length} trades | Peak Capital: $${formatCurrency(peak)}`, padLeft, height - 12);
+
+  ctx.restore();
+}
+
+// ==========================================================================
+// DYNAMIC GRAPH 3: 6 SUB-BOT ALGORITHM ANALYTICS
+// ==========================================================================
+async function renderSubBotsChart() {
+  const container = document.getElementById('subbots-chart-content');
+  if (!container) return;
+
+  container.innerHTML = '<div class="subbots-loading">Loading 6 Sub-Bot Quantitative Telemetry...</div>';
+
+  try {
+    const res = await fetch('/api/reports/sub-bots');
+    const data = await res.json();
+    const subBotsMap = data.sub_bots || data.bot_breakdown;
+    if (!data.success || !subBotsMap) {
+      container.innerHTML = '<div class="subbots-empty">Sub-bot metrics unavailable.</div>';
+      return;
+    }
+
+    const regime = data.market_regime || { regime: 'RANGING_CHOP', adx: 18.0, description: 'Sideways Market Chop' };
+    const bots = Object.entries(subBotsMap);
+
+    const regimeHeader = `
+      <div class="subbots-regime-banner">
+        <div>
+          <span class="regime-banner-title">DETECTED REGIME: <strong>${regime.regime.replace(/_/g, ' ')}</strong></span>
+          <span class="regime-banner-sub mono">ADX Strength: ${regime.adx !== undefined ? regime.adx.toFixed(1) : '---'} &bull; Volatility Squeeze: ${regime.volatility_squeeze ? 'YES' : 'NO'}</span>
+        </div>
+        <span class="regime-banner-desc">${regime.description || ''}</span>
+      </div>
+    `;
+
+    const cardsHtml = bots.map(([key, bot]) => {
+      const winRate = bot.win_rate_pct || 0;
+      const trades = bot.trades || 0;
+      const wins = bot.wins || 0;
+      const losses = bot.losses || 0;
+      const pnl = bot.realized_pnl || 0;
+      const pnlSign = pnl >= 0 ? '+' : '';
+      const pnlClass = pnl >= 0 ? 'success' : 'danger';
+      const weight = bot.weight !== undefined ? bot.weight : 1.0;
+      const weightBadge = weight >= 1.15 ? 'boosted' : (weight <= 0.85 ? 'defensive' : 'normal');
+
+      // Recommended status in current regime
+      let regimeFit = 'NEUTRAL';
+      let regimeClass = 'neutral';
+      if (regime.regime === 'RANGING_CHOP' || regime.regime === 'VOLATILITY_SQUEEZE') {
+        if (key === 'oversold_bounce' || key === 'bollinger_reversion') {
+          regimeFit = 'PREFERRED (CHOP HUNTER)';
+          regimeClass = 'preferred';
+        } else if (key === 'ema_rsi') {
+          regimeFit = 'SUPPRESSED (LOW ADX CHOP GUARD)';
+          regimeClass = 'suppressed';
+        }
+      } else if (regime.regime.includes('TRENDING')) {
+        if (key === 'orb' || key === 'bull_flag' || key === 'ema_rsi') {
+          regimeFit = 'PREFERRED (TREND)';
+          regimeClass = 'preferred';
+        }
+      }
+
+      const barColor = winRate >= 60 ? 'var(--accent-cyan)' : (winRate >= 40 ? 'var(--accent-gold)' : 'var(--accent-crimson)');
+
+      return `
+        <div class="subbot-analytics-card">
+          <div class="subbot-card-top">
+            <div>
+              <strong class="subbot-name">${bot.name}</strong>
+              <div class="subbot-role">${bot.role}</div>
+            </div>
+            <span class="weight-badge ${weightBadge}">${weight.toFixed(2)}x WEIGHT</span>
+          </div>
+
+          <div class="subbot-stats-row">
+            <div>
+              <span class="subbot-stat-lbl">WIN RATE</span>
+              <strong class="subbot-stat-val mono" style="color:${barColor}">${winRate.toFixed(1)}%</strong>
+            </div>
+            <div>
+              <span class="subbot-stat-lbl">TRADES (W / L)</span>
+              <strong class="subbot-stat-val mono">${trades} (${wins}W / ${losses}L)</strong>
+            </div>
+            <div>
+              <span class="subbot-stat-lbl">REALIZED PNL</span>
+              <strong class="subbot-stat-val mono ${pnlClass}">${pnlSign}$${pnl.toFixed(2)}</strong>
+            </div>
+          </div>
+
+          <div class="subbot-progress-track">
+            <div class="subbot-progress-bar" style="width: ${Math.min(100, Math.max(5, winRate))}%; background: ${barColor}"></div>
+          </div>
+
+          <div class="subbot-card-bottom">
+            <span class="regime-fit-tag ${regimeClass}">REGIME: ${regimeFit}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = regimeHeader + `<div class="subbots-grid-inner">${cardsHtml}</div>`;
+  } catch (err) {
+    container.innerHTML = '<div class="subbots-error">Failed to fetch sub-bot reports.</div>';
+  }
+}
+
+// ==========================================================================
+// DYNAMIC GRAPH 4: MULTI-COIN FLEET RADAR
+// ==========================================================================
+function renderFleetRadarChart() {
+  const container = document.getElementById('fleet-chart-content');
+  if (!container) return;
+
+  const coins = Array.isArray(state.watchlist) && state.watchlist.length > 0 ? state.watchlist : [
+    "BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT", "SUI/USDT", "DOGE/USDT", "XRP/USDT", "PEPE/USDT"
+  ];
+
+  const posMap = {};
+  (state.activePositions || []).forEach(p => { posMap[p.symbol] = p; });
+
+  container.innerHTML = coins.map(sym => {
+    const px = state.prices[sym] || (sym === state.symbol ? state.currentPrice : 0);
+    const pos = posMap[sym];
+    const isViewing = sym === state.symbol;
+
+    let posBadge = '';
+    let pnlClass = 'neutral';
+    if (pos) {
+      const s = pos.unrealized_pnl >= 0 ? '+' : '';
+      pnlClass = pos.unrealized_pnl >= 0 ? 'success' : 'danger';
+      posBadge = `<span class="fleet-pos-badge ${pnlClass}">LONG: ${s}$${pos.unrealized_pnl.toFixed(2)} (${s}${pos.unrealized_pnl_pct.toFixed(1)}%)</span>`;
+    }
+
+    return `
+      <div class="fleet-coin-card ${pos ? 'in-trade' : ''}">
+        <div class="fleet-card-header">
+          <div class="fleet-card-title">
+            <span class="fleet-pulse-dot ${pos ? 'active' : ''}"></span>
+            <strong class="fleet-sym">${sym}</strong>
+          </div>
+          ${posBadge}
+        </div>
+        <div class="fleet-card-body">
+          <div class="fleet-price-row">
+            <span class="fleet-price-lbl">MARK PRICE</span>
+            <strong class="fleet-price-val mono">${px > 0 ? '$' + formatCurrency(px) : '---'}</strong>
+          </div>
+        </div>
+        <div class="fleet-card-actions">
+          <button type="button" class="fleet-inspect-btn ${isViewing ? 'active' : ''}" onclick="switchMarket('${sym}'); switchGraphView('price');">
+            <span>${isViewing ? '✓ Chart Active' : 'Inspect Candlestick Chart'}</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ==========================================================================
+// DYNAMIC TIME MACHINE: MONTE CARLO SIMULATOR RUNNER & RETURN DISTRIBUTION
+// ==========================================================================
+async function runDynamicTimeMachine() {
+  const btnRunTM = document.getElementById('btn-run-timemachine');
+  if (btnRunTM) {
+    btnRunTM.textContent = 'Simulating...';
+    btnRunTM.disabled = true;
+  }
+
+  const payload = {
+    symbol: state.tmSymbol || state.symbol || 'BTC/USDT',
+    replays: state.tmReplays || 1000,
+    horizon: state.tmHorizon || 30,
+    target_mode: state.tmTargetMode || '2R'
+  };
+
+  try {
+    const res = await fetch('/api/bot/time-machine/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if (d.success) {
+      updateDayTraderSuite(d);
+      if (d.timemachine && d.timemachine.return_distribution) {
+        renderTimeMachineDistribution(d.timemachine.return_distribution);
+      }
+    }
+  } catch (e) {
+    console.error('Dynamic time machine run failed:', e);
+  } finally {
+    if (btnRunTM) {
+      setTimeout(() => {
+        btnRunTM.textContent = 'Re-run';
+        btnRunTM.disabled = false;
+      }, 600);
+    }
+  }
+}
+
+function renderTimeMachineDistribution(dist) {
+  const container = document.getElementById('tm-dist-bars');
+  if (!container) return;
+
+  if (!dist || !Array.isArray(dist) || dist.length === 0) {
+    container.innerHTML = '<div class="tm-dist-empty">No distribution data available.</div>';
+    return;
+  }
+
+  container.innerHTML = dist.map(b => {
+    const pct = b.pct || 0;
+    const lbl = b.label || b.range || '';
+    const isWin = b.type === 'target' || lbl.startsWith('+') || lbl.includes('> +');
+    const isLoss = b.type === 'stop' || lbl.startsWith('< -') || lbl.includes('-');
+    const barClass = isWin ? 'win-bar' : (isLoss ? 'loss-bar' : 'neutral-bar');
+
+    return `
+      <div class="tm-dist-col">
+        <div class="tm-dist-bar-track">
+          <div class="tm-dist-bar-fill ${barClass}" style="height: ${Math.min(100, Math.max(5, pct * 2.2))}%"></div>
+        </div>
+        <span class="tm-dist-pct mono">${pct.toFixed(1)}%</span>
+        <span class="tm-dist-lbl">${lbl}</span>
+      </div>
+    `;
+  }).join('');
 }
 

@@ -101,6 +101,23 @@ class LocalLearningEngine:
                     "learned_weight": 1.0,
                     "status": "NORMAL"
                 },
+                "bollinger_reversion": {
+                    "name": "Range Hunter",
+                    "trades": 0,
+                    "wins": 0,
+                    "losses": 0,
+                    "win_rate_pct": 50.0,
+                    "total_pnl": 0.0,
+                    "gross_profit": 0.0,
+                    "gross_loss": 0.0,
+                    "profit_factor": 1.0,
+                    "avg_win_usd": 0.0,
+                    "avg_loss_usd": 0.0,
+                    "consecutive_wins": 0,
+                    "consecutive_losses": 0,
+                    "learned_weight": 1.0,
+                    "status": "NORMAL"
+                },
                 "ema_rsi": {
                     "name": "EMA 9/21 Trend",
                     "trades": 0,
@@ -124,16 +141,19 @@ class LocalLearningEngine:
 
     def _load_memory(self) -> Dict[str, Any]:
         """Load persistent memory file or create default."""
+        default_mem = self._default_memory()
         if os.path.exists(self.storage_path):
             try:
                 with open(self.storage_path, "r") as f:
                     data = json.load(f)
-                    # Validate setups key presence
-                    if "setups" in data:
+                    if "setups" in data and isinstance(data["setups"], dict):
+                        # Merge any missing setups from default
+                        for k, v in default_mem["setups"].items():
+                            if k not in data["setups"]:
+                                data["setups"][k] = v
                         return data
             except Exception as e:
                 logger.error(f"Error reading local learning memory: {e}")
-        default_mem = self._default_memory()
         self._save_memory(default_mem)
         return default_mem
 
@@ -158,6 +178,8 @@ class LocalLearningEngine:
             return "oversold_bounce"
         elif "20-ma" in text or "reclaim" in text:
             return "reclaim_ma20"
+        elif "range" in text or "hunter" in text or "bb mid" in text:
+            return "bollinger_reversion"
         return "ema_rsi"
 
     def record_closed_trade(self, trade: Dict[str, Any], market_context: Optional[Dict[str, Any]] = None):
@@ -168,10 +190,12 @@ class LocalLearningEngine:
         pnl = float(trade.get("realized_pnl", 0.0))
         pnl_pct = float(trade.get("realized_pnl_pct", 0.0))
         reason = str(trade.get("reason", ""))
-        setup_key = self.identify_setup_key(reason)
-
-        if setup_key not in self.memory["setups"]:
-            setup_key = "ema_rsi"
+        # Bug 1 Fix: prioritize explicit setup_id from closed trade, never string matching
+        setup_key = trade.get("setup_id")
+        if not setup_key or setup_key not in self.memory["setups"]:
+            setup_key = self.identify_setup_key(reason, trade.get("setup_name", ""))
+            if setup_key not in self.memory["setups"]:
+                setup_key = "ema_rsi"
 
         s = self.memory["setups"][setup_key]
         is_win = pnl > 0
