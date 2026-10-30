@@ -116,7 +116,9 @@ class ORBStrategy(BaseStrategy):
         rvol = float(curr.get("rvol", 1.0))
 
         # Extract timestamps to compute true session start (UTC)
-        if "time" in df.columns:
+        if "dt" in df.columns:
+            dt_series = df["dt"]
+        elif "time" in df.columns:
             ts = df["time"]
             unit = "ms" if (pd.api.types.is_numeric_dtype(ts) and float(ts.iloc[-1]) > 1e11) else "s"
             dt_series = pd.to_datetime(ts, unit=unit, utc=True)

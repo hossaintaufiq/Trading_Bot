@@ -100,6 +100,7 @@ class BotEngine:
 
         # Subsystems
         self.paper_exchange = PaperExchange(
+            state_file=self.config.get("paper_state_path", "paper_state.json"),
             initial_balance=self.config.get("paper_initial_balance", 10000.0),
             fee_pct=self.config.get("taker_fee_pct", 0.1),
             slippage_pct=self.config.get("slippage_pct", 0.05)

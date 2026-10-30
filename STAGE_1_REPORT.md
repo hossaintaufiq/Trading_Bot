@@ -145,3 +145,4 @@ tests/test_stage1_fixes.py::test_bug8_correlation_exposure_cap PASSED    [100%]
 
 **GATE REACHED**: Stage 1 is fully completed and verified.  
 Per the project rules, execution has stopped here. Ready to proceed to **Stage 2: Backtester** upon your explicit "continue" command.
+

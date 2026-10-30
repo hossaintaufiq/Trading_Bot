@@ -266,7 +266,10 @@ def test_bug4_orb_session_anchor_and_reset():
 def test_bug5_closed_candle_deduplication(tmp_path):
     config_file = tmp_path / "config.json"
     with open(config_file, "w") as f:
-        json.dump({"max_correlated_positions": 5}, f)
+        json.dump({
+            "max_correlated_positions": 5,
+            "paper_state_path": str(tmp_path / "pe_state.json")
+        }, f)
 
     engine = BotEngine(config_path=str(config_file))
     engine.paper_exchange.state_file = str(tmp_path / "pe_state.json")
@@ -419,7 +422,8 @@ def test_bug8_correlation_exposure_cap(tmp_path):
             "max_correlated_positions": 2,
             "total_budget_limit_usd": 10000.0,
             "max_open_positions": 5,
-            "max_trade_amount_usdt": 100.0
+            "max_trade_amount_usdt": 100.0,
+            "paper_state_path": str(tmp_path / "pe_state.json")
         }, f)
 
     engine = BotEngine(config_path=str(config_file))
