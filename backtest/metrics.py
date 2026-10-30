@@ -139,3 +139,4 @@ def compute_performance_metrics(
         "breakdown_by_strategy": breakdown_strategy,
         "breakdown_by_symbol": breakdown_symbol
     }
+

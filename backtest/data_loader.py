@@ -189,3 +189,4 @@ class BinanceDataLoader:
             clean_df.to_csv(cache_path, index=False)
 
         return clean_df, report
+

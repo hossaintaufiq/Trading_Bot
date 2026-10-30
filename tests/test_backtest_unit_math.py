@@ -144,3 +144,4 @@ def test_bnb_fee_discount_hand_calculation():
     fee_saved = res_std["total_fees"] - res_bnb["total_fees"]
     assert abs(fee_saved - 0.0504) < 1e-3
     assert res_bnb["net_pnl"] > res_std["net_pnl"]
+
