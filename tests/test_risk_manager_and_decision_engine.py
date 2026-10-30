@@ -124,3 +124,4 @@ def test_decision_engine_macro_regime_filter():
     })
     regime_bull = de.evaluate_macro_regime(btc_df_bull)
     assert regime_bull["allow_alts"] is True
+

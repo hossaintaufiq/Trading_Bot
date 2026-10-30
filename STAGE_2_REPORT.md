@@ -123,3 +123,4 @@ Replayed over the user's paper trading window (2026-10-29 20:43 to 2026-10-30 11
    - **Relative Strength & Best Coin Selection**: Rank assets by relative momentum against BTC; never trade weak or lagging coins.
    - **Cost Hurdle**: Require minimum target distance >= 4x roundtrip costs (>= 1.20%).
    - **Asymmetric Risk/Reward**: Stop at 1.5x ATR, Target at 2.5R to 3R, with break-even ratchet at +1R and ATR runner trailing stop.
+
