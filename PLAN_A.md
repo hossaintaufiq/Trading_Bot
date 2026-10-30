@@ -118,3 +118,4 @@ If any pre-registered threshold is missed:
 - The strategy is declared **FAILED**.
 - No parameters will be adjusted to achieve a pass.
 - Work on Proposal A stops immediately.
+
