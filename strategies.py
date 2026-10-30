@@ -102,6 +102,8 @@ class ORBStrategy(BaseStrategy):
         super().__init__("orb", params)
         self.session_start_hour_utc = int(params.get("session_start_hour_utc", 0))
         self.opening_range_minutes = int(params.get("opening_range_minutes", 15))
+        self.session_date: Optional[str] = None
+        self.session_range: Optional[Dict[str, Any]] = None
 
     def evaluate(self, df: pd.DataFrame, position: Optional[Dict[str, Any]] = None) -> Signal:
         if len(df) < 20:
@@ -156,6 +158,15 @@ class ORBStrategy(BaseStrategy):
         orb_low = float(or_candles["low"].min())
         orb_mid = (orb_high + orb_low) / 2.0
         orb_range_pct = ((orb_high - orb_low) / max(1e-6, orb_low)) * 100.0
+
+        self.session_date = str(session_date)
+        self.session_range = {
+            "date": str(session_date),
+            "high": orb_high,
+            "low": orb_low,
+            "mid": orb_mid,
+            "range_pct": orb_range_pct
+        }
 
         metrics = {
             "price": price,
