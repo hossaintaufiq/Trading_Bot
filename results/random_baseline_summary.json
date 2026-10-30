@@ -1,0 +1,17 @@
+{
+  "num_seeds": 100,
+  "avg_trades": 607.5,
+  "trades_spread": "[564, 652]",
+  "avg_win_rate_pct": 27.59,
+  "win_rate_spread": "[23.76%, 33.22%] (std: 1.54%)",
+  "avg_payoff_ratio": 1.69,
+  "payoff_spread": "[1.53, 1.96]",
+  "avg_profit_factor": 0.65,
+  "profit_factor_spread": "[0.50, 0.85]",
+  "avg_gross_pnl": -163.83,
+  "avg_fees_paid": 121.3,
+  "avg_net_pnl": -254.67,
+  "net_pnl_spread": "[$-385.04, $-92.93] (std: $54.47)",
+  "avg_expectancy_usd": -0.4184,
+  "expectancy_spread": "[$-0.6354, $-0.1608]"
+}
