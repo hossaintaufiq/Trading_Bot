@@ -33,8 +33,9 @@ def run_decision_backtest(
     max_correlated_positions: int = 2,
     trade_amount: float = 100.0,
     rr_ratio: float = 2.5,
-    min_target_pct: float = 1.20
-) -> Dict[str, Any]:
+    min_target_pct: float = 1.20,
+    atr_trail_multiplier: float = 1.5
+) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     loader = BinanceDataLoader(cache_dir="backtest/data/12m")
     symbols = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT", "XRP/USDT", "DOGE/USDT", "SUI/USDT"]
 
@@ -46,7 +47,7 @@ def run_decision_backtest(
         "min_target_pct": min_target_pct,
         "target_rr_ratio": rr_ratio,
         "atr_stop_multiplier": 1.5,
-        "atr_trail_multiplier": 1.5
+        "atr_trail_multiplier": atr_trail_multiplier
     })
 
     print(f"Loading and enriching {len(symbols)} symbols on {timeframe}...", flush=True)
@@ -183,9 +184,9 @@ def run_decision_backtest(
                 if pos["stop_loss_price"] < be_price:
                     pos["stop_loss_price"] = be_price
 
-                # Wider runner trail (2.5x ATR) only after reaching +2.0R
+                # Wider runner trail after reaching +2.0R
                 if gain >= 2.0 * r_dist:
-                    trail_px = round(highest_seen - (2.5 * curr_atr), 4)
+                    trail_px = round(highest_seen - (atr_trail_multiplier * curr_atr), 4)
                     if trail_px > pos["stop_loss_price"]:
                         pos["stop_loss_price"] = trail_px
 

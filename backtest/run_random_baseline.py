@@ -6,6 +6,8 @@ taker fee (0.10%), slippage (0.05%), and conservative intrabar tie-break.
 """
 
 import os
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import json
 import time
 import numpy as np
@@ -82,6 +84,7 @@ def run_random_benchmark(num_seeds: int = 100, timeframe: str = "1h") -> Dict[st
                     tp = exec_p + (rr_ratio * risk)
 
                     positions[b_sym] = {
+                        "open_p": open_p,
                         "entry_price": exec_p,
                         "quantity": qty,
                         "cost": trade_amount,
@@ -123,10 +126,20 @@ def run_random_benchmark(num_seeds: int = 100, timeframe: str = "1h") -> Dict[st
                 sell_fee = gross * (fee_pct / 100.0)
                 net = gross - sell_fee
                 pnl = net - pos["cost"]
+
+                # Precise arithmetic breakdown
+                buy_fee = pos["buy_fee"]
+                total_fees = buy_fee + sell_fee
+                buy_slip = pos["quantity"] * (pos["entry_price"] - pos["open_p"])
+                sell_slip = pos["quantity"] * (exit_p - exec_exit)
+                total_slip = buy_slip + sell_slip
+                gross_pnl = pnl + total_fees + total_slip
+
                 closed_trades.append({
                     "pnl": pnl,
-                    "fees": pos["buy_fee"] + sell_fee,
-                    "gross_pnl": (pos["quantity"] * exit_p) - pos["cost"]
+                    "fees": total_fees,
+                    "slippage": total_slip,
+                    "gross_pnl": gross_pnl
                 })
 
             # 3. Random entries if slots available
@@ -152,6 +165,7 @@ def run_random_benchmark(num_seeds: int = 100, timeframe: str = "1h") -> Dict[st
             net_pnl = float(df_s["pnl"].sum())
             gross_pnl = float(df_s["gross_pnl"].sum())
             fees = float(df_s["fees"].sum())
+            slippage = float(df_s["slippage"].sum())
             wr = (len(w) / n) * 100.0
             avg_w = float(w["pnl"].mean()) if len(w) > 0 else 0.0
             avg_l = float(abs(l["pnl"].mean())) if len(l) > 0 else 0.0
@@ -166,8 +180,9 @@ def run_random_benchmark(num_seeds: int = 100, timeframe: str = "1h") -> Dict[st
                 "payoff_ratio": payoff,
                 "profit_factor": pf,
                 "gross_pnl": gross_pnl,
-                "net_pnl": net_pnl,
                 "fees_paid": fees,
+                "slippage_paid": slippage,
+                "net_pnl": net_pnl,
                 "expectancy": exp
             })
 
@@ -187,6 +202,7 @@ def run_random_benchmark(num_seeds: int = 100, timeframe: str = "1h") -> Dict[st
         "profit_factor_spread": f"[{df_seeds['profit_factor'].min():.2f}, {df_seeds['profit_factor'].max():.2f}]",
         "avg_gross_pnl": round(float(df_seeds["gross_pnl"].mean()), 2),
         "avg_fees_paid": round(float(df_seeds["fees_paid"].mean()), 2),
+        "avg_slippage_paid": round(float(df_seeds["slippage_paid"].mean()), 2),
         "avg_net_pnl": round(float(df_seeds["net_pnl"].mean()), 2),
         "net_pnl_spread": f"[${df_seeds['net_pnl'].min():.2f}, ${df_seeds['net_pnl'].max():.2f}] (std: ${df_seeds['net_pnl'].std():.2f})",
         "avg_expectancy_usd": round(float(df_seeds["expectancy"].mean()), 4),
@@ -208,3 +224,4 @@ if __name__ == "__main__":
     for k, v in res.items():
         print(f"  {k}: {v}")
     print("="*80)
+
