@@ -225,32 +225,44 @@ class LocalLearningEngine:
         else:
             s["profit_factor"] = round(s["gross_profit"], 2) if s["gross_profit"] > 0 else 1.0
 
-        # Compute Adaptive Learned Weight (0.65 to 1.35)
-        # Bayesian prior: blend with initial prior of 1.0 over first 4 trades
+        # STAGE 5 HARDENING:
+        # 1. Require a minimum sample of 30 trades per setup before changing any weight.
+        # 2. Strong Bayesian shrinkage toward neutral prior (1.0).
+        # 3. Never auto-increase risk beyond 1.0x (max 1.0x, min 0.50x).
+        # 4. Audit log every weight change.
         n = s["trades"]
+        MIN_SAMPLE_SIZE = 30
         prior_weight = 1.0
-        prior_strength = 4.0
+        prior_strength = 30.0
 
-        raw_factor = 1.0 + ((s["win_rate_pct"] - 50.0) / 100.0) * 0.5 + (min(2.5, s["profit_factor"]) - 1.0) * 0.15
-
-        # Penalty for consecutive losing streaks in current regime
-        if s["consecutive_losses"] >= 2:
-            raw_factor -= 0.12 * min(3, s["consecutive_losses"])
-        elif s["consecutive_wins"] >= 2:
-            raw_factor += 0.08 * min(3, s["consecutive_wins"])
-
-        # Bayesian shrinkage
-        blended_weight = ((n * raw_factor) + (prior_strength * prior_weight)) / (n + prior_strength)
-        blended_weight = max(0.65, min(1.35, blended_weight))
-        s["learned_weight"] = round(blended_weight, 2)
-
-        # Status badge
-        if s["learned_weight"] >= 1.15:
-            s["status"] = "BOOSTED"
-        elif s["learned_weight"] <= 0.85:
-            s["status"] = "DEFENSIVE"
+        if n < MIN_SAMPLE_SIZE:
+            blended_weight = 1.0
+            s["learned_weight"] = 1.0
+            s["status"] = "COLLECTING_SAMPLE"
+            logger.info(f"Setup {s['name']}: {n}/{MIN_SAMPLE_SIZE} trades recorded. Weight locked at neutral 1.00x.")
         else:
-            s["status"] = "NORMAL"
+            # Performance factor
+            perf_factor = 1.0 + ((s["win_rate_pct"] - 50.0) / 100.0) * 0.4 + (min(2.0, s["profit_factor"]) - 1.0) * 0.15
+
+            # Penalty for consecutive losing streaks
+            if s["consecutive_losses"] >= 3:
+                perf_factor -= 0.10 * min(3, s["consecutive_losses"])
+
+            # Shrinkage toward neutral 1.0
+            blended_weight = ((n * perf_factor) + (prior_strength * prior_weight)) / (n + prior_strength)
+
+            # SAFETY RULE: Never auto-increase risk above baseline 1.0x
+            blended_weight = max(0.50, min(1.00, blended_weight))
+            old_w = s.get("learned_weight", 1.0)
+            s["learned_weight"] = round(blended_weight, 2)
+
+            if s["learned_weight"] < 0.85:
+                s["status"] = "DEFENSIVE"
+            else:
+                s["status"] = "NORMAL"
+
+            if old_w != s["learned_weight"]:
+                logger.info(f"⚖️ WEIGHT CHANGE AUDIT: [{s['name']}] adjusted from {old_w}x to {s['learned_weight']}x (Trades: {n}, WR: {s['win_rate_pct']}%, PF: {s['profit_factor']})")
 
         # Update overall metrics
         self.memory["total_trades_analyzed"] += 1
