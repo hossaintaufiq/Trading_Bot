@@ -194,3 +194,4 @@ Across all stages of this research engagement, an exact total of **78 configurat
 Low-timeframe (1m, 5m, 15m) and intermediate-timeframe (1h, 4h) **long-only spot breakout trading does not generate positive net expectancy in crypto markets after exchange fees and slippage.** 
 
 While expanding from 1m to 4h dramatically reduced fee drag (from >70% of PnL down to ~8%), spot crypto breakouts suffer from high false-breakout rates (62–66% loss rate) in all modern market regimes outside parabolic macro bull runs. Directional long-only spot trading cannot sustain positive expectancy across full market cycles.
+
