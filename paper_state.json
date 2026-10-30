@@ -1,5 +1,5 @@
 {
-  "usdt_balance": 9801.987865537218,
+  "usdt_balance": 9801.428996957615,
   "positions": {
     "SOL/USDT": {
       "symbol": "SOL/USDT",
@@ -19,55 +19,139 @@
     },
     "BNB/USDT": {
       "symbol": "BNB/USDT",
-      "setup_id": "ema_rsi",
-      "entry_price": 701.4706,
-      "quantity": 0.071208,
+      "setup_id": "oversold_bounce",
+      "entry_price": 700.1999,
+      "quantity": 0.071337,
       "cost_usdt": 50.0,
-      "entry_time": 1793362979620,
-      "highest_price": 701.4706,
-      "initial_stop_price": 700.65,
-      "stop_loss_price": 700.65,
-      "take_profit_price": 701.966,
-      "invalidation_price": 700.65,
-      "max_holding_bars": 40,
+      "entry_time": 1793363520115,
+      "highest_price": 700.1999,
+      "initial_stop_price": 699.2413,
+      "stop_loss_price": 699.2413,
+      "take_profit_price": 713.847,
+      "invalidation_price": 699.2413,
+      "max_holding_bars": 30,
       "trailing_active": false,
-      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 23.2, RSI: 53.9)"
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 29.9 to 38.6 with green confirmation candle"
     },
     "BTC/USDT": {
       "symbol": "BTC/USDT",
-      "setup_id": "ema_rsi",
-      "entry_price": 77568.765,
+      "setup_id": "oversold_bounce",
+      "entry_price": 77554.758,
       "quantity": 0.000644,
       "cost_usdt": 50.0,
-      "entry_time": 1793362979657,
-      "highest_price": 77568.765,
-      "initial_stop_price": 77450.5674,
-      "stop_loss_price": 77450.5674,
-      "take_profit_price": 77672.9786,
-      "invalidation_price": 77450.5674,
-      "max_holding_bars": 40,
+      "entry_time": 1793363520261,
+      "highest_price": 77554.758,
+      "initial_stop_price": 77406.7455,
+      "stop_loss_price": 77406.7455,
+      "take_profit_price": 79066.32,
+      "invalidation_price": 77406.7455,
+      "max_holding_bars": 30,
       "trailing_active": false,
-      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 37.1, RSI: 52.8)"
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 42.1 to 51.7 with green confirmation candle"
     }
   },
   "active_position": {
     "symbol": "BTC/USDT",
-    "setup_id": "ema_rsi",
-    "entry_price": 77568.765,
+    "setup_id": "oversold_bounce",
+    "entry_price": 77554.758,
     "quantity": 0.000644,
     "cost_usdt": 50.0,
-    "entry_time": 1793362979657,
-    "highest_price": 77568.765,
-    "initial_stop_price": 77450.5674,
-    "stop_loss_price": 77450.5674,
-    "take_profit_price": 77672.9786,
-    "invalidation_price": 77450.5674,
-    "max_holding_bars": 40,
+    "entry_time": 1793363520261,
+    "highest_price": 77554.758,
+    "initial_stop_price": 77406.7455,
+    "stop_loss_price": 77406.7455,
+    "take_profit_price": 79066.32,
+    "invalidation_price": 77406.7455,
+    "max_holding_bars": 30,
     "trailing_active": false,
-    "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 37.1, RSI: 52.8)"
+    "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 42.1 to 51.7 with green confirmation candle"
   },
   "asset_balance": 0.000644,
   "trades_history": [
+    {
+      "id": "TRD-1793363520261",
+      "timestamp": 1793363520261,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77554.758,
+      "quantity": 0.000644,
+      "cost_usdt": 50.0,
+      "fee_usdt": 0.05,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 42.1 to 51.7 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793363520115",
+      "timestamp": 1793363520115,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 700.1999,
+      "quantity": 0.071337,
+      "cost_usdt": 50.0,
+      "fee_usdt": 0.05,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 29.9 to 38.6 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793363399702",
+      "timestamp": 1793363399702,
+      "symbol": "BTC/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 77427.267,
+      "quantity": 0.000644,
+      "cost_usdt": 50.0,
+      "proceeds_usdt": 49.81,
+      "fee_usdt": 0.0499,
+      "realized_pnl": -0.19,
+      "realized_pnl_pct": -0.37,
+      "hold_duration_sec": 119,
+      "reason": "Death Cross: EMA 9 crossed below EMA 21"
+    },
+    {
+      "id": "TRD-1793363279752",
+      "timestamp": 1793363279752,
+      "symbol": "BTC/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 77576.779,
+      "quantity": 0.000644,
+      "cost_usdt": 50.0,
+      "fee_usdt": 0.05,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Golden Cross Confirmed: EMA 9 crossed EMA 21 in active trend (ADX: 22.0, RSI: 53.7)"
+    },
+    {
+      "id": "TRD-1793363265702",
+      "timestamp": 1793363265702,
+      "symbol": "BNB/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 700.2097,
+      "quantity": 0.071208,
+      "cost_usdt": 50.0,
+      "proceeds_usdt": 49.81,
+      "fee_usdt": 0.0499,
+      "realized_pnl": -0.19,
+      "realized_pnl_pct": -0.38,
+      "hold_duration_sec": 286,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $700.56 (Stop: $700.65, PnL: -0.13%)"
+    },
+    {
+      "id": "TRD-1793363219806",
+      "timestamp": 1793363219806,
+      "symbol": "BTC/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 77433.274,
+      "quantity": 0.000644,
+      "cost_usdt": 50.0,
+      "proceeds_usdt": 49.82,
+      "fee_usdt": 0.0499,
+      "realized_pnl": -0.18,
+      "realized_pnl_pct": -0.37,
+      "hold_duration_sec": 240,
+      "reason": "Death Cross: EMA 9 crossed below EMA 21"
+    },
     {
       "id": "TRD-1793362979657",
       "timestamp": 1793362979657,
@@ -1948,92 +2032,6 @@
       "cost_usdt": 100.0,
       "fee_usdt": 0.1,
       "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 13.6 with green candle"
-    },
-    {
-      "id": "TRD-1793306841816",
-      "timestamp": 1793306841816,
-      "symbol": "BNB/USDT",
-      "side": "SELL",
-      "price": 680.9194,
-      "quantity": 0.145533,
-      "cost_usdt": 100.0,
-      "proceeds_usdt": 99.0,
-      "fee_usdt": 0.0991,
-      "realized_pnl": -1.0,
-      "realized_pnl_pct": -1.0,
-      "hold_duration_sec": 21,
-      "reason": "Bracket Stop Exit ($682.65)"
-    },
-    {
-      "id": "TRD-1793306839724",
-      "timestamp": 1793306839724,
-      "symbol": "BTC/USDT",
-      "side": "SELL",
-      "price": 78460.75,
-      "quantity": 0.001263,
-      "cost_usdt": 100.0,
-      "proceeds_usdt": 99.0,
-      "fee_usdt": 0.0991,
-      "realized_pnl": -1.0,
-      "realized_pnl_pct": -1.0,
-      "hold_duration_sec": 179,
-      "reason": "Bracket Stop Exit ($78,501.71)"
-    },
-    {
-      "id": "TRD-1793306835758",
-      "timestamp": 1793306835758,
-      "symbol": "ETH/USDT",
-      "side": "SELL",
-      "price": 2236.6611,
-      "quantity": 0.044146,
-      "cost_usdt": 100.0,
-      "proceeds_usdt": 98.64,
-      "fee_usdt": 0.0987,
-      "realized_pnl": -1.36,
-      "realized_pnl_pct": -1.36,
-      "hold_duration_sec": 187,
-      "reason": "Bracket Stop Exit ($2,243.72)"
-    },
-    {
-      "id": "TRD-1793306823947",
-      "timestamp": 1793306823947,
-      "symbol": "SUI/USDT",
-      "side": "SELL",
-      "price": 0.8688,
-      "quantity": 114.010134,
-      "cost_usdt": 100.0,
-      "proceeds_usdt": 98.95,
-      "fee_usdt": 0.099,
-      "realized_pnl": -1.05,
-      "realized_pnl_pct": -1.05,
-      "hold_duration_sec": 43,
-      "reason": "Bracket Stop Exit ($0.87)"
-    },
-    {
-      "id": "TRD-1793306822050",
-      "timestamp": 1793306822050,
-      "symbol": "XRP/USDT",
-      "side": "BUY",
-      "price": 1.2322,
-      "quantity": 81.073461,
-      "cost_usdt": 100.0,
-      "fee_usdt": 0.1,
-      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 14.4 with green candle"
-    },
-    {
-      "id": "TRD-1793306820041",
-      "timestamp": 1793306820041,
-      "symbol": "XRP/USDT",
-      "side": "SELL",
-      "price": 1.2288,
-      "quantity": 80.615271,
-      "cost_usdt": 100.0,
-      "proceeds_usdt": 98.96,
-      "fee_usdt": 0.0991,
-      "realized_pnl": -1.04,
-      "realized_pnl_pct": -1.04,
-      "hold_duration_sec": 117,
-      "reason": "Bracket Stop Exit ($1.23)"
     }
   ],
   "peak_equity": 10002.46232663255,
@@ -2440,6 +2438,324 @@
       "equity": 9951.87,
       "drawdown": 0.51,
       "pnl": -17.17
+    },
+    {
+      "time": 1793362981620,
+      "equity": 9951.72,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793362991633,
+      "equity": 9951.73,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363001641,
+      "equity": 9951.73,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363011644,
+      "equity": 9951.72,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363021737,
+      "equity": 9951.72,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363031844,
+      "equity": 9951.71,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363041844,
+      "equity": 9951.71,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363051844,
+      "equity": 9951.77,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363061877,
+      "equity": 9951.78,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363071921,
+      "equity": 9951.73,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363082721,
+      "equity": 9951.84,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363093651,
+      "equity": 9951.78,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363103727,
+      "equity": 9951.74,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363113859,
+      "equity": 9951.68,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363123889,
+      "equity": 9951.67,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363133910,
+      "equity": 9951.69,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363143916,
+      "equity": 9951.65,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363153962,
+      "equity": 9951.64,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363164175,
+      "equity": 9951.64,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363174243,
+      "equity": 9951.64,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363184418,
+      "equity": 9951.68,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363194434,
+      "equity": 9951.68,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363205668,
+      "equity": 9951.7,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363215731,
+      "equity": 9951.69,
+      "drawdown": 0.51,
+      "pnl": -15.97
+    },
+    {
+      "time": 1793363225852,
+      "equity": 9951.65,
+      "drawdown": 0.51,
+      "pnl": -15.11
+    },
+    {
+      "time": 1793363235869,
+      "equity": 9951.63,
+      "drawdown": 0.51,
+      "pnl": -15.11
+    },
+    {
+      "time": 1793363245930,
+      "equity": 9951.67,
+      "drawdown": 0.51,
+      "pnl": -15.11
+    },
+    {
+      "time": 1793363255935,
+      "equity": 9951.67,
+      "drawdown": 0.51,
+      "pnl": -15.11
+    },
+    {
+      "time": 1793363266188,
+      "equity": 9951.55,
+      "drawdown": 0.51,
+      "pnl": -15.3
+    },
+    {
+      "time": 1793363276395,
+      "equity": 9951.56,
+      "drawdown": 0.51,
+      "pnl": -15.3
+    },
+    {
+      "time": 1793363286395,
+      "equity": 9951.5,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363296476,
+      "equity": 9951.48,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363307654,
+      "equity": 9951.48,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363317703,
+      "equity": 9951.48,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363327711,
+      "equity": 9951.44,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363337719,
+      "equity": 9951.44,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363347852,
+      "equity": 9951.43,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363358397,
+      "equity": 9951.41,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363369621,
+      "equity": 9951.41,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363379635,
+      "equity": 9951.4,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363389701,
+      "equity": 9951.39,
+      "drawdown": 0.51,
+      "pnl": -14.25
+    },
+    {
+      "time": 1793363399750,
+      "equity": 9951.31,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363409828,
+      "equity": 9951.32,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363419836,
+      "equity": 9951.33,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363429840,
+      "equity": 9951.35,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363439843,
+      "equity": 9951.32,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363449851,
+      "equity": 9951.32,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363459862,
+      "equity": 9951.29,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363469926,
+      "equity": 9951.3,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363479939,
+      "equity": 9951.29,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363490170,
+      "equity": 9951.32,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363500391,
+      "equity": 9951.33,
+      "drawdown": 0.51,
+      "pnl": -13.08
+    },
+    {
+      "time": 1793363510415,
+      "equity": 9951.34,
+      "drawdown": 0.51,
+      "pnl": -13.08
     }
   ]
 }

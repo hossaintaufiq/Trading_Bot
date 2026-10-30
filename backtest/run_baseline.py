@@ -83,26 +83,30 @@ def run_single_simulation(
     return metrics, trades
 
 
-def run_all_baseline_experiments():
+def run_all_baseline_experiments(timeframes: Optional[List[str]] = None):
     loader = BinanceDataLoader(cache_dir="backtest/data/12m")
     symbols = ["BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT", "XRP/USDT", "DOGE/USDT", "SUI/USDT"]
     os.makedirs("results", exist_ok=True)
 
-    timeframes = ["1h", "15m"]
-    # Add 5m if available
-    if os.path.exists(os.path.join(loader.cache_dir, "BTC_USDT_5m.csv")):
-        timeframes.append("5m")
+    if timeframes is None:
+        timeframes = ["1h", "15m"]
 
     all_summaries = []
 
     for tf in timeframes:
-        print(f"\n>>> Running Backtest Experiments for Timeframe: {tf} ...")
+        t_start_tf = time.time()
+        print(f"\n" + "="*80, flush=True)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] STARTING BASELINE EXPERIMENTS: TIMEFRAME = {tf} (7 SYMBOLS, 12 MONTHS)", flush=True)
+        print("="*80, flush=True)
+
         data = load_dataset(loader, symbols, tf)
         if not data:
-            print(f"Skipping {tf}: Data not found.")
+            print(f"Skipping {tf}: Data not found.", flush=True)
             continue
 
         # 1. Original Logic, Standard Fee (0.10%)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] [{tf}] Running 1/4: ORIGINAL logic (Fee: 0.10%, Slip: 0.05%) ...", flush=True)
+        t0 = time.time()
         m_orig_std, tr_orig_std = run_single_simulation(
             data, tf, fee_pct=0.10, slippage_pct=0.05, use_original=True,
             run_label=f"ORIGINAL_{tf}_Fee0.10"
@@ -110,8 +114,11 @@ def run_all_baseline_experiments():
         if tr_orig_std:
             pd.DataFrame(tr_orig_std).to_csv(f"results/trades_ORIGINAL_{tf}_Fee0.10.csv", index=False)
         all_summaries.append(m_orig_std)
+        print(f"    --> Done in {time.time()-t0:.1f}s | Trades: {m_orig_std['total_trades']}, WR: {m_orig_std['win_rate_pct']}%, Net PnL: ${m_orig_std['net_pnl_usd']:.2f}, Exp: ${m_orig_std['expectancy_per_trade_usd']:.4f}", flush=True)
 
         # 2. Original Logic, BNB Discount Fee (0.075%)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] [{tf}] Running 2/4: ORIGINAL logic with BNB Discount (Fee: 0.075%, Slip: 0.05%) ...", flush=True)
+        t0 = time.time()
         m_orig_bnb, tr_orig_bnb = run_single_simulation(
             data, tf, fee_pct=0.075, slippage_pct=0.05, use_original=True,
             run_label=f"ORIGINAL_{tf}_Fee0.075_BNB"
@@ -119,8 +126,11 @@ def run_all_baseline_experiments():
         if tr_orig_bnb:
             pd.DataFrame(tr_orig_bnb).to_csv(f"results/trades_ORIGINAL_{tf}_Fee0.075_BNB.csv", index=False)
         all_summaries.append(m_orig_bnb)
+        print(f"    --> Done in {time.time()-t0:.1f}s | Trades: {m_orig_bnb['total_trades']}, WR: {m_orig_bnb['win_rate_pct']}%, Net PnL: ${m_orig_bnb['net_pnl_usd']:.2f}, Exp: ${m_orig_bnb['expectancy_per_trade_usd']:.4f}", flush=True)
 
         # 3. Fixed Stage 1 Logic, Standard Fee (0.10%)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] [{tf}] Running 3/4: FIXED Stage 1 logic (Fee: 0.10%, Slip: 0.05%) ...", flush=True)
+        t0 = time.time()
         m_fix_std, tr_fix_std = run_single_simulation(
             data, tf, fee_pct=0.10, slippage_pct=0.05, use_original=False,
             run_label=f"FIXED_{tf}_Fee0.10"
@@ -128,8 +138,11 @@ def run_all_baseline_experiments():
         if tr_fix_std:
             pd.DataFrame(tr_fix_std).to_csv(f"results/trades_FIXED_{tf}_Fee0.10.csv", index=False)
         all_summaries.append(m_fix_std)
+        print(f"    --> Done in {time.time()-t0:.1f}s | Trades: {m_fix_std['total_trades']}, WR: {m_fix_std['win_rate_pct']}%, Net PnL: ${m_fix_std['net_pnl_usd']:.2f}, Exp: ${m_fix_std['expectancy_per_trade_usd']:.4f}", flush=True)
 
         # 4. Fixed Stage 1 Logic, BNB Discount Fee (0.075%)
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] [{tf}] Running 4/4: FIXED Stage 1 logic with BNB Discount (Fee: 0.075%, Slip: 0.05%) ...", flush=True)
+        t0 = time.time()
         m_fix_bnb, tr_fix_bnb = run_single_simulation(
             data, tf, fee_pct=0.075, slippage_pct=0.05, use_original=False,
             run_label=f"FIXED_{tf}_Fee0.075_BNB"
@@ -137,8 +150,9 @@ def run_all_baseline_experiments():
         if tr_fix_bnb:
             pd.DataFrame(tr_fix_bnb).to_csv(f"results/trades_FIXED_{tf}_Fee0.075_BNB.csv", index=False)
         all_summaries.append(m_fix_bnb)
+        print(f"    --> Done in {time.time()-t0:.1f}s | Trades: {m_fix_bnb['total_trades']}, WR: {m_fix_bnb['win_rate_pct']}%, Net PnL: ${m_fix_bnb['net_pnl_usd']:.2f}, Exp: ${m_fix_bnb['expectancy_per_trade_usd']:.4f}", flush=True)
 
-        print(f"[{tf}] Completed. Original PnL: ${m_orig_std['net_pnl_usd']:.2f} (WR: {m_orig_std['win_rate_pct']}%), Fixed PnL: ${m_fix_std['net_pnl_usd']:.2f} (WR: {m_fix_std['win_rate_pct']}%)")
+        print(f"[{tf}] ALL 4 RUNS FINISHED in {time.time()-t_start_tf:.1f}s", flush=True)
 
     # Save full JSON summary
     with open("results/baseline_summary.json", "w") as f:

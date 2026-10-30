@@ -1,9 +1,9 @@
 {
   "version": "1.0",
-  "last_updated": 1793362905701,
-  "total_trades_analyzed": 105,
-  "overall_win_rate_pct": 21.9,
-  "overall_profit_factor": 0.42,
+  "last_updated": 1793363399702,
+  "total_trades_analyzed": 108,
+  "overall_win_rate_pct": 21.3,
+  "overall_profit_factor": 0.41,
   "setups": {
     "orb": {
       "name": "ORB Breakout",
@@ -75,18 +75,18 @@
     },
     "ema_rsi": {
       "name": "EMA 9/21 Trend",
-      "trades": 96,
+      "trades": 99,
       "wins": 14,
-      "losses": 82,
-      "win_rate_pct": 14.6,
-      "total_pnl": -61.01,
+      "losses": 85,
+      "win_rate_pct": 14.1,
+      "total_pnl": -61.57,
       "gross_profit": 21.12,
-      "gross_loss": 82.13,
+      "gross_loss": 82.69,
       "profit_factor": 0.26,
       "avg_win_usd": 1.51,
-      "avg_loss_usd": 1.0,
+      "avg_loss_usd": 0.97,
       "consecutive_wins": 0,
-      "consecutive_losses": 14,
+      "consecutive_losses": 17,
       "learned_weight": 0.65,
       "status": "DEFENSIVE"
     },
@@ -109,6 +109,39 @@
     }
   },
   "recent_trade_memories": [
+    {
+      "timestamp": 1793363399702,
+      "setup_key": "ema_rsi",
+      "setup_name": "EMA 9/21 Trend",
+      "pnl": -0.19,
+      "pnl_pct": -0.37,
+      "is_win": false,
+      "hold_duration_sec": 119,
+      "new_weight": 0.65,
+      "market_context": {}
+    },
+    {
+      "timestamp": 1793363265702,
+      "setup_key": "ema_rsi",
+      "setup_name": "EMA 9/21 Trend",
+      "pnl": -0.19,
+      "pnl_pct": -0.38,
+      "is_win": false,
+      "hold_duration_sec": 286,
+      "new_weight": 0.65,
+      "market_context": {}
+    },
+    {
+      "timestamp": 1793363219806,
+      "setup_key": "ema_rsi",
+      "setup_name": "EMA 9/21 Trend",
+      "pnl": -0.18,
+      "pnl_pct": -0.37,
+      "is_win": false,
+      "hold_duration_sec": 240,
+      "new_weight": 0.65,
+      "market_context": {}
+    },
     {
       "timestamp": 1793362905701,
       "setup_key": "ema_rsi",
@@ -623,39 +656,6 @@
       "pnl_pct": -1.17,
       "is_win": false,
       "hold_duration_sec": 11755,
-      "new_weight": 0.65,
-      "market_context": {}
-    },
-    {
-      "timestamp": 1793318171805,
-      "setup_key": "ema_rsi",
-      "setup_name": "EMA 9/21 Trend",
-      "pnl": -1.32,
-      "pnl_pct": -1.32,
-      "is_win": false,
-      "hold_duration_sec": 7129,
-      "new_weight": 0.65,
-      "market_context": {}
-    },
-    {
-      "timestamp": 1793317609729,
-      "setup_key": "ema_rsi",
-      "setup_name": "EMA 9/21 Trend",
-      "pnl": -0.86,
-      "pnl_pct": -0.86,
-      "is_win": false,
-      "hold_duration_sec": 5727,
-      "new_weight": 0.65,
-      "market_context": {}
-    },
-    {
-      "timestamp": 1793317601940,
-      "setup_key": "ema_rsi",
-      "setup_name": "EMA 9/21 Trend",
-      "pnl": -1.49,
-      "pnl_pct": -1.49,
-      "is_win": false,
-      "hold_duration_sec": 5862,
       "new_weight": 0.65,
       "market_context": {}
     }
