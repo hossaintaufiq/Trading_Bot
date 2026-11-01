@@ -205,7 +205,8 @@ class MarketDataService:
         timeframe = raw_candle.get("timeframe", "")
 
         if symbol not in self._cache or timeframe not in self._cache[symbol]:
-            return
+            self._cache.setdefault(symbol, {}).setdefault(timeframe, [])
+        self._current_candle.setdefault(symbol, {})
 
         # Validate candle (allow incomplete candle for UI streaming)
         vc, issues = self.validator.validate_candle(raw_candle, require_closed=False)

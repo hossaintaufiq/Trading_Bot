@@ -152,6 +152,73 @@ class BinancePublicClient:
 
         return []
 
+    async def fetch_klines_paginated(
+        self,
+        symbol: str,
+        interval: str,
+        start_time: int,
+        end_time: Optional[int] = None,
+        total_limit: Optional[int] = None,
+        page_size: int = 1000,
+    ) -> List[Dict[str, Any]]:
+        """
+        Fetch historical candles spanning multiple pages via Binance public REST API.
+
+        Args:
+            symbol: e.g. 'BTCUSDT'
+            interval: e.g. '15m'
+            start_time: Epoch milliseconds (inclusive)
+            end_time: Epoch milliseconds (inclusive, optional)
+            total_limit: Maximum total candles to retrieve across all pages (optional)
+            page_size: Batch size per page (max 1000)
+
+        Returns:
+            Concatenated, chronologically sorted list of unique candle dicts.
+        """
+        all_candles: List[Dict[str, Any]] = []
+        current_start = start_time
+        batch_limit = min(page_size, 1000)
+
+        while True:
+            fetch_limit = batch_limit
+            if total_limit is not None:
+                remaining = total_limit - len(all_candles)
+                if remaining <= 0:
+                    break
+                fetch_limit = min(batch_limit, remaining)
+
+            batch = await self.fetch_klines(
+                symbol=symbol,
+                interval=interval,
+                start_time=current_start,
+                end_time=end_time,
+                limit=fetch_limit,
+            )
+
+            if not batch:
+                break
+
+            all_candles.extend(batch)
+
+            if len(batch) < fetch_limit:
+                # Exchange returned fewer candles than requested; end of data
+                break
+
+            # Next page start_time = last candle open time + 1 millisecond
+            last_candle_iso = batch[-1]["timestamp"]
+            dt = datetime.fromisoformat(last_candle_iso.replace("Z", "+00:00"))
+            next_start = int(dt.timestamp() * 1000) + 1
+            if next_start <= current_start:
+                break
+            current_start = next_start
+
+            if end_time is not None and current_start >= end_time:
+                break
+
+            await asyncio.sleep(0.05)
+
+        return all_candles
+
     def _parse_rest_klines(
         self, symbol: str, interval: str, raw_klines: List[List[Any]]
     ) -> List[Dict[str, Any]]:
