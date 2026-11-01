@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* NEPTUNE Design System — CSS Custom Properties */
+    --color-navy-950: #050810;
+    --color-navy-900: #0a0e1a;
+    --color-navy-800: #0d1220;
+    --color-navy-700: #111827;
+    --color-charcoal-800: #1a1f2e;
+    --color-electric-blue: #00b4d8;
+    --color-cyan: #00f5d4;
+    --color-bull: #10b981;
+    --color-bear: #ef4444;
+    --color-gold: #f59e0b;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Scrollbar styling for dark theme */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+}
+
+@layer components {
+  /* Glass card — primary surface component */
+  .glass-card {
+    @apply bg-charcoal-800 bg-opacity-80 backdrop-blur-sm border border-white/5 rounded-xl;
+  }
+
+  /* Metric badge */
+  .metric-badge {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Mono number display */
+  .mono-num {
+    @apply font-mono tabular-nums tracking-tight;
+  }
+
+  /* Status dot */
+  .status-dot {
+    @apply w-2 h-2 rounded-full flex-shrink-0;
+  }
+
+  .status-dot.live {
+    @apply bg-cyan animate-pulse-slow;
+    box-shadow: 0 0 6px theme("colors.cyan.DEFAULT");
+  }
+
+  .status-dot.error {
+    @apply bg-bear;
+  }
+
+  .status-dot.idle {
+    @apply bg-slate-500;
+  }
+}
