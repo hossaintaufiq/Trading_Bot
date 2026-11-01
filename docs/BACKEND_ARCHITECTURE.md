@@ -207,7 +207,7 @@ stateDiagram-v2
 
 ---
 
-## 5. Agent Base Class Contract
+## 5. Agent Base Class Contract & Deterministic Analysis Engine
 
 Every specialist agent inherits from `BaseAgent`, enforcing strict typing for input and output contracts:
 
@@ -238,6 +238,58 @@ class BaseAgent(ABC, Generic[TInput, TOutput]):
     @abstractmethod
     async def execute(self, payload: TInput) -> TOutput:
         """Core analytical or execution logic implemented by the specialist agent."""
+        pass
+```
+
+### 5.1 Deterministic Quantitative Analysis Engine (`app.analytics` & `app.agents`)
+
+Implemented in Milestone 3 as a pure, reproducible market perception pipeline:
+
+```mermaid
+flowchart LR
+    subgraph Market_Data["Market Data Tier"]
+        CANDLES["Closed Validated Candles (Rule A-09)"]
+    end
+
+    subgraph Analytical_Agents["Specialist Agents (Layer 1 Perception)"]
+        SCAN["Market Scanner (Regime, Squeeze, ATR Ratio)"]
+        TREND["Trend Analyst (EMA 20/50/200, ADX)"]
+        MOM["Momentum Analyst (RSI, MACD, Exhaustion)"]
+        VOL["Volume Analyst (RelVol, VWAP, Anomaly, OBV)"]
+    end
+
+    subgraph Synthesis["Synthesis (Layer 2)"]
+        STRAT["Strategy Analyst (Conflict Checking & Confluence)"]
+    end
+
+    subgraph Outcomes["Candidate Signal Outcome"]
+        LONG["LONG Candidate (min 1.5 R:R, Decimal)"]
+        SHORT["SHORT Candidate (min 1.5 R:R, Decimal)"]
+        NO_SIG["NO_SIGNAL (Inhibited by conflicts or no confluence)"]
+    end
+
+    CANDLES --> SCAN
+    CANDLES --> TREND
+    CANDLES --> MOM
+    CANDLES --> VOL
+
+    SCAN --> STRAT
+    TREND --> STRAT
+    MOM --> STRAT
+    VOL --> STRAT
+
+    STRAT --> LONG
+    STRAT --> SHORT
+    STRAT --> NO_SIG
+```
+
+#### Core Architectural Guarantees:
+1. **Mathematical Purity**: All indicators in `app.analytics.indicators` are pure, stateless functions over float sequences without I/O or network dependencies.
+2. **Causal Integrity (Rule S-05)**: Bar $i$ exclusively computes over bars $0 \dots i$. Look-ahead is physically impossible.
+3. **Closed Candles Only (Rule A-09)**: All strategy evaluations reject in-progress candles and require closed candles.
+4. **Warm-up Awareness**: Functions return `None` during warm-up periods (e.g. 14 bars for RSI, 34 bars for MACD, 200 bars for EMA 200) and discount confidence when history is incomplete.
+5. **Conflict Resolution**: Opposing indicators (e.g. Bullish Trend vs Bearish Momentum or Volatile regime) inhibit trading and force `NO_SIGNAL`.
+6. **Monetary Precision (Rule A-01)**: All stop-loss, take-profit, and risk-reward calculations use Python `Decimal`.
         pass
 
     @abstractmethod
