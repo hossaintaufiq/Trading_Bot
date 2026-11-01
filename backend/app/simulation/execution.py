@@ -215,3 +215,4 @@ class PaperExecutionSimulator:
             market_regime=position.market_regime,
             strategy_metadata=position.strategy_metadata,
         )
+

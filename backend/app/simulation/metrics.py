@@ -241,3 +241,4 @@ def calculate_backtest_metrics(
         performance_by_timeframe=perf_by_tf,
         performance_by_regime=perf_by_reg,
     )
+

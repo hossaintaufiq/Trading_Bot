@@ -126,3 +126,4 @@ class WalkForwardValidator:
             "result_train": res_train,
             "result_test": res_test,
         }
+

@@ -28,3 +28,4 @@ CREATE TABLE IF NOT EXISTS backtest_runs (
 
 CREATE INDEX IF NOT EXISTS idx_backtest_runs_strategy
     ON backtest_runs (strategy_id, created_at DESC);
+
