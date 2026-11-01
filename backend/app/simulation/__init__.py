@@ -10,6 +10,7 @@ from app.simulation.models import (
     EquityPoint,
     SimulatedTrade,
 )
+from app.simulation.reversal import MultiFactorReversalDetector, ReversalDecision
 from app.simulation.walk_forward import WalkForwardValidator
 
 __all__ = [
@@ -19,7 +20,9 @@ __all__ = [
     "BacktestResult",
     "EquityPoint",
     "HistoricalBacktestEngine",
+    "MultiFactorReversalDetector",
     "PaperExecutionSimulator",
+    "ReversalDecision",
     "SimulatedTrade",
     "WalkForwardValidator",
     "calculate_backtest_metrics",

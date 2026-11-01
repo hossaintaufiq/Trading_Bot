@@ -32,6 +32,9 @@ class BacktestConfig(BaseModel):
     strategy_id: str = "trend_momentum_pullback_v1"
     strategy_config: Dict[str, Any] = Field(default_factory=dict)
     conservative_ambiguous_bars: bool = True      # Stop hit if both stop & target touched in 1 bar
+    exit_policy: str = "BALANCED"                 # BALANCED, FIXED_BRACKET, AGGRESSIVE, TREND_FOLLOWING
+    trailing_atr_multiplier: Decimal = Decimal("2.0")
+    trailing_activation_threshold_r: Decimal = Decimal("1.0")
     save_to_db: bool = False
     save_to_parquet: bool = False
     output_dir: Optional[str] = None
@@ -60,9 +63,17 @@ class SimulatedTrade(BaseModel):
     spread_cost: Decimal                        # Spread penalty across entry & exit
     slippage_cost: Decimal                      # Slippage penalty across entry & exit
     net_pnl: Decimal                            # gross_pnl - fees - spread_cost - slippage_cost
-    exit_reason: str                            # STOP_LOSS, TAKE_PROFIT, AMBIGUOUS_BAR_STOP, FORCE_CLOSE
+    exit_reason: str                            # STOP_LOSS, TAKE_PROFIT, AMBIGUOUS_BAR_STOP, REVERSAL_CONFIRMED, FORCE_CLOSE
     market_regime: str                          # Regime at entry (e.g. TRENDING_BULL, RANGING)
     strategy_metadata: Dict[str, Any] = Field(default_factory=dict)
+    initial_stop_loss: Decimal = Decimal("0.00")
+    final_stop_loss: Decimal = Decimal("0.00")
+    trailing_stop_updates: int = 0
+    peak_favorable_price: Decimal = Decimal("0.00")
+    original_theoretical_target: Optional[Decimal] = None
+    reversal_detection_timestamp: Optional[str] = None
+    mfe: Decimal = Decimal("0.00")
+    mae: Decimal = Decimal("0.00")
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -79,7 +90,7 @@ class SimulatedTrade(BaseModel):
             "exit_timestamp": self.exit_timestamp,
             "exit_price": float(self.exit_price),
             "stop_loss": float(self.stop_loss),
-            "take_profit": float(self.take_profit),
+            "take_profit": float(self.take_profit) if self.take_profit is not None else 0.0,
             "position_size": float(self.position_size),
             "gross_pnl": float(self.gross_pnl),
             "fees": float(self.fees),
@@ -89,6 +100,14 @@ class SimulatedTrade(BaseModel):
             "exit_reason": self.exit_reason,
             "market_regime": self.market_regime,
             "strategy_metadata": self.strategy_metadata,
+            "initial_stop_loss": float(self.initial_stop_loss),
+            "final_stop_loss": float(self.final_stop_loss),
+            "trailing_stop_updates": self.trailing_stop_updates,
+            "peak_favorable_price": float(self.peak_favorable_price),
+            "original_theoretical_target": float(self.original_theoretical_target) if self.original_theoretical_target is not None else None,
+            "reversal_detection_timestamp": self.reversal_detection_timestamp,
+            "mfe": float(self.mfe),
+            "mae": float(self.mae),
         }
 
 
@@ -106,13 +125,15 @@ class ActivePosition:
         entry_price: Decimal,
         raw_entry_price: Decimal,
         stop_loss: Decimal,
-        take_profit: Decimal,
+        take_profit: Optional[Decimal],
         position_size: Decimal,
         entry_fee: Decimal,
         entry_slippage_cost: Decimal,
         entry_spread_cost: Decimal,
         market_regime: str,
         strategy_metadata: Dict[str, Any],
+        exit_policy: str = "BALANCED",
+        theoretical_take_profit: Optional[Decimal] = None,
     ):
         self.position_id = position_id
         self.signal_id = signal_id
@@ -122,16 +143,32 @@ class ActivePosition:
         self.entry_timestamp = entry_timestamp
         self.entry_price = entry_price
         self.raw_entry_price = raw_entry_price
+        self.initial_stop_loss = stop_loss
         self.stop_loss = stop_loss
+        self.trailing_stop = stop_loss
         self.take_profit = take_profit
+        self.theoretical_take_profit = theoretical_take_profit or take_profit
         self.position_size = position_size
         self.entry_fee = entry_fee
         self.entry_slippage_cost = entry_slippage_cost
         self.entry_spread_cost = entry_spread_cost
         self.market_regime = market_regime
         self.strategy_metadata = strategy_metadata
+        self.exit_policy = exit_policy
         self.current_price = entry_price
         self.unrealized_pnl = Decimal("0")
+
+        # Balanced Protection tracking fields
+        self.initial_risk_per_unit = abs(raw_entry_price - stop_loss)
+        self.peak_price_since_entry = raw_entry_price
+        self.trough_price_since_entry = raw_entry_price
+        self.unrealized_high_water_mark = Decimal("0.00")
+        self.trailing_updates_count = 0
+        self.reversal_exit_pending = False
+        self.reversal_detection_timestamp: Optional[str] = None
+        self.reversal_reason_codes: List[str] = []
+        self.mfe = Decimal("0.00")
+        self.mae = Decimal("0.00")
 
 
 class EquityPoint(BaseModel):
@@ -172,6 +209,7 @@ class BacktestMetrics(BaseModel):
     performance_by_symbol: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     performance_by_timeframe: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     performance_by_regime: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    performance_by_exit_reason: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 

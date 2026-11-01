@@ -31,6 +31,7 @@ from app.agents.momentum_analyst import MomentumAnalystAgent, MomentumAnalystInp
 from app.agents.strategy_analyst import StrategyAnalystAgent, StrategyAnalystInput
 from app.agents.trend_analyst import TrendAnalystAgent, TrendAnalystInput
 from app.agents.volume_analyst import VolumeAnalystAgent, VolumeAnalystInput
+from app.analytics.indicators import calculate_atr
 from app.config.settings import get_settings
 from app.data.market.validator import CandleValidator, ValidatedCandle
 from app.data.repositories.parquet_repo import ParquetMarketDataRepository
@@ -44,6 +45,7 @@ from app.simulation.models import (
     EquityPoint,
     SimulatedTrade,
 )
+from app.simulation.reversal import MultiFactorReversalDetector
 
 
 class HistoricalBacktestEngine:
@@ -156,7 +158,7 @@ class HistoricalBacktestEngine:
                 daily_starting_equity = cash_equity + pos_value_day_start
                 daily_realized_pnl = Decimal("0")
 
-            # --- PHASE A: Update open positions against current candle brackets ---
+            # --- PHASE A: Update open positions against brackets & pending reversals ---
             positions_to_keep: List[ActivePosition] = []
             for pos in open_positions:
                 curr_candle = candle_lookup.get(pos.symbol, {}).get(ts)
@@ -164,7 +166,33 @@ class HistoricalBacktestEngine:
                     positions_to_keep.append(pos)
                     continue
 
-                trade = self.execution_simulator.evaluate_candle_bracket(pos, curr_candle)
+                c_open = Decimal(str(curr_candle.open))
+                trade = None
+
+                # 1. If reversal exit was confirmed on previous candle close (T-1),
+                # check priority at candle T open:
+                if pos.reversal_exit_pending:
+                    # Protective stop loss takes precedence if breached at/before open
+                    stop_breached_at_open = False
+                    if pos.direction == "LONG" and c_open <= pos.stop_loss:
+                        stop_breached_at_open = True
+                    elif pos.direction == "SHORT" and c_open >= pos.stop_loss:
+                        stop_breached_at_open = True
+
+                    if stop_breached_at_open:
+                        exit_reason = "TRAILING_STOP" if (
+                            pos.stop_loss > pos.initial_stop_loss if pos.direction == "LONG"
+                            else pos.stop_loss < pos.initial_stop_loss
+                        ) else "STOP_LOSS"
+                        exit_price_raw = min(pos.stop_loss, c_open) if pos.direction == "LONG" else max(pos.stop_loss, c_open)
+                        trade = self.execution_simulator._finalize_trade(pos, exit_price_raw, curr_candle.timestamp, exit_reason)
+                    else:
+                        trade = self.execution_simulator.execute_pending_reversal(pos, curr_candle)
+
+                # 2. If no pending reversal executed, evaluate standard/trailing bracket
+                if trade is None:
+                    trade = self.execution_simulator.evaluate_candle_bracket(pos, curr_candle)
+
                 if trade is not None:
                     # Trade closed: credit actual cash proceeds (executed exit notional - exit fee)
                     exit_notional = pos.position_size * trade.exit_price
@@ -178,7 +206,88 @@ class HistoricalBacktestEngine:
 
             open_positions = positions_to_keep
 
-            # --- PHASE B: Evaluate Strategy Candidates for Each Symbol ---
+            # --- PHASE B: Update trailing stops & evaluate reversals on surviving positions ---
+            for pos in open_positions:
+                curr_candle = candle_lookup.get(pos.symbol, {}).get(ts)
+                if curr_candle is None:
+                    continue
+
+                sym_candles = candles_map.get(pos.symbol, [])
+                sub_candles = [c for c in sym_candles if c.timestamp <= ts]
+
+                # Compute current ATR for trailing stop calculation
+                curr_atr = None
+                if len(sub_candles) >= 15:
+                    atr_vals = calculate_atr(
+                        [c.high for c in sub_candles],
+                        [c.low for c in sub_candles],
+                        [c.close for c in sub_candles],
+                        period=14,
+                    )
+                    if atr_vals and atr_vals[-1] is not None:
+                        curr_atr = Decimal(str(atr_vals[-1]))
+
+                # Ratchet trailing stop if activated (in-place one-way ratchet)
+                self.execution_simulator.update_trailing_stop(
+                    position=pos,
+                    candle=curr_candle,
+                    atr_value=curr_atr,
+                    atr_multiplier=self.config.trailing_atr_multiplier,
+                    activation_threshold_r=self.config.trailing_activation_threshold_r,
+                )
+
+                # Multi-Factor Reversal Detection at candle close (requires >= 30 candles)
+                if pos.exit_policy == "BALANCED" and not pos.reversal_exit_pending and len(sub_candles) >= 30:
+                    reg_out = await self.market_scanner.run(
+                        MarketScannerInput(
+                            timestamp=ts,
+                            symbols=[pos.symbol],
+                            timeframe=self.config.timeframe,
+                            candles_by_symbol={pos.symbol: sub_candles},
+                        )
+                    )
+                    sym_regime = reg_out.output.regimes.get(pos.symbol)
+                    if sym_regime:
+                        trend_out = await self.trend_analyst.run(
+                            TrendAnalystInput(
+                                timestamp=ts,
+                                symbol=pos.symbol,
+                                timeframe=self.config.timeframe,
+                                candles=sub_candles,
+                            )
+                        )
+                        mom_out = await self.momentum_analyst.run(
+                            MomentumAnalystInput(
+                                timestamp=ts,
+                                symbol=pos.symbol,
+                                timeframe=self.config.timeframe,
+                                candles=sub_candles,
+                            )
+                        )
+                        vol_out = await self.volume_analyst.run(
+                            VolumeAnalystInput(
+                                timestamp=ts,
+                                symbol=pos.symbol,
+                                timeframe=self.config.timeframe,
+                                candles=sub_candles,
+                            )
+                        )
+
+                        rev_dec = MultiFactorReversalDetector.evaluate(
+                            position=pos,
+                            trend_data=trend_out.output,
+                            momentum_data=mom_out.output,
+                            volume_data=vol_out.output,
+                            regime_data=sym_regime,
+                            evaluation_timestamp=ts,
+                        )
+                        if rev_dec.reversal_detected:
+                            pos.reversal_exit_pending = True
+                            pos.reversal_detection_timestamp = ts
+                            pos.reversal_reason_codes = rev_dec.reason_codes
+
+            # --- PHASE C: Evaluate Strategy Candidates for Available Symbols ---
+            newly_opened_positions: List[ActivePosition] = []
             for sym in self.config.symbols:
                 sym_candles = candles_map.get(sym, [])
                 curr_candle = candle_lookup.get(sym, {}).get(ts)
@@ -192,8 +301,8 @@ class HistoricalBacktestEngine:
                     continue  # Warm-up requirement
 
                 # Check if position already open for this symbol
-                sym_already_open = any(p.symbol == sym for p in open_positions)
-                if sym_already_open or len(open_positions) >= self.config.max_concurrent_positions:
+                sym_already_open = any(p.symbol == sym for p in open_positions) or any(p.symbol == sym for p in newly_opened_positions)
+                if sym_already_open or (len(open_positions) + len(newly_opened_positions)) >= self.config.max_concurrent_positions:
                     continue
 
                 # Run specialist analytical agents
@@ -252,7 +361,7 @@ class HistoricalBacktestEngine:
                     cand = strat_out.output.candidates[0]
 
                     # Total portfolio equity for risk sizing
-                    curr_pos_val = sum(p.position_size * p.current_price for p in open_positions)
+                    curr_pos_val = sum(p.position_size * p.current_price for p in open_positions) + sum(p.position_size * p.current_price for p in newly_opened_positions)
                     total_equity_now = cash_equity + curr_pos_val
 
                     # Pass through Risk Manager (Rule S-04)
@@ -262,7 +371,7 @@ class HistoricalBacktestEngine:
                         peak_equity=peak_equity,
                         daily_starting_equity=daily_starting_equity,
                         daily_realized_pnl=daily_realized_pnl,
-                        open_positions=open_positions,
+                        open_positions=open_positions + newly_opened_positions,
                         timestamp=ts,
                     )
 
@@ -286,14 +395,18 @@ class HistoricalBacktestEngine:
                                 "rr_ratio": cand.risk_reward_ratio,
                                 "rationale": cand.rationale,
                             },
+                            exit_policy=self.config.exit_policy,
+                            theoretical_take_profit=Decimal(str(cand.suggested_take_profit)),
                         )
 
                         # Deduct actual cash outflow at entry (executed notional + entry fee)
                         cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
                         cash_equity -= cash_outflow
-                        open_positions.append(new_pos)
+                        newly_opened_positions.append(new_pos)
 
-            # --- PHASE C: Mark-to-Market Equity Snapshot ---
+            open_positions.extend(newly_opened_positions)
+
+            # --- PHASE D: Mark-to-Market Equity Snapshot ---
             open_val = sum(p.position_size * p.current_price for p in open_positions)
             total_eq = cash_equity + open_val
             if total_eq > peak_equity:

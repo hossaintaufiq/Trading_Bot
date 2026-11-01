@@ -51,6 +51,7 @@ def calculate_backtest_metrics(
             performance_by_symbol={},
             performance_by_timeframe={},
             performance_by_regime={},
+            performance_by_exit_reason={},
         )
 
     # 1. Basic trade counts & P&L aggregates
@@ -214,6 +215,19 @@ def calculate_backtest_metrics(
             "net_pnl": float(sum((t.net_pnl for t in reg_trades), Decimal("0.00"))),
         }
 
+    perf_by_exit_reason: Dict[str, Dict[str, Any]] = {}
+    for reason in set(t.exit_reason for t in trades):
+        reason_trades = [t for t in trades if t.exit_reason == reason]
+        reason_wins = [t for t in reason_trades if t.net_pnl > Decimal("0")]
+        reason_gross_profit = sum((t.gross_pnl for t in reason_trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+        reason_gross_loss = abs(sum((t.gross_pnl for t in reason_trades if t.gross_pnl < Decimal("0")), Decimal("0.00")))
+        perf_by_exit_reason[reason] = {
+            "total_trades": len(reason_trades),
+            "win_rate": round(len(reason_wins) / len(reason_trades), 4) if reason_trades else 0.0,
+            "net_pnl": float(sum((t.net_pnl for t in reason_trades), Decimal("0.00"))),
+            "profit_factor": round(float(reason_gross_profit / reason_gross_loss), 2) if reason_gross_loss > Decimal("0") else (999.0 if reason_gross_profit > Decimal("0") else 0.0),
+        }
+
     return BacktestMetrics(
         total_trades=total_trades,
         winning_trades=winning_trades,
@@ -240,5 +254,6 @@ def calculate_backtest_metrics(
         performance_by_symbol=perf_by_sym,
         performance_by_timeframe=perf_by_tf,
         performance_by_regime=perf_by_reg,
+        performance_by_exit_reason=perf_by_exit_reason,
     )
 

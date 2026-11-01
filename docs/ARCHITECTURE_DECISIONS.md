@@ -23,6 +23,11 @@
 - [ADR-010: Repository Pattern for Persistence Abstraction](#adr-010-repository-pattern-for-persistence-abstraction)
 - [ADR-011: Binance Public Unauthenticated API for Market Data Ingress](#adr-011-binance-public-unauthenticated-api-for-market-data-ingress)
 - [ADR-012: UTC-Only Timestamps Throughout Entire System](#adr-012-utc-only-timestamps-throughout-entire-system)
+- [ADR-013: Parquet Trajectory Partitioning and SQLite Summary Persistence](#adr-013-parquet-trajectory-partitioning-and-sqlite-summary-persistence)
+- [ADR-014: Cache-First Historical Market-Data Backfill](#adr-014-cache-first-historical-market-data-backfill)
+- [ADR-015: Dual-Mode Emergency Kill Switch](#adr-015-dual-mode-emergency-kill-switch)
+- [ADR-016: Historical Backtesting Engine and Conservative Intrabar Ambiguity Resolution](#adr-016-historical-backtesting-engine-and-conservative-intrabar-ambiguity-resolution)
+- [ADR-017: Balanced Protection Exit Engine and Multi-Factor Early Reversal Protocol](#adr-017-balanced-protection-exit-engine-and-multi-factor-early-reversal-protocol)
 
 ---
 
@@ -269,4 +274,28 @@
   - Preserves mathematical exactness by executing monetary calculations with Python `Decimal`.
 - **Alternatives Considered**: Optimistic first-hit assumption or 50/50 randomized resolution. Rejected as violating quantitative safety standards.
 - **Consequences**: Backtest performance metrics reflect conservative, realistic execution dynamics.
+
+---
+
+### ADR-017: Balanced Protection Exit Engine and Multi-Factor Early Reversal Protocol
+
+- **Status**: Accepted
+- **Date**: 2026-11-01
+- **Context**: Fixed take-profit orders prematurely cut off winning positions during strong trend regimes. Conversely, trailing stops alone can give back significant accumulated profit during sudden market reversals, while relying on single indicators (e.g. RSI overbought) causes premature whipsaw exits.
+- **Decision**: 
+  1. Implement a **Balanced Protection** exit architecture where positions possess an initial protective stop-loss, while fixed take-profits are non-terminating (positions run past initial theoretical targets while trends remain healthy).
+  2. Implement an in-place **one-way ratcheting trailing stop** activated at $+1.0 R$ profit threshold ($new\_stop \ge previous\_stop$ for Long, $new\_stop \le previous\_stop$ for Short). Trailing distance is parameterized by ATR multiplier (default 2.0x ATR) or $2.0 R$. Stops never move in the direction of increased risk.
+  3. Prohibit retroactive trailing stop application: stops updated from candle $T$'s high/low are strictly enforced for candle $T+1$ onwards.
+  4. Implement `MultiFactorReversalDetector` requiring confirmation from $\ge 2$ independent analytical domains (Trend, Momentum, Volume, Scanner Regime). A single indicator alone is strictly forbidden from triggering an exit.
+  5. Enforce strict temporal separation: reversal detection occurs at candle $T$ close; execution fills no earlier than candle $T+1$ open with adverse slippage, spread, and taker fees.
+  6. Enforce stop precedence: if candle $T+1$ opens gap-down/up beyond the active protective stop, the stop-loss order takes precedence over the pending reversal exit.
+  7. Maintain backward compatibility with `FIXED_BRACKET` mode for benchmarking.
+- **Rationale**:
+  - Balances downside protection with letting trend profits run, avoiding arbitrary profit caps.
+  - Mitigates false reversal whipsaws by demanding multi-factor domain confluence.
+  - Eliminates look-ahead and execution bias by strictly executing exits on subsequent candle events.
+- **Alternatives Considered**: 
+  - Dynamic ATR take-profit: Still caps upside during parabolic trends.
+  - Single-factor reversal (e.g. RSI roll-over alone): Prone to premature exits in strong bull regimes.
+- **Consequences**: Active positions track MFE, MAE, peak favorable prices, and trailing ratchets; execution ledger details exit reasons (`STOP_LOSS`, `TRAILING_STOP`, `REVERSAL_CONFIRMED`).
 
