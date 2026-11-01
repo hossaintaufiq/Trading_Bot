@@ -52,3 +52,4 @@ export const useMarketStore = create<MarketState>((set, get) => ({
 
   setConnected: (connected) => set({ isConnected: connected }),
 }));
+

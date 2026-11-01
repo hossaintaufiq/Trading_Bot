@@ -103,3 +103,4 @@ class BaseAgent(abc.ABC, Generic[InputT, OutputT]):
 
     def __repr__(self) -> str:
         return f"<Agent id={self.agent_id} name={self.agent_name}>"
+

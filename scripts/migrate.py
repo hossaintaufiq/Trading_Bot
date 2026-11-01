@@ -63,12 +63,12 @@ def run_migrations(status_only: bool = False) -> None:
     for filename in migration_files:
         version = int(filename.split("_")[0])
         if status_only:
-            status = "✓ applied" if version in applied else "○ pending"
+            status = "[APPLIED]" if version in applied else "[PENDING]"
             print(f"  {status}  {filename}")
             continue
 
         if version in applied:
-            print(f"  skip  {filename}")
+            print(f"  [SKIP]  {filename}")
             continue
 
         sql_path = os.path.join(MIGRATIONS_DIR, filename)
@@ -82,10 +82,10 @@ def run_migrations(status_only: bool = False) -> None:
                 (version, filename, datetime.now(timezone.utc).isoformat()),
             )
             conn.commit()
-            print(f"  ✓ applied  {filename}")
+            print(f"  [OK] applied  {filename}")
         except Exception as exc:
             conn.rollback()
-            print(f"  ✗ FAILED   {filename}: {exc}")
+            print(f"  [FAIL]   {filename}: {exc}")
             raise
 
     conn.close()
@@ -96,3 +96,4 @@ if __name__ == "__main__":
     parser.add_argument("--status", action="store_true")
     args = parser.parse_args()
     run_migrations(status_only=args.status)
+

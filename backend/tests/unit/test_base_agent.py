@@ -39,7 +39,7 @@ class FailingAgent(BaseAgent[SampleInput, SampleOutput]):
 class TestBaseAgent:
     def test_successful_execution(self):
         agent = GoodAgent()
-        result: AgentResult = asyncio.get_event_loop().run_until_complete(
+        result: AgentResult = asyncio.run(
             agent.run(SampleInput(value=5.0))
         )
         assert result.success is True
@@ -50,7 +50,7 @@ class TestBaseAgent:
 
     def test_failed_execution_captured(self):
         agent = FailingAgent()
-        result: AgentResult = asyncio.get_event_loop().run_until_complete(
+        result: AgentResult = asyncio.run(
             agent.run(SampleInput(value=5.0))
         )
         assert result.success is False
@@ -60,14 +60,14 @@ class TestBaseAgent:
 
     def test_execution_id_is_unique(self):
         agent = GoodAgent()
-        loop = asyncio.get_event_loop()
-        r1 = loop.run_until_complete(agent.run(SampleInput(value=1.0)))
-        r2 = loop.run_until_complete(agent.run(SampleInput(value=2.0)))
+        r1 = asyncio.run(agent.run(SampleInput(value=1.0)))
+        r2 = asyncio.run(agent.run(SampleInput(value=2.0)))
         assert r1.execution_id != r2.execution_id
 
     def test_agent_id_is_set(self):
         agent = GoodAgent()
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             agent.run(SampleInput(value=1.0))
         )
         assert result.agent_id == "good_agent"
+

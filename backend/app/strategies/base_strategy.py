@@ -131,3 +131,4 @@ class BaseStrategy(abc.ABC):
 
     def __repr__(self) -> str:
         return f"<Strategy id={self.strategy_id} name={self.strategy_name}>"
+

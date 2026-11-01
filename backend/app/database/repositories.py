@@ -120,3 +120,4 @@ class ISimulationRepository(Protocol):
 
     async def load_simulation_paths(self, simulation_id: str) -> pd.DataFrame:
         ...
+

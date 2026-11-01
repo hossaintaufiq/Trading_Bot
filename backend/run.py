@@ -17,3 +17,4 @@ if __name__ == "__main__":
         log_level=settings.log_level.lower(),
         workers=1,  # Always 1 in development with reload=True
     )
+

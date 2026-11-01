@@ -96,3 +96,4 @@ approved_timeframes:
   - 15m
   - 1h
   - 4h
+

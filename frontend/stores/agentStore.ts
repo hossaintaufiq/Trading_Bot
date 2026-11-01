@@ -30,3 +30,4 @@ export const useAgentStore = create<AgentState>((set) => ({
     set({ agents: map, lastUpdated: new Date().toISOString() });
   },
 }));
+

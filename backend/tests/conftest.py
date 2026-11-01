@@ -59,3 +59,4 @@ def sample_candles() -> pd.DataFrame:
 def sample_candles_1h() -> pd.DataFrame:
     """100 synthetic BTCUSDT 1h candles."""
     return make_candles(n=100, timeframe="1h")
+

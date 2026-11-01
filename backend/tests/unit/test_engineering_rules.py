@@ -21,9 +21,9 @@ class TestMonetaryPrecision:
 
     def test_float_addition_is_not_exact(self):
         """This test documents WHY we forbid float for money."""
-        result = 100.1 + 0.2
-        assert result != 100.3, (
-            "Float is NOT exact. This documents the reason we use Decimal."
+        result = 0.1 + 0.2
+        assert result != 0.3, (
+            "Float is NOT exact (0.1 + 0.2 != 0.3). This documents the reason we use Decimal."
         )
 
     def test_position_size_calculation_uses_decimal(self):
@@ -114,3 +114,4 @@ class TestRewardRiskRatio:
 
         risk = entry - stop
         assert risk == Decimal("0"), "Zero risk means stop equals entry — invalid."
+

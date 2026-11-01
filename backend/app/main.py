@@ -37,3 +37,4 @@ async def health() -> dict:
         "paper_trading_only": True,
         "real_money_trading": False,
     }
+

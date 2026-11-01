@@ -176,3 +176,4 @@ These are research defaults. They are not investment recommendations.
 6. Do not introduce new dependencies without justification.
 7. Run `pytest` before committing backend changes.
 8. Run `npm test` before committing frontend changes.
+

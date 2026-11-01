@@ -239,3 +239,4 @@ export interface WsEvent<T = unknown> {
   version: string;
   payload: T;
 }
+

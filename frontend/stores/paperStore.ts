@@ -50,3 +50,4 @@ export const usePaperStore = create<PaperState>((set, get) => ({
           : state.recentFills,
     })),
 }));
+

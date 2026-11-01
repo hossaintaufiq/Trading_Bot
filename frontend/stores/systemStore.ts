@@ -32,3 +32,4 @@ export const useSystemStore = create<SystemState>((set) => ({
       wsConnections: { ...state.wsConnections, [channel]: wsState },
     })),
 }));
+

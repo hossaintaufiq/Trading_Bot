@@ -212,3 +212,4 @@ CREATE TABLE IF NOT EXISTS system_events (
 
 CREATE INDEX IF NOT EXISTS idx_system_events_level
     ON system_events (level, occurred_at DESC);
+
