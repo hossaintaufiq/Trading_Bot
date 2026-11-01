@@ -1,4 +1,10 @@
 """NEPTUNE Historical Simulation and Backtesting Module."""
+from app.simulation.benchmark import (
+    BenchmarkReport,
+    DatasetEvaluationResult,
+    ExitPolicyBenchmark,
+    PolicyMetricsComparison,
+)
 from app.simulation.engine import HistoricalBacktestEngine
 from app.simulation.execution import PaperExecutionSimulator
 from app.simulation.metrics import calculate_backtest_metrics
@@ -18,10 +24,14 @@ __all__ = [
     "BacktestConfig",
     "BacktestMetrics",
     "BacktestResult",
+    "BenchmarkReport",
+    "DatasetEvaluationResult",
     "EquityPoint",
+    "ExitPolicyBenchmark",
     "HistoricalBacktestEngine",
     "MultiFactorReversalDetector",
     "PaperExecutionSimulator",
+    "PolicyMetricsComparison",
     "ReversalDecision",
     "SimulatedTrade",
     "WalkForwardValidator",

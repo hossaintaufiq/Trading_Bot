@@ -133,6 +133,10 @@ class HistoricalBacktestEngine:
             sym: {c.timestamp: c for c in c_list}
             for sym, c_list in candles_map.items()
         }
+        candle_index: Dict[str, Dict[str, int]] = {
+            sym: {c.timestamp: idx for idx, c in enumerate(c_list)}
+            for sym, c_list in candles_map.items()
+        }
 
         # 2. Portfolio and Accounting State
         cash_equity = self.config.initial_capital
@@ -180,6 +184,7 @@ class HistoricalBacktestEngine:
                         stop_breached_at_open = True
 
                     if stop_breached_at_open:
+                        pos.reversal_superseded = True
                         exit_reason = "TRAILING_STOP" if (
                             pos.stop_loss > pos.initial_stop_loss if pos.direction == "LONG"
                             else pos.stop_loss < pos.initial_stop_loss
@@ -187,6 +192,7 @@ class HistoricalBacktestEngine:
                         exit_price_raw = min(pos.stop_loss, c_open) if pos.direction == "LONG" else max(pos.stop_loss, c_open)
                         trade = self.execution_simulator._finalize_trade(pos, exit_price_raw, curr_candle.timestamp, exit_reason)
                     else:
+                        pos.reversal_superseded = False
                         trade = self.execution_simulator.execute_pending_reversal(pos, curr_candle)
 
                 # 2. If no pending reversal executed, evaluate standard/trailing bracket
@@ -213,7 +219,10 @@ class HistoricalBacktestEngine:
                     continue
 
                 sym_candles = candles_map.get(pos.symbol, [])
-                sub_candles = [c for c in sym_candles if c.timestamp <= ts]
+                c_idx = candle_index.get(pos.symbol, {}).get(ts)
+                if c_idx is None:
+                    continue
+                sub_candles = sym_candles[:c_idx + 1]
 
                 # Compute current ATR for trailing stop calculation
                 curr_atr = None
@@ -295,8 +304,11 @@ class HistoricalBacktestEngine:
                     continue
 
                 # Rule S-05 Look-ahead protection:
-                # Find index of curr_candle and slice ONLY up to this index
-                sub_candles = [c for c in sym_candles if c.timestamp <= ts]
+                # Slice ONLY up to current candle index
+                c_idx = candle_index.get(sym, {}).get(ts)
+                if c_idx is None:
+                    continue
+                sub_candles = sym_candles[:c_idx + 1]
                 if len(sub_candles) < 30:
                     continue  # Warm-up requirement
 

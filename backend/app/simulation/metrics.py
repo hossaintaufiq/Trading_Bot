@@ -52,6 +52,16 @@ def calculate_backtest_metrics(
             performance_by_timeframe={},
             performance_by_regime={},
             performance_by_exit_reason={},
+            average_mfe=Decimal("0.00"),
+            average_mae=Decimal("0.00"),
+            average_holding_duration_seconds=0.0,
+            reversal_metrics={
+                "total_reversal_detections": 0,
+                "total_reversal_exits": 0,
+                "total_reversal_superseded": 0,
+                "average_reversal_exit_pnl": 0.0,
+                "performance_by_combination": {},
+            },
         )
 
     # 1. Basic trade counts & P&L aggregates
@@ -228,6 +238,55 @@ def calculate_backtest_metrics(
             "profit_factor": round(float(reason_gross_profit / reason_gross_loss), 2) if reason_gross_loss > Decimal("0") else (999.0 if reason_gross_profit > Decimal("0") else 0.0),
         }
 
+    # 7. MFE, MAE, Duration & Reversal Confirmation Analytics
+    avg_mfe = sum((t.mfe for t in trades), Decimal("0.00")) / Decimal(str(total_trades))
+    avg_mae = sum((t.mae for t in trades), Decimal("0.00")) / Decimal(str(total_trades))
+    avg_duration = float(np.mean([t.holding_duration_seconds for t in trades])) if trades else 0.0
+
+    rev_exits = [t for t in trades if t.exit_reason == "REVERSAL_CONFIRMED"]
+    rev_superseded = [t for t in trades if t.reversal_superseded]
+    rev_detections_count = len(rev_exits) + len(rev_superseded)
+    rev_avg_pnl = (
+        float(sum((t.net_pnl for t in rev_exits), Decimal("0.00")) / Decimal(str(len(rev_exits))))
+        if rev_exits
+        else 0.0
+    )
+
+    combo_perf: Dict[str, Dict[str, Any]] = {}
+    for t in trades:
+        if t.reversal_reasons:
+            domains = set()
+            for r in t.reversal_reasons:
+                if "TREND" in r:
+                    domains.add("TREND")
+                elif "MOMENTUM" in r:
+                    domains.add("MOMENTUM")
+                elif "VOLUME" in r:
+                    domains.add("VOLUME")
+                elif "REGIME" in r:
+                    domains.add("REGIME")
+                else:
+                    domains.add(r)
+            combo_key = "+".join(sorted(domains)) if domains else "+".join(sorted(t.reversal_reasons))
+            if combo_key not in combo_perf:
+                combo_perf[combo_key] = {"trades": 0, "wins": 0, "net_pnl": 0.0}
+            combo_perf[combo_key]["trades"] += 1
+            if t.net_pnl > Decimal("0"):
+                combo_perf[combo_key]["wins"] += 1
+            combo_perf[combo_key]["net_pnl"] += float(t.net_pnl)
+
+    for k, v in combo_perf.items():
+        v["win_rate"] = round(v["wins"] / v["trades"], 4) if v["trades"] > 0 else 0.0
+        v["net_pnl"] = round(v["net_pnl"], 2)
+
+    reversal_metrics = {
+        "total_reversal_detections": rev_detections_count,
+        "total_reversal_exits": len(rev_exits),
+        "total_reversal_superseded": len(rev_superseded),
+        "average_reversal_exit_pnl": round(rev_avg_pnl, 2),
+        "performance_by_combination": combo_perf,
+    }
+
     return BacktestMetrics(
         total_trades=total_trades,
         winning_trades=winning_trades,
@@ -255,5 +314,9 @@ def calculate_backtest_metrics(
         performance_by_timeframe=perf_by_tf,
         performance_by_regime=perf_by_reg,
         performance_by_exit_reason=perf_by_exit_reason,
+        average_mfe=avg_mfe.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        average_mae=avg_mae.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        average_holding_duration_seconds=round(avg_duration, 1),
+        reversal_metrics=reversal_metrics,
     )
 

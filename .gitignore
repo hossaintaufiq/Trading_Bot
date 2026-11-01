@@ -51,9 +51,13 @@ next-env.d.ts
 # ---- Storage — never commit large data files ----
 storage/historical/**/*.parquet
 storage/simulations/**/*.parquet
+storage/backtests/**/*.parquet
+*.parquet
 storage/db/*.db
 storage/db/*.db-wal
 storage/db/*.db-shm
+storage/exports/*
+!storage/exports/.gitkeep
 
 # ---- SQLite ----
 *.db

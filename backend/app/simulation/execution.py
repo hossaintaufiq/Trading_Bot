@@ -12,6 +12,7 @@ Applies:
   Favorable outcome is never assumed (Section 4 & Rule S-06).
 """
 import uuid
+from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional, Tuple
 
@@ -325,6 +326,14 @@ class PaperExecutionSimulator:
         # Net P&L is gross PnL minus all round-trip frictions
         net_pnl = gross_pnl - total_fees - total_slippage_cost - total_spread_cost
 
+        # Calculate holding duration in seconds
+        try:
+            t_entry = datetime.fromisoformat(position.entry_timestamp.replace("Z", "+00:00"))
+            t_exit = datetime.fromisoformat(exit_timestamp.replace("Z", "+00:00"))
+            holding_duration = max(0.0, (t_exit - t_entry).total_seconds())
+        except Exception:
+            holding_duration = 0.0
+
         return SimulatedTrade(
             trade_id=f"trd_{uuid.uuid4().hex[:12]}",
             symbol=position.symbol,
@@ -354,5 +363,8 @@ class PaperExecutionSimulator:
             reversal_detection_timestamp=position.reversal_detection_timestamp,
             mfe=position.mfe.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
             mae=position.mae.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+            holding_duration_seconds=holding_duration,
+            reversal_reasons=list(position.reversal_reason_codes),
+            reversal_superseded=getattr(position, "reversal_superseded", False),
         )
 

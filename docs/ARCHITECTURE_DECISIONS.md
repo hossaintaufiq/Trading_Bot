@@ -28,6 +28,7 @@
 - [ADR-015: Dual-Mode Emergency Kill Switch](#adr-015-dual-mode-emergency-kill-switch)
 - [ADR-016: Historical Backtesting Engine and Conservative Intrabar Ambiguity Resolution](#adr-016-historical-backtesting-engine-and-conservative-intrabar-ambiguity-resolution)
 - [ADR-017: Balanced Protection Exit Engine and Multi-Factor Early Reversal Protocol](#adr-017-balanced-protection-exit-engine-and-multi-factor-early-reversal-protocol)
+- [ADR-018: Exit Policy Benchmark Protocol and Chronological Out-of-Sample Degradation Framework](#adr-018-exit-policy-benchmark-protocol-and-chronological-out-of-sample-degradation-framework)
 
 ---
 
@@ -298,4 +299,26 @@
   - Dynamic ATR take-profit: Still caps upside during parabolic trends.
   - Single-factor reversal (e.g. RSI roll-over alone): Prone to premature exits in strong bull regimes.
 - **Consequences**: Active positions track MFE, MAE, peak favorable prices, and trailing ratchets; execution ledger details exit reasons (`STOP_LOSS`, `TRAILING_STOP`, `REVERSAL_CONFIRMED`).
+
+---
+
+### ADR-018: Exit Policy Benchmark Protocol and Chronological Out-of-Sample Degradation Framework
+
+- **Status**: Accepted
+- **Date**: 2026-11-02
+- **Context**: Milestone 4.2 requires a reproducible quantitative evaluation comparing `FIXED_BRACKET` and `BALANCED` exit policies across multiple symbols, timeframes, and market regimes, to rigorously determine whether trailing stops and multi-factor reversal confirmations improve strategy expectancy, win rate, or drawdown without inducing curve-fitting.
+- **Decision**: 
+  1. Implement `ExitPolicyBenchmark` to evaluate identical entry signals, position sizing, and risk constraints across both exit policies simultaneously.
+  2. Implement chronological 70/30 In-Sample (IS) vs Out-of-Sample (OOS) data splits. Random or shuffled splits are strictly prohibited (Rule `S-05`).
+  3. Measure Walk-Forward Efficiency ($WFE = \text{AnnNet}_{OOS} / \text{AnnNet}_{IS}$) and Annualized Degradation % between IS and OOS to gauge robustness across regimes.
+  4. Track Maximum Favorable Excursion (MFE), Maximum Adverse Excursion (MAE), and holding duration on all trades.
+  5. Segment performance across market regimes (`TRENDING_BULL`, `TRENDING_BEAR`, `RANGING`, `VOLATILE`, `UNCERTAIN`) and audit multi-factor reversal reason combinations.
+  6. Persist benchmark runs to SQLite table `benchmark_runs` with aggregate delta metrics and save individual trade ledgers to Parquet (`storage/backtests/bkt_{id}_trades.parquet`).
+- **Rationale**:
+  - Ensures absolute experimental integrity with zero look-ahead bias and zero survivorship bias.
+  - Empirically reveals regime-specific performance characteristics: Balanced Protection excels on higher timeframes and in trending regimes by eliminating artificial profit caps, while Fixed Brackets maintain an advantage in high-frequency whipsaw environments.
+- **Alternatives Considered**: 
+  - K-fold cross validation: Inapplicable to chronological time-series due to look-ahead leakage.
+  - Unsplit full-dataset backtesting: Prone to in-sample overfitting and deceptive optimism.
+- **Consequences**: Standardized benchmark framework produces reproducible, auditable comparisons exported to SQLite, JSON, and Parquet ledgers.
 

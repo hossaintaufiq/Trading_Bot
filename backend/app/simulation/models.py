@@ -74,6 +74,9 @@ class SimulatedTrade(BaseModel):
     reversal_detection_timestamp: Optional[str] = None
     mfe: Decimal = Decimal("0.00")
     mae: Decimal = Decimal("0.00")
+    holding_duration_seconds: float = 0.0
+    reversal_reasons: List[str] = Field(default_factory=list)
+    reversal_superseded: bool = False
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -108,6 +111,9 @@ class SimulatedTrade(BaseModel):
             "reversal_detection_timestamp": self.reversal_detection_timestamp,
             "mfe": float(self.mfe),
             "mae": float(self.mae),
+            "holding_duration_seconds": self.holding_duration_seconds,
+            "reversal_reasons": self.reversal_reasons,
+            "reversal_superseded": self.reversal_superseded,
         }
 
 
@@ -167,6 +173,7 @@ class ActivePosition:
         self.reversal_exit_pending = False
         self.reversal_detection_timestamp: Optional[str] = None
         self.reversal_reason_codes: List[str] = []
+        self.reversal_superseded: bool = False
         self.mfe = Decimal("0.00")
         self.mae = Decimal("0.00")
 
@@ -210,6 +217,10 @@ class BacktestMetrics(BaseModel):
     performance_by_timeframe: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     performance_by_regime: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     performance_by_exit_reason: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+    average_mfe: Decimal = Decimal("0.00")
+    average_mae: Decimal = Decimal("0.00")
+    average_holding_duration_seconds: float = 0.0
+    reversal_metrics: Dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
