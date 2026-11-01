@@ -65,6 +65,8 @@ class PolicyMetricsComparison(BaseModel):
     fixed_trades_count: int
     balanced_trades_count: int
     entry_signals_identical: bool
+    common_entries_count: int = 0
+    common_trades_delta_pnl: float = 0.0
 
 
 class DatasetEvaluationResult(BaseModel):
@@ -350,6 +352,15 @@ class ExitPolicyBenchmark:
                 "balanced_win_rate": rb.get("win_rate", 0.0),
             }
 
+        # Check common entries
+        f_entries = {t.entry_timestamp: t for t in res_fixed.trades}
+        b_entries = {t.entry_timestamp: t for t in res_balanced.trades}
+        common_ts = set(f_entries.keys()).intersection(set(b_entries.keys()))
+        common_count = len(common_ts)
+        common_fixed_pnl = sum(float(f_entries[ts].net_pnl) for ts in common_ts)
+        common_balanced_pnl = sum(float(b_entries[ts].net_pnl) for ts in common_ts)
+        common_delta = round(common_balanced_pnl - common_fixed_pnl, 2)
+
         comparison = PolicyMetricsComparison(
             fixed_metrics=m_fix,
             balanced_metrics=m_bal,
@@ -358,6 +369,8 @@ class ExitPolicyBenchmark:
             fixed_trades_count=len(res_fixed.trades),
             balanced_trades_count=len(res_balanced.trades),
             entry_signals_identical=entry_signals_identical,
+            common_entries_count=common_count,
+            common_trades_delta_pnl=common_delta,
         )
 
         return comparison, res_fixed, res_balanced
@@ -368,22 +381,23 @@ class ExitPolicyBenchmark:
         trades_balanced: List[SimulatedTrade],
     ) -> bool:
         """
-        Verify that both policies operated under identical signal conditions.
-        First trades must match in signal timestamp, direction, and entry price.
+        Verify whether both policies operated under strictly identical entry sequences.
+        Returns True if and only if trade counts match AND all entry timestamps,
+        directions, and prices match exactly.
         """
         if not trades_fixed and not trades_balanced:
             return True
-        if not trades_fixed or not trades_balanced:
+        if len(trades_fixed) != len(trades_balanced):
             return False
 
-        # First trade of both runs must be identical in signal, timestamp, and price
-        t_f0 = trades_fixed[0]
-        t_b0 = trades_balanced[0]
-        return (
-            t_f0.signal_timestamp == t_b0.signal_timestamp
-            and t_f0.direction == t_b0.direction
-            and t_f0.entry_price == t_b0.entry_price
-        )
+        for tf, tb in zip(trades_fixed, trades_balanced):
+            if (
+                tf.signal_timestamp != tb.signal_timestamp
+                or tf.direction != tb.direction
+                or tf.entry_price != tb.entry_price
+            ):
+                return False
+        return True
 
     def _compute_aggregate_summary(
         self,
@@ -401,6 +415,20 @@ class ExitPolicyBenchmark:
                 "aggregate_net_pnl_delta": 0.0,
                 "total_fixed_trades": 0,
                 "total_balanced_trades": 0,
+                "fixed_gross_profit": 0.0,
+                "fixed_gross_loss": 0.0,
+                "fixed_total_fees": 0.0,
+                "fixed_total_slippage": 0.0,
+                "fixed_total_spread": 0.0,
+                "fixed_total_friction": 0.0,
+                "balanced_gross_profit": 0.0,
+                "balanced_gross_loss": 0.0,
+                "balanced_total_fees": 0.0,
+                "balanced_total_slippage": 0.0,
+                "balanced_total_spread": 0.0,
+                "balanced_total_friction": 0.0,
+                "total_common_trades": 0,
+                "total_common_delta_pnl": 0.0,
                 "mean_wfe_fixed": 0.0,
                 "mean_wfe_balanced": 0.0,
                 "summary": "No dataset had sufficient trades for aggregation.",
@@ -412,6 +440,24 @@ class ExitPolicyBenchmark:
 
         total_fixed_trades = sum(e.full_period.fixed_trades_count for e in successful)
         total_balanced_trades = sum(e.full_period.balanced_trades_count for e in successful)
+
+        # Aggregate financial friction and gross PnL
+        fixed_gross_profit = sum(float(e.full_period.fixed_metrics.gross_profit) for e in successful)
+        fixed_gross_loss = sum(float(e.full_period.fixed_metrics.gross_loss) for e in successful)
+        fixed_fees = sum(float(e.full_period.fixed_metrics.total_fees) for e in successful)
+        fixed_slippage = sum(float(e.full_period.fixed_metrics.total_slippage) for e in successful)
+        fixed_spread = sum(float(e.full_period.fixed_metrics.total_spread) for e in successful)
+        fixed_friction = fixed_fees + fixed_slippage + fixed_spread
+
+        balanced_gross_profit = sum(float(e.full_period.balanced_metrics.gross_profit) for e in successful)
+        balanced_gross_loss = sum(float(e.full_period.balanced_metrics.gross_loss) for e in successful)
+        balanced_fees = sum(float(e.full_period.balanced_metrics.total_fees) for e in successful)
+        balanced_slippage = sum(float(e.full_period.balanced_metrics.total_slippage) for e in successful)
+        balanced_spread = sum(float(e.full_period.balanced_metrics.total_spread) for e in successful)
+        balanced_friction = balanced_fees + balanced_slippage + balanced_spread
+
+        total_common_trades = sum(e.full_period.common_entries_count for e in successful)
+        total_common_delta_pnl = sum(e.full_period.common_trades_delta_pnl for e in successful)
 
         avg_wfe_fixed = float(pd.Series([e.walk_forward_efficiency_fixed for e in successful]).mean())
         avg_wfe_balanced = float(pd.Series([e.walk_forward_efficiency_balanced for e in successful]).mean())
@@ -425,6 +471,20 @@ class ExitPolicyBenchmark:
             "aggregate_net_pnl_delta": round(pnl_delta, 2),
             "total_fixed_trades": total_fixed_trades,
             "total_balanced_trades": total_balanced_trades,
+            "fixed_gross_profit": round(fixed_gross_profit, 2),
+            "fixed_gross_loss": round(fixed_gross_loss, 2),
+            "fixed_total_fees": round(fixed_fees, 2),
+            "fixed_total_slippage": round(fixed_slippage, 2),
+            "fixed_total_spread": round(fixed_spread, 2),
+            "fixed_total_friction": round(fixed_friction, 2),
+            "balanced_gross_profit": round(balanced_gross_profit, 2),
+            "balanced_gross_loss": round(balanced_gross_loss, 2),
+            "balanced_total_fees": round(balanced_fees, 2),
+            "balanced_total_slippage": round(balanced_slippage, 2),
+            "balanced_total_spread": round(balanced_spread, 2),
+            "balanced_total_friction": round(balanced_friction, 2),
+            "total_common_trades": total_common_trades,
+            "total_common_delta_pnl": round(total_common_delta_pnl, 2),
             "mean_wfe_fixed": round(avg_wfe_fixed, 2),
             "mean_wfe_balanced": round(avg_wfe_balanced, 2),
         }

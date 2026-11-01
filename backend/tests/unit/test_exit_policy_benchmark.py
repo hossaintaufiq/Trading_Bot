@@ -347,5 +347,119 @@ class TestExitPolicyBenchmark:
         assert len(report.evaluations) == 2
         assert report.aggregate_summary["total_evaluations"] == 2
         assert "aggregate_net_pnl_delta" in report.aggregate_summary
+        assert "fixed_total_friction" in report.aggregate_summary
+        assert "balanced_total_friction" in report.aggregate_summary
         assert report.git_commit != ""
+
+    def test_entry_parity_detects_mismatched_trade_sequences(self):
+        """
+        Regression Test (Audit Finding 1):
+        Verify that _verify_entry_signals_parity correctly rejects sequences with
+        differing lengths or mismatched subsequent signals, avoiding false-positive parity.
+        """
+        benchmark = ExitPolicyBenchmark()
+        t1 = SimulatedTrade(
+            trade_id="t1",
+            symbol="BTCUSDT",
+            timeframe="15m",
+            direction="LONG",
+            signal_timestamp="2026-10-25T10:00:00.000Z",
+            entry_timestamp="2026-10-25T10:15:00.000Z",
+            entry_price=Decimal("100.0"),
+            exit_timestamp="2026-10-25T11:00:00.000Z",
+            exit_price=Decimal("105.0"),
+            stop_loss=Decimal("95.0"),
+            take_profit=Decimal("110.0"),
+            position_size=Decimal("1.0"),
+            gross_pnl=Decimal("5.0"),
+            fees=Decimal("0.2"),
+            spread_cost=Decimal("0.02"),
+            slippage_cost=Decimal("0.1"),
+            net_pnl=Decimal("4.68"),
+            exit_reason="TAKE_PROFIT",
+            market_regime="TRENDING_BULL",
+        )
+        t2 = t1.model_copy(update={"trade_id": "t2", "signal_timestamp": "2026-10-25T12:00:00.000Z"})
+        t3 = t1.model_copy(update={"trade_id": "t3", "signal_timestamp": "2026-10-25T13:00:00.000Z"})
+
+        # Matching single trade
+        assert benchmark._verify_entry_signals_parity([t1], [t1]) is True
+
+        # Unequal trade counts (e.g. 2 vs 1) must be False
+        assert benchmark._verify_entry_signals_parity([t1, t2], [t1]) is False
+        assert benchmark._verify_entry_signals_parity([t1], [t1, t2]) is False
+
+        # Mismatched subsequent signal timestamp
+        assert benchmark._verify_entry_signals_parity([t1, t2], [t1, t3]) is False
+
+    def test_common_entries_and_aggregate_friction_reconciliation(self):
+        """
+        Regression Test (Audit Findings 2, 4, 6):
+        Verify that PolicyMetricsComparison and _compute_aggregate_summary correctly
+        isolate common entries and accumulate friction and gross PnL.
+        """
+        benchmark = ExitPolicyBenchmark()
+        t_common_f = SimulatedTrade(
+            trade_id="tf1",
+            symbol="BTCUSDT",
+            timeframe="15m",
+            direction="LONG",
+            signal_timestamp="2026-10-25T10:00:00.000Z",
+            entry_timestamp="2026-10-25T10:15:00.000Z",
+            entry_price=Decimal("100.0"),
+            exit_timestamp="2026-10-25T11:00:00.000Z",
+            exit_price=Decimal("110.0"),
+            stop_loss=Decimal("95.0"),
+            take_profit=Decimal("110.0"),
+            position_size=Decimal("1.0"),
+            gross_pnl=Decimal("10.0"),
+            fees=Decimal("0.2"),
+            spread_cost=Decimal("0.02"),
+            slippage_cost=Decimal("0.1"),
+            net_pnl=Decimal("9.68"),
+            exit_reason="TAKE_PROFIT",
+            market_regime="TRENDING_BULL",
+        )
+        t_common_b = t_common_f.model_copy(
+            update={
+                "trade_id": "tb1",
+                "exit_price": Decimal("115.0"),
+                "gross_pnl": Decimal("15.0"),
+                "net_pnl": Decimal("14.68"),
+                "exit_reason": "TRAILING_STOP",
+            }
+        )
+
+        mf = calculate_backtest_metrics([t_common_f], [], Decimal("1000.0"), "15m")
+        mb = calculate_backtest_metrics([t_common_b], [], Decimal("1000.0"), "15m")
+
+        ev = DatasetEvaluationResult(
+            symbol="BTCUSDT",
+            timeframe="15m",
+            status="SUCCESS",
+            total_candles=100,
+            dataset_start="2026-10-25T00:00:00.000Z",
+            dataset_end="2026-10-25T23:45:00.000Z",
+            full_period=PolicyMetricsComparison(
+                fixed_metrics=mf,
+                balanced_metrics=mb,
+                delta_metrics={"net_pnl_delta": 5.0},
+                regime_comparison={},
+                fixed_trades_count=1,
+                balanced_trades_count=1,
+                entry_signals_identical=True,
+                common_entries_count=1,
+                common_trades_delta_pnl=5.0,
+            ),
+        )
+
+        summary = benchmark._compute_aggregate_summary([ev])
+        assert summary["fixed_gross_profit"] == 10.0
+        assert summary["balanced_gross_profit"] == 15.0
+        assert summary["fixed_total_fees"] == 0.2
+        assert summary["balanced_total_fees"] == 0.2
+        assert summary["fixed_total_friction"] == 0.32
+        assert summary["balanced_total_friction"] == 0.32
+        assert summary["total_common_trades"] == 1
+        assert summary["total_common_delta_pnl"] == 5.0
 
