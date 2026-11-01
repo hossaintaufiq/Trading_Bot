@@ -64,7 +64,7 @@ class PaperExecutionSimulator:
 
         notional = exec_entry_price * position_size
         entry_fee = notional * self.taker_fee_pct
-        entry_slippage_cost = abs(exec_entry_price - raw_price) * position_size
+        entry_slippage_cost = (raw_price * self.slippage_pct) * position_size
         entry_spread_cost = (raw_price * self.spread_fraction) * position_size
 
         position_id = f"pos_{uuid.uuid4().hex[:12]}"
@@ -126,8 +126,8 @@ class PaperExecutionSimulator:
                 return self._finalize_trade(position, exit_price_raw, candle.timestamp, "STOP_LOSS")
 
             if target_touched:
-                # If market gapped up above target on open, fill at open (better execution)
-                exit_price_raw = max(position.take_profit, c_open)
+                # Resting limit order fills at take profit level (no unearned favorable windfall)
+                exit_price_raw = position.take_profit
                 return self._finalize_trade(position, exit_price_raw, candle.timestamp, "TAKE_PROFIT")
 
         else:  # SHORT
@@ -144,7 +144,8 @@ class PaperExecutionSimulator:
                 return self._finalize_trade(position, exit_price_raw, candle.timestamp, "STOP_LOSS")
 
             if target_touched:
-                exit_price_raw = min(position.take_profit, c_open)
+                # Resting limit order fills at take profit level
+                exit_price_raw = position.take_profit
                 return self._finalize_trade(position, exit_price_raw, candle.timestamp, "TAKE_PROFIT")
 
         return None
@@ -184,7 +185,7 @@ class PaperExecutionSimulator:
         exit_fee = exit_notional * self.taker_fee_pct
         total_fees = position.entry_fee + exit_fee
 
-        exit_slippage_cost = abs(exit_price_raw - exec_exit_price) * position.position_size
+        exit_slippage_cost = (exit_price_raw * self.slippage_pct) * position.position_size
         total_slippage_cost = position.entry_slippage_cost + exit_slippage_cost
 
         exit_spread_cost = (exit_price_raw * self.spread_fraction) * position.position_size

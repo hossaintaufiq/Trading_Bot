@@ -61,21 +61,21 @@ def calculate_backtest_metrics(
     losing_trades = len(losing_trades_list)
     win_rate = float(winning_trades / total_trades)
 
-    gross_profit = sum(t.gross_pnl for t in trades if t.gross_pnl > Decimal("0"))
-    gross_loss = abs(sum(t.gross_pnl for t in trades if t.gross_pnl < Decimal("0")))
-    net_profit = sum(t.net_pnl for t in trades)
+    gross_profit = sum((t.gross_pnl for t in trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+    gross_loss = abs(sum((t.gross_pnl for t in trades if t.gross_pnl < Decimal("0")), Decimal("0.00")))
+    net_profit = sum((t.net_pnl for t in trades), Decimal("0.00"))
 
-    total_fees = sum(t.fees for t in trades)
-    total_slippage = sum(t.slippage_cost for t in trades)
-    total_spread = sum(t.spread_cost for t in trades)
+    total_fees = sum((t.fees for t in trades), Decimal("0.00"))
+    total_slippage = sum((t.slippage_cost for t in trades), Decimal("0.00"))
+    total_spread = sum((t.spread_cost for t in trades), Decimal("0.00"))
 
     average_win = (
-        (sum(t.net_pnl for t in winning_trades_list) / Decimal(str(winning_trades)))
+        (sum((t.net_pnl for t in winning_trades_list), Decimal("0.00")) / Decimal(str(winning_trades)))
         if winning_trades > 0
         else Decimal("0.00")
     )
     average_loss = (
-        abs(sum(t.net_pnl for t in losing_trades_list) / Decimal(str(losing_trades)))
+        abs(sum((t.net_pnl for t in losing_trades_list), Decimal("0.00")) / Decimal(str(losing_trades)))
         if losing_trades > 0
         else Decimal("0.00")
     )
@@ -187,12 +187,12 @@ def calculate_backtest_metrics(
         sym_trades = [t for t in trades if t.symbol == sym]
         sym_wins = [t for t in sym_trades if t.net_pnl > Decimal("0")]
         sym_losses = [t for t in sym_trades if t.net_pnl < Decimal("0")]
-        sym_gross_profit = sum(t.gross_pnl for t in sym_trades if t.gross_pnl > Decimal("0"))
-        sym_gross_loss = abs(sum(t.gross_pnl for t in sym_trades if t.gross_pnl < Decimal("0")))
+        sym_gross_profit = sum((t.gross_pnl for t in sym_trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+        sym_gross_loss = abs(sum((t.gross_pnl for t in sym_trades if t.gross_pnl < Decimal("0")), Decimal("0.00")))
         perf_by_sym[sym] = {
             "total_trades": len(sym_trades),
             "win_rate": round(len(sym_wins) / len(sym_trades), 4) if sym_trades else 0.0,
-            "net_pnl": float(sum(t.net_pnl for t in sym_trades)),
+            "net_pnl": float(sum((t.net_pnl for t in sym_trades), Decimal("0.00"))),
             "profit_factor": round(float(sym_gross_profit / sym_gross_loss), 2) if sym_gross_loss > Decimal("0") else (999.0 if sym_gross_profit > Decimal("0") else 0.0),
         }
 
@@ -202,7 +202,7 @@ def calculate_backtest_metrics(
         perf_by_tf[tf_key] = {
             "total_trades": len(tf_trades),
             "win_rate": round(len(tf_wins) / len(tf_trades), 4) if tf_trades else 0.0,
-            "net_pnl": float(sum(t.net_pnl for t in tf_trades)),
+            "net_pnl": float(sum((t.net_pnl for t in tf_trades), Decimal("0.00"))),
         }
 
     for reg in set(t.market_regime for t in trades):
@@ -211,7 +211,7 @@ def calculate_backtest_metrics(
         perf_by_reg[reg] = {
             "total_trades": len(reg_trades),
             "win_rate": round(len(reg_wins) / len(reg_trades), 4) if reg_trades else 0.0,
-            "net_pnl": float(sum(t.net_pnl for t in reg_trades)),
+            "net_pnl": float(sum((t.net_pnl for t in reg_trades), Decimal("0.00"))),
         }
 
     return BacktestMetrics(

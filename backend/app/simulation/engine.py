@@ -166,16 +166,11 @@ class HistoricalBacktestEngine:
 
                 trade = self.execution_simulator.evaluate_candle_bracket(pos, curr_candle)
                 if trade is not None:
-                    # Trade closed!
-                    # Return notional proceeds to cash:
-                    # Cash was debited at entry: raw_notional + entry_friction
-                    # Cash is now credited: raw_exit_notional - exit_friction
-                    exit_raw_notional = pos.position_size * (
-                        trade.exit_price / (Decimal("1") - self.config.slippage_pct)
-                    )
-                    # We compute exact cash return via net_pnl:
-                    # cash_new = cash_old + (pos.raw_entry_price * pos.position_size + trade.net_pnl)
-                    cash_equity += (pos.raw_entry_price * pos.position_size) + trade.net_pnl
+                    # Trade closed: credit actual cash proceeds (executed exit notional - exit fee)
+                    exit_notional = pos.position_size * trade.exit_price
+                    exit_fee = exit_notional * self.config.taker_fee_pct
+                    cash_inflow = exit_notional - exit_fee
+                    cash_equity += cash_inflow
                     daily_realized_pnl += trade.net_pnl
                     completed_trades.append(trade)
                 else:
@@ -293,9 +288,9 @@ class HistoricalBacktestEngine:
                             },
                         )
 
-                        # Deduct raw position cost from cash equity
-                        cost = (new_pos.position_size * new_pos.raw_entry_price)
-                        cash_equity -= cost
+                        # Deduct actual cash outflow at entry (executed notional + entry fee)
+                        cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
+                        cash_equity -= cash_outflow
                         open_positions.append(new_pos)
 
             # --- PHASE C: Mark-to-Market Equity Snapshot ---
@@ -327,7 +322,9 @@ class HistoricalBacktestEngine:
                 trade = self.execution_simulator.force_close(
                     pos, last_candle, reason="FORCE_CLOSE_END_OF_TEST"
                 )
-                cash_equity += (pos.raw_entry_price * pos.position_size) + trade.net_pnl
+                exit_notional = pos.position_size * trade.exit_price
+                exit_fee = exit_notional * self.config.taker_fee_pct
+                cash_equity += (exit_notional - exit_fee)
                 completed_trades.append(trade)
 
         open_positions.clear()
