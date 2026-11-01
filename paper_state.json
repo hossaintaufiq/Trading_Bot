@@ -1,22 +1,3376 @@
 {
-  "usdt_balance": 10000.0,
-  "positions": {},
-  "active_position": null,
-  "asset_balance": 0.0,
-  "trades_history": [],
-  "peak_equity": 10000.0,
-  "max_drawdown_pct": 0.0,
-  "equity_history": [
+  "usdt_balance": 9396.44722662009,
+  "positions": {
+    "ETH/USDT": {
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "entry_price": 2245.5122,
+      "quantity": 0.074145,
+      "cost_usdt": 166.66,
+      "entry_time": 1793414159657,
+      "highest_price": 2247.75,
+      "initial_stop_price": 2242.3052,
+      "stop_loss_price": 2242.3052,
+      "take_profit_price": 2289.2778,
+      "invalidation_price": 2242.3052,
+      "max_holding_bars": 30,
+      "trailing_active": false,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 34.7 to 45.6 with green confirmation candle"
+    },
+    "BTC/USDT": {
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "entry_price": 77480.2408,
+      "quantity": 0.002149,
+      "cost_usdt": 166.67,
+      "entry_time": 1793415779661,
+      "highest_price": 77480.2408,
+      "initial_stop_price": 77397.7416,
+      "stop_loss_price": 77397.7416,
+      "take_profit_price": 78990.3504,
+      "invalidation_price": 77397.7416,
+      "max_holding_bars": 30,
+      "trailing_active": false,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 42.5 to 49.0 with green confirmation candle"
+    },
+    "BNB/USDT": {
+      "symbol": "BNB/USDT",
+      "setup_id": "ema_rsi",
+      "entry_price": 705.6927,
+      "quantity": 0.235943,
+      "cost_usdt": 166.67,
+      "entry_time": 1793415899533,
+      "highest_price": 705.6927,
+      "initial_stop_price": 705.0694,
+      "stop_loss_price": 705.0694,
+      "take_profit_price": 705.827,
+      "invalidation_price": 705.0694,
+      "max_holding_bars": 40,
+      "trailing_active": false,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 35.6, RSI: 48.9)"
+    }
+  },
+  "active_position": {
+    "symbol": "BTC/USDT",
+    "setup_id": "oversold_bounce",
+    "entry_price": 77480.2408,
+    "quantity": 0.002149,
+    "cost_usdt": 166.67,
+    "entry_time": 1793415779661,
+    "highest_price": 77480.2408,
+    "initial_stop_price": 77397.7416,
+    "stop_loss_price": 77397.7416,
+    "take_profit_price": 78990.3504,
+    "invalidation_price": 77397.7416,
+    "max_holding_bars": 30,
+    "trailing_active": false,
+    "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 42.5 to 49.0 with green confirmation candle"
+  },
+  "asset_balance": 0.002149,
+  "trades_history": [
     {
-      "time": 1793365000000,
-      "cash": 10000.0,
-      "equity": 10000.0,
-      "open_positions": 0
+      "id": "TRD-1793415899533",
+      "timestamp": 1793415899533,
+      "symbol": "BNB/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 705.6927,
+      "quantity": 0.235943,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 35.6, RSI: 48.9)"
+    },
+    {
+      "id": "TRD-1793415839617",
+      "timestamp": 1793415839617,
+      "symbol": "BNB/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "SELL",
+      "price": 704.8474,
+      "quantity": 0.235846,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.6,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 60,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $705.20 (Stop: $705.20, PnL: -0.11%)"
+    },
+    {
+      "id": "TRD-1793415779661",
+      "timestamp": 1793415779661,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77480.2408,
+      "quantity": 0.002149,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 42.5 to 49.0 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793415779556",
+      "timestamp": 1793415779556,
+      "symbol": "BNB/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "BUY",
+      "price": 705.9828,
+      "quantity": 0.235846,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Closed above 20 Moving Average ($705.60) with 1.1x volume"
+    },
+    {
+      "id": "TRD-1793415661514",
+      "timestamp": 1793415661514,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77383.289,
+      "quantity": 0.002149,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.13,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.54,
+      "realized_pnl_pct": -0.32,
+      "hold_duration_sec": 601,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,422.00 (Stop: $77,427.21, PnL: -0.08%)"
+    },
+    {
+      "id": "TRD-1793415653774",
+      "timestamp": 1793415653774,
+      "symbol": "SUI/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 0.9045,
+      "quantity": 183.74751,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.04,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.63,
+      "realized_pnl_pct": -0.38,
+      "hold_duration_sec": 474,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $0.91 (Stop: $0.91, PnL: -0.13%)"
+    },
+    {
+      "id": "TRD-1793415179671",
+      "timestamp": 1793415179671,
+      "symbol": "SUI/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 0.9062,
+      "quantity": 183.74751,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 51.9 to 52.6 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793415129738",
+      "timestamp": 1793415129738,
+      "symbol": "SUI/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 0.9047,
+      "quantity": 183.74751,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.08,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.59,
+      "realized_pnl_pct": -0.35,
+      "hold_duration_sec": 70,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $0.91 (Stop: $0.91, PnL: -0.11%)"
+    },
+    {
+      "id": "TRD-1793415059667",
+      "timestamp": 1793415059667,
+      "symbol": "SUI/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 0.9062,
+      "quantity": 183.74751,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 50.7 to 52.7 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793415059565",
+      "timestamp": 1793415059565,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77480.731,
+      "quantity": 0.002149,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 49.3 to 51.6 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793414929526",
+      "timestamp": 1793414929526,
+      "symbol": "BTC/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 77393.284,
+      "quantity": 0.002148,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.6,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 349,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,432.00 (Stop: $77,438.42, PnL: -0.11%)"
+    },
+    {
+      "id": "TRD-1793414579568",
+      "timestamp": 1793414579568,
+      "symbol": "BTC/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 77516.739,
+      "quantity": 0.002148,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-31 range high ($77,388.01) with 1.2x volume"
+    },
+    {
+      "id": "TRD-1793414373602",
+      "timestamp": 1793414373602,
+      "symbol": "BNB/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 704.8874,
+      "quantity": 0.236416,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.48,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.19,
+      "realized_pnl_pct": -0.11,
+      "hold_duration_sec": 214,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $705.24 (Locked Stop: $706.39, PnL: +0.14%)"
+    },
+    {
+      "id": "TRD-1793414209592",
+      "timestamp": 1793414209592,
+      "symbol": "BTC/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 77397.4319,
+      "quantity": 0.002152,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.39,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.28,
+      "realized_pnl_pct": -0.17,
+      "hold_duration_sec": 110,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $77,436.15 (Locked Stop: $77,606.81, PnL: +0.08%)"
+    },
+    {
+      "id": "TRD-1793414159657",
+      "timestamp": 1793414159657,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2245.5122,
+      "quantity": 0.074145,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 34.7 to 45.6 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793414159556",
+      "timestamp": 1793414159556,
+      "symbol": "BNB/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 704.282,
+      "quantity": 0.236416,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($703.55) in sideways market"
+    },
+    {
+      "id": "TRD-1793414099549",
+      "timestamp": 1793414099549,
+      "symbol": "BTC/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 77374.688,
+      "quantity": 0.002152,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($77,327.17) in sideways market"
+    },
+    {
+      "id": "TRD-1793413987593",
+      "timestamp": 1793413987593,
+      "symbol": "BTC/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 77316.1526,
+      "quantity": 0.002151,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.14,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.53,
+      "realized_pnl_pct": -0.32,
+      "hold_duration_sec": 308,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,354.83 (Stop: $77,358.62, PnL: -0.09%)"
+    },
+    {
+      "id": "TRD-1793413985608",
+      "timestamp": 1793413985608,
+      "symbol": "BNB/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 703.5381,
+      "quantity": 0.236281,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.6,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 246,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $703.89 (Stop: $704.00, PnL: -0.11%)"
+    },
+    {
+      "id": "TRD-1793413985538",
+      "timestamp": 1793413985538,
+      "symbol": "ETH/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 2242.5182,
+      "quantity": 0.074129,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.59,
+      "realized_pnl_pct": -0.35,
+      "hold_duration_sec": 245,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,243.64 (Stop: $2,243.98, PnL: -0.10%)"
+    },
+    {
+      "id": "TRD-1793413739620",
+      "timestamp": 1793413739620,
+      "symbol": "ETH/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 2245.9924,
+      "quantity": 0.074129,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($2,244.28) in sideways market"
+    },
+    {
+      "id": "TRD-1793413739536",
+      "timestamp": 1793413739536,
+      "symbol": "BNB/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 704.6822,
+      "quantity": 0.236281,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($704.16) in sideways market"
+    },
+    {
+      "id": "TRD-1793413679584",
+      "timestamp": 1793413679584,
+      "symbol": "BTC/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 77424.0227,
+      "quantity": 0.002151,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($77,368.10) in sideways market"
+    },
+    {
+      "id": "TRD-1793413676290",
+      "timestamp": 1793413676290,
+      "symbol": "SOL/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 96.6716,
+      "quantity": 1.719571,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.6,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 56,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $96.72 (Stop: $96.73, PnL: -0.11%)"
+    },
+    {
+      "id": "TRD-1793413619742",
+      "timestamp": 1793413619742,
+      "symbol": "SOL/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 96.8284,
+      "quantity": 1.719571,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 22.6, RSI: 51.4)"
+    },
+    {
+      "id": "TRD-1793413577533",
+      "timestamp": 1793413577533,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 2244.1574,
+      "quantity": 0.074065,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.05,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.62,
+      "realized_pnl_pct": -0.37,
+      "hold_duration_sec": 257,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,245.28 (Stop: $2,245.44, PnL: -0.12%)"
+    },
+    {
+      "id": "TRD-1793413447517",
+      "timestamp": 1793413447517,
+      "symbol": "BTC/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "SELL",
+      "price": 77469.0461,
+      "quantity": 0.002149,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.31,
+      "fee_usdt": 0.1665,
+      "realized_pnl": -0.35,
+      "realized_pnl_pct": -0.21,
+      "hold_duration_sec": 787,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $77,507.80 (+0.05%)"
+    },
+    {
+      "id": "TRD-1793413319607",
+      "timestamp": 1793413319607,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 2248.0835,
+      "quantity": 0.074065,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 23.7, RSI: 55.3)"
+    },
+    {
+      "id": "TRD-1793413289538",
+      "timestamp": 1793413289538,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 2245.6266,
+      "quantity": 0.074104,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.24,
+      "fee_usdt": 0.1664,
+      "realized_pnl": -0.43,
+      "realized_pnl_pct": -0.26,
+      "hold_duration_sec": 29,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $2,246.75 (+-0.01%)"
+    },
+    {
+      "id": "TRD-1793413259631",
+      "timestamp": 1793413259631,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 2246.8829,
+      "quantity": 0.074104,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 26.2, RSI: 48.5)"
+    },
+    {
+      "id": "TRD-1793413237649",
+      "timestamp": 1793413237649,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 703.9179,
+      "quantity": 0.236127,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.05,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.62,
+      "realized_pnl_pct": -0.37,
+      "hold_duration_sec": 578,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $704.27 (Stop: $704.27, PnL: -0.12%)"
+    },
+    {
+      "id": "TRD-1793413161577",
+      "timestamp": 1793413161577,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 2244.1873,
+      "quantity": 0.074049,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.01,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.66,
+      "realized_pnl_pct": -0.39,
+      "hold_duration_sec": 201,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,245.31 (Stop: $2,245.39, PnL: -0.14%)"
+    },
+    {
+      "id": "TRD-1793412959593",
+      "timestamp": 1793412959593,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 2248.5437,
+      "quantity": 0.074049,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 26.0, RSI: 58.8)"
+    },
+    {
+      "id": "TRD-1793412853881",
+      "timestamp": 1793412853881,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 1.2557,
+      "quantity": 132.700837,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.46,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.21,
+      "realized_pnl_pct": -0.12,
+      "hold_duration_sec": 554,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $1.26 (Locked Stop: $1.26, PnL: +0.13%)"
+    },
+    {
+      "id": "TRD-1793412659609",
+      "timestamp": 1793412659609,
+      "symbol": "BTC/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "BUY",
+      "price": 77469.8856,
+      "quantity": 0.002149,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Closed above 20 Moving Average ($77,406.13) with 1.2x volume"
+    },
+    {
+      "id": "TRD-1793412659547",
+      "timestamp": 1793412659547,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 705.1424,
+      "quantity": 0.236127,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 30.1 to 35.9 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793412651739",
+      "timestamp": 1793412651739,
+      "symbol": "SUI/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 0.9027,
+      "quantity": 184.665024,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.54,
+      "fee_usdt": 0.1667,
+      "realized_pnl": -0.13,
+      "realized_pnl_pct": -0.08,
+      "hold_duration_sec": 352,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $0.90 (Locked Stop: $0.90, PnL: +0.17%)"
+    },
+    {
+      "id": "TRD-1793412461547",
+      "timestamp": 1793412461547,
+      "symbol": "BTC/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "SELL",
+      "price": 77351.305,
+      "quantity": 0.002149,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.06,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.6,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 41,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,390.00 (Stop: $77,395.30, PnL: -0.10%)"
+    },
+    {
+      "id": "TRD-1793412419561",
+      "timestamp": 1793412419561,
+      "symbol": "BTC/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "BUY",
+      "price": 77464.9931,
+      "quantity": 0.002149,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Closed above 20 Moving Average ($77,417.50) with 1.4x volume"
+    },
+    {
+      "id": "TRD-1793412299618",
+      "timestamp": 1793412299618,
+      "symbol": "SUI/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 0.9017,
+      "quantity": 184.665024,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 32.5 to 36.1 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793412299588",
+      "timestamp": 1793412299588,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 1.2547,
+      "quantity": 132.700837,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 30.7 to 36.3 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793412243825",
+      "timestamp": 1793412243825,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 1.2529,
+      "quantity": 132.700837,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.09,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.58,
+      "realized_pnl_pct": -0.35,
+      "hold_duration_sec": 64,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $1.25 (Stop: $1.25, PnL: -0.10%)"
+    },
+    {
+      "id": "TRD-1793412243524",
+      "timestamp": 1793412243524,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 2242.1284,
+      "quantity": 0.074126,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.03,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.63,
+      "realized_pnl_pct": -0.38,
+      "hold_duration_sec": 603,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,243.25 (Stop: $2,243.43, PnL: -0.13%)"
+    },
+    {
+      "id": "TRD-1793412179636",
+      "timestamp": 1793412179636,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 1.2547,
+      "quantity": 132.700837,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 28.7 to 33.4 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793412131609",
+      "timestamp": 1793412131609,
+      "symbol": "BNB/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 704.2777,
+      "quantity": 0.235466,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 165.67,
+      "fee_usdt": 0.1658,
+      "realized_pnl": -1.0,
+      "realized_pnl_pct": -0.6,
+      "hold_duration_sec": 1032,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $704.63 (Stop: $705.75, PnL: -0.35%)"
+    },
+    {
+      "id": "TRD-1793412121532",
+      "timestamp": 1793412121532,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77351.315,
+      "quantity": 0.002149,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.06,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.61,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 1801,
+      "reason": "\u23f0 Max Holding Bars Exceeded (30/30 bars, PnL: -0.11%)"
+    },
+    {
+      "id": "TRD-1793411639602",
+      "timestamp": 1793411639602,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2246.0925,
+      "quantity": 0.074126,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 35.3 to 42.6 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793411550325",
+      "timestamp": 1793411550325,
+      "symbol": "SOL/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 96.7916,
+      "quantity": 1.716099,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 165.94,
+      "fee_usdt": 0.1661,
+      "realized_pnl": -0.72,
+      "realized_pnl_pct": -0.43,
+      "hold_duration_sec": 990,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $96.84 (Stop: $96.85, PnL: -0.18%)"
+    },
+    {
+      "id": "TRD-1793411099554",
+      "timestamp": 1793411099554,
+      "symbol": "BNB/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 707.1234,
+      "quantity": 0.235466,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($705.95) in sideways market"
+    },
+    {
+      "id": "TRD-1793410879612",
+      "timestamp": 1793410879612,
+      "symbol": "BNB/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "SELL",
+      "price": 707.0663,
+      "quantity": 0.235027,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.01,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.66,
+      "realized_pnl_pct": -0.39,
+      "hold_duration_sec": 320,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $707.42 (Stop: $707.42, PnL: -0.14%)"
+    },
+    {
+      "id": "TRD-1793410559773",
+      "timestamp": 1793410559773,
+      "symbol": "SOL/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 97.0185,
+      "quantity": 1.716099,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Golden Cross Confirmed: EMA 9 crossed EMA 21 in active trend (ADX: 46.6, RSI: 64.1)"
+    },
+    {
+      "id": "TRD-1793410559553",
+      "timestamp": 1793410559553,
+      "symbol": "BNB/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "BUY",
+      "price": 708.444,
+      "quantity": 0.235027,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Closed above 20 Moving Average ($707.43) with 1.1x volume"
+    },
+    {
+      "id": "TRD-1793410555541",
+      "timestamp": 1793410555541,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 2246.876,
+      "quantity": 0.074144,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.43,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.23,
+      "realized_pnl_pct": -0.14,
+      "hold_duration_sec": 235,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $2,248.00 (Locked Stop: $2,252.27, PnL: +0.11%)"
+    },
+    {
+      "id": "TRD-1793410535669",
+      "timestamp": 1793410535669,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 707.4261,
+      "quantity": 0.235536,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.46,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.21,
+      "realized_pnl_pct": -0.13,
+      "hold_duration_sec": 216,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $707.78 (Locked Stop: $709.03, PnL: +0.12%)"
+    },
+    {
+      "id": "TRD-1793410319627",
+      "timestamp": 1793410319627,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2245.5322,
+      "quantity": 0.074144,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 31.3 to 36.2 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793410319582",
+      "timestamp": 1793410319582,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77472.727,
+      "quantity": 0.002149,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 33.5 to 40.8 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793410319545",
+      "timestamp": 1793410319545,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 706.9133,
+      "quantity": 0.235536,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 32.6 to 35.8 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793410201553",
+      "timestamp": 1793410201553,
+      "symbol": "BTC/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 77361.3,
+      "quantity": 0.002149,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.08,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.59,
+      "realized_pnl_pct": -0.35,
+      "hold_duration_sec": 181,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,400.00 (Stop: $77,419.72, PnL: -0.12%)"
+    },
+    {
+      "id": "TRD-1793410189859",
+      "timestamp": 1793410189859,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 1.2559,
+      "quantity": 132.365682,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.59,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 170,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $1.26 (Stop: $1.26, PnL: -0.10%)"
+    },
+    {
+      "id": "TRD-1793410147523",
+      "timestamp": 1793410147523,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 2243.0279,
+      "quantity": 0.074114,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.6,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 127,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,244.15 (Stop: $2,244.26, PnL: -0.11%)"
+    },
+    {
+      "id": "TRD-1793410019631",
+      "timestamp": 1793410019631,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 1.2578,
+      "quantity": 132.365682,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 31.7 to 35.2 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793410019596",
+      "timestamp": 1793410019596,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2246.5827,
+      "quantity": 0.074114,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 30.9 to 36.6 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793410019565",
+      "timestamp": 1793410019565,
+      "symbol": "BTC/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 77492.727,
+      "quantity": 0.002149,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($77,449.44) in sideways market"
+    },
+    {
+      "id": "TRD-1793409939613",
+      "timestamp": 1793409939613,
+      "symbol": "BNB/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 706.4766,
+      "quantity": 0.234983,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 165.84,
+      "fee_usdt": 0.166,
+      "realized_pnl": -0.82,
+      "realized_pnl_pct": -0.49,
+      "hold_duration_sec": 400,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $706.83 (Stop: $707.31, PnL: -0.24%)"
+    },
+    {
+      "id": "TRD-1793409919538",
+      "timestamp": 1793409919538,
+      "symbol": "ETH/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 2244.7571,
+      "quantity": 0.07407,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.1,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.57,
+      "realized_pnl_pct": -0.34,
+      "hold_duration_sec": 259,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,245.88 (Stop: $2,246.05, PnL: -0.09%)"
+    },
+    {
+      "id": "TRD-1793409917522",
+      "timestamp": 1793409917522,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77445.4679,
+      "quantity": 0.002146,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.03,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.64,
+      "realized_pnl_pct": -0.38,
+      "hold_duration_sec": 737,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,484.21 (Stop: $77,489.94, PnL: -0.13%)"
+    },
+    {
+      "id": "TRD-1793409659603",
+      "timestamp": 1793409659603,
+      "symbol": "ETH/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 2247.9134,
+      "quantity": 0.07407,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($2,246.53) in sideways market"
+    },
+    {
+      "id": "TRD-1793409573530",
+      "timestamp": 1793409573530,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 2246.5761,
+      "quantity": 0.074003,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.09,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.58,
+      "realized_pnl_pct": -0.35,
+      "hold_duration_sec": 573,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,247.70 (Stop: $2,248.07, PnL: -0.10%)"
+    },
+    {
+      "id": "TRD-1793409539542",
+      "timestamp": 1793409539542,
+      "symbol": "BNB/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 708.5341,
+      "quantity": 0.234983,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($707.48) in sideways market"
+    },
+    {
+      "id": "TRD-1793409447823",
+      "timestamp": 1793409447823,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 1.2575,
+      "quantity": 132.176438,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.04,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.62,
+      "realized_pnl_pct": -0.37,
+      "hold_duration_sec": 88,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $1.26 (Stop: $1.26, PnL: -0.12%)"
+    },
+    {
+      "id": "TRD-1793409359589",
+      "timestamp": 1793409359589,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 1.2596,
+      "quantity": 132.176438,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 36.3 to 43.2 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793409276306",
+      "timestamp": 1793409276306,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 96.7116,
+      "quantity": 1.717693,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 165.95,
+      "fee_usdt": 0.1661,
+      "realized_pnl": -0.71,
+      "realized_pnl_pct": -0.42,
+      "hold_duration_sec": 276,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $96.76 (Stop: $96.78, PnL: -0.17%)"
+    },
+    {
+      "id": "TRD-1793409179570",
+      "timestamp": 1793409179570,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77587.9346,
+      "quantity": 0.002146,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 49.5 to 52.8 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793409087525",
+      "timestamp": 1793409087525,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77471.245,
+      "quantity": 0.002147,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.16,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.51,
+      "realized_pnl_pct": -0.3,
+      "hold_duration_sec": 87,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,510.00 (Stop: $77,510.55, PnL: -0.07%)"
+    },
+    {
+      "id": "TRD-1793408999715",
+      "timestamp": 1793408999715,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 96.9284,
+      "quantity": 1.717693,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 52.6 to 55.1 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793408999606",
+      "timestamp": 1793408999606,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2249.9644,
+      "quantity": 0.074003,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 45.0 to 45.6 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793408999560",
+      "timestamp": 1793408999560,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77564.0226,
+      "quantity": 0.002147,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 48.5 to 49.2 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793408942313",
+      "timestamp": 1793408942313,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 96.7816,
+      "quantity": 1.71691,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.0,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.67,
+      "realized_pnl_pct": -0.4,
+      "hold_duration_sec": 242,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $96.83 (Stop: $96.84, PnL: -0.15%)"
+    },
+    {
+      "id": "TRD-1793408881625",
+      "timestamp": 1793408881625,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 708.4456,
+      "quantity": 0.234605,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.04,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.62,
+      "realized_pnl_pct": -0.37,
+      "hold_duration_sec": 1802,
+      "reason": "\u23f0 Max Holding Bars Exceeded (30/30 bars, PnL: -0.12%)"
+    },
+    {
+      "id": "TRD-1793408699676",
+      "timestamp": 1793408699676,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 96.9785,
+      "quantity": 1.71691,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 63.5 to 65.2 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793408521555",
+      "timestamp": 1793408521555,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 2251.4837,
+      "quantity": 0.073998,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.44,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.23,
+      "realized_pnl_pct": -0.14,
+      "hold_duration_sec": 1261,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $2,252.61 (+0.11%)"
+    },
+    {
+      "id": "TRD-1793408497582",
+      "timestamp": 1793408497582,
+      "symbol": "BTC/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 77572.6843,
+      "quantity": 0.002147,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.38,
+      "fee_usdt": 0.1665,
+      "realized_pnl": -0.29,
+      "realized_pnl_pct": -0.17,
+      "hold_duration_sec": 338,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $77,611.49 (+0.07%)"
+    },
+    {
+      "id": "TRD-1793408159558",
+      "timestamp": 1793408159558,
+      "symbol": "BTC/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 77557.0191,
+      "quantity": 0.002147,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-31 range high ($77,420.00) with 1.3x volume"
+    },
+    {
+      "id": "TRD-1793408103533",
+      "timestamp": 1793408103533,
+      "symbol": "BTC/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 77449.276,
+      "quantity": 0.002146,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.04,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.63,
+      "realized_pnl_pct": -0.38,
+      "hold_duration_sec": 243,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,488.02 (Stop: $77,489.27, PnL: -0.12%)"
+    },
+    {
+      "id": "TRD-1793407859566",
+      "timestamp": 1793407859566,
+      "symbol": "BTC/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 77579.7305,
+      "quantity": 0.002146,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-31 range high ($77,420.00) with 1.4x volume"
+    },
+    {
+      "id": "TRD-1793407777546",
+      "timestamp": 1793407777546,
+      "symbol": "BTC/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 77478.4814,
+      "quantity": 0.00215,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.41,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.26,
+      "realized_pnl_pct": -0.15,
+      "hold_duration_sec": 577,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $77,517.24 (+0.09%)"
+    },
+    {
+      "id": "TRD-1793407259625",
+      "timestamp": 1793407259625,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 2250.1045,
+      "quantity": 0.073998,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 28.6, RSI: 60.1)"
+    },
+    {
+      "id": "TRD-1793407248320",
+      "timestamp": 1793407248320,
+      "symbol": "SOL/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "SELL",
+      "price": 96.4717,
+      "quantity": 1.727604,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.5,
+      "fee_usdt": 0.1667,
+      "realized_pnl": -0.17,
+      "realized_pnl_pct": -0.1,
+      "hold_duration_sec": 228,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $96.52 (Locked Stop: $96.67, PnL: +0.15%)"
+    },
+    {
+      "id": "TRD-1793407199559",
+      "timestamp": 1793407199559,
+      "symbol": "BTC/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 77450.9861,
+      "quantity": 0.00215,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Golden Cross Confirmed: EMA 9 crossed EMA 21 in active trend (ADX: 33.8, RSI: 59.6)"
+    },
+    {
+      "id": "TRD-1793407147522",
+      "timestamp": 1793407147522,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77365.308,
+      "quantity": 0.002153,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.4,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.27,
+      "realized_pnl_pct": -0.16,
+      "hold_duration_sec": 367,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $77,404.01 (Locked Stop: $77,562.65, PnL: +0.09%)"
+    },
+    {
+      "id": "TRD-1793407079541",
+      "timestamp": 1793407079541,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 709.6747,
+      "quantity": 0.234605,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 47.2 to 54.3 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793407031837",
+      "timestamp": 1793407031837,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 1.2582,
+      "quantity": 132.092503,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.03,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.63,
+      "realized_pnl_pct": -0.38,
+      "hold_duration_sec": 132,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $1.26 (Stop: $1.26, PnL: -0.13%)"
+    },
+    {
+      "id": "TRD-1793407019694",
+      "timestamp": 1793407019694,
+      "symbol": "SOL/USDT",
+      "setup_id": "bollinger_reversion",
+      "side": "BUY",
+      "price": 96.3782,
+      "quantity": 1.727604,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Range Hunter: Bounced off Lower Bollinger Band ($96.27) in sideways market"
+    },
+    {
+      "id": "TRD-1793407015628",
+      "timestamp": 1793407015628,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 708.3157,
+      "quantity": 0.234603,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.01,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.66,
+      "realized_pnl_pct": -0.4,
+      "hold_duration_sec": 116,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $708.67 (Stop: $708.69, PnL: -0.15%)"
+    },
+    {
+      "id": "TRD-1793406899643",
+      "timestamp": 1793406899643,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 1.2604,
+      "quantity": 132.092503,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 46.9 to 52.8 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793406899550",
+      "timestamp": 1793406899550,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 709.7247,
+      "quantity": 0.234603,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 54.2 to 55.5 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793406833524",
+      "timestamp": 1793406833524,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 2244.2873,
+      "quantity": 0.074078,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.09,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.57,
+      "realized_pnl_pct": -0.34,
+      "hold_duration_sec": 53,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,245.41 (Stop: $2,245.64, PnL: -0.10%)"
+    },
+    {
+      "id": "TRD-1793406797623",
+      "timestamp": 1793406797623,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 708.5356,
+      "quantity": 0.23454,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.01,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.66,
+      "realized_pnl_pct": -0.39,
+      "hold_duration_sec": 18,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $708.89 (Stop: $708.93, PnL: -0.14%)"
+    },
+    {
+      "id": "TRD-1793406779630",
+      "timestamp": 1793406779630,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2247.5532,
+      "quantity": 0.074078,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 40.8 to 45.3 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793406779596",
+      "timestamp": 1793406779596,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77330.656,
+      "quantity": 0.002153,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 34.2 to 38.9 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793406779553",
+      "timestamp": 1793406779553,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 709.9148,
+      "quantity": 0.23454,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 56.4 to 58.2 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793406711538",
+      "timestamp": 1793406711538,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77241.37,
+      "quantity": 0.002152,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.06,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.61,
+      "realized_pnl_pct": -0.37,
+      "hold_duration_sec": 1191,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,280.01 (Stop: $77,283.40, PnL: -0.14%)"
+    },
+    {
+      "id": "TRD-1793406707535",
+      "timestamp": 1793406707535,
+      "symbol": "ETH/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "SELL",
+      "price": 2245.0469,
+      "quantity": 0.074044,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.6,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 467,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,246.17 (Stop: $2,246.28, PnL: -0.11%)"
+    },
+    {
+      "id": "TRD-1793406553626",
+      "timestamp": 1793406553626,
+      "symbol": "BNB/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 709.0253,
+      "quantity": 0.234146,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 165.85,
+      "fee_usdt": 0.166,
+      "realized_pnl": -0.81,
+      "realized_pnl_pct": -0.49,
+      "hold_duration_sec": 134,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $709.38 (Stop: $709.68, PnL: -0.24%)"
+    },
+    {
+      "id": "TRD-1793406419558",
+      "timestamp": 1793406419558,
+      "symbol": "BNB/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 711.0654,
+      "quantity": 0.234146,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-31 range high ($709.57) with 1.7x volume"
+    },
+    {
+      "id": "TRD-1793406379828",
+      "timestamp": 1793406379828,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 1.2594,
+      "quantity": 131.998203,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.07,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.59,
+      "realized_pnl_pct": -0.36,
+      "hold_duration_sec": 20,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $1.26 (Stop: $1.26, PnL: -0.10%)"
+    },
+    {
+      "id": "TRD-1793406359617",
+      "timestamp": 1793406359617,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 1.2613,
+      "quantity": 131.998203,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 65.0 to 65.7 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793406239592",
+      "timestamp": 1793406239592,
+      "symbol": "ETH/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "BUY",
+      "price": 2248.7138,
+      "quantity": 0.074044,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Closed above 20 Moving Average ($2,247.27) with 1.4x volume"
+    },
+    {
+      "id": "TRD-1793406162315",
+      "timestamp": 1793406162315,
+      "symbol": "SOL/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 96.3818,
+      "quantity": 1.724279,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.02,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.64,
+      "realized_pnl_pct": -0.38,
+      "hold_duration_sec": 282,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $96.43 (Stop: $96.43, PnL: -0.13%)"
+    },
+    {
+      "id": "TRD-1793406017531",
+      "timestamp": 1793406017531,
+      "symbol": "ETH/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 2246.6361,
+      "quantity": 0.073965,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.01,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.66,
+      "realized_pnl_pct": -0.4,
+      "hold_duration_sec": 77,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,247.76 (Stop: $2,248.76, PnL: -0.15%)"
+    },
+    {
+      "id": "TRD-1793405939634",
+      "timestamp": 1793405939634,
+      "symbol": "ETH/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 2251.115,
+      "quantity": 0.073965,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-31 range high ($2,248.37) with 3.0x volume"
+    },
+    {
+      "id": "TRD-1793405937537",
+      "timestamp": 1793405937537,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 2248.6351,
+      "quantity": 0.074057,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.36,
+      "fee_usdt": 0.1665,
+      "realized_pnl": -0.31,
+      "realized_pnl_pct": -0.19,
+      "hold_duration_sec": 237,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $2,249.76 (+0.06%)"
+    },
+    {
+      "id": "TRD-1793405879697",
+      "timestamp": 1793405879697,
+      "symbol": "SOL/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 96.5583,
+      "quantity": 1.724279,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-31 range high ($96.49) with 1.2x volume"
+    },
+    {
+      "id": "TRD-1793405878312",
+      "timestamp": 1793405878312,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 96.4617,
+      "quantity": 1.726784,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.4,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.26,
+      "realized_pnl_pct": -0.15,
+      "hold_duration_sec": 358,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $96.51 (Locked Stop: $96.71, PnL: +0.10%)"
+    },
+    {
+      "id": "TRD-1793405699579",
+      "timestamp": 1793405699579,
+      "symbol": "ETH/USDT",
+      "setup_id": "ema_rsi",
+      "side": "BUY",
+      "price": 2248.3236,
+      "quantity": 0.074057,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Confirmed Pullback Bounce: Rebounded off EMA 9 support (ADX: 30.2, RSI: 60.8)"
+    },
+    {
+      "id": "TRD-1793405641586",
+      "timestamp": 1793405641586,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 2245.5966,
+      "quantity": 0.074086,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.2,
+      "fee_usdt": 0.1664,
+      "realized_pnl": -0.47,
+      "realized_pnl_pct": -0.28,
+      "hold_duration_sec": 1801,
+      "reason": "\u23f0 Max Holding Bars Exceeded (30/30 bars, PnL: -0.03%)"
+    },
+    {
+      "id": "TRD-1793405519690",
+      "timestamp": 1793405519690,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 96.4182,
+      "quantity": 1.726784,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 46.1 to 50.0 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793405519572",
+      "timestamp": 1793405519572,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77384.683,
+      "quantity": 0.002152,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 45.8 to 54.7 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793405405532",
+      "timestamp": 1793405405532,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77253.9637,
+      "quantity": 0.002152,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.08,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.58,
+      "realized_pnl_pct": -0.35,
+      "hold_duration_sec": 185,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,292.61 (Stop: $77,293.68, PnL: -0.09%)"
+    },
+    {
+      "id": "TRD-1793405341837",
+      "timestamp": 1793405341837,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 1.2581,
+      "quantity": 132.426291,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.44,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.23,
+      "realized_pnl_pct": -0.14,
+      "hold_duration_sec": 662,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $1.26 (Locked Stop: $1.26, PnL: +0.11%)"
+    },
+    {
+      "id": "TRD-1793405219588",
+      "timestamp": 1793405219588,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77360.5509,
+      "quantity": 0.002152,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 47.7 to 49.5 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793405139562",
+      "timestamp": 1793405139562,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77263.359,
+      "quantity": 0.002152,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.1,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.56,
+      "realized_pnl_pct": -0.33,
+      "hold_duration_sec": 1059,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $77,302.01 (Stop: $77,311.92, PnL: -0.10%)"
+    },
+    {
+      "id": "TRD-1793404679624",
+      "timestamp": 1793404679624,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 1.2573,
+      "quantity": 132.426291,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 54.8 to 58.2 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793404660312",
+      "timestamp": 1793404660312,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 96.3718,
+      "quantity": 1.72904,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.46,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.21,
+      "realized_pnl_pct": -0.12,
+      "hold_duration_sec": 880,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $96.42 (Locked Stop: $96.59, PnL: +0.13%)"
+    },
+    {
+      "id": "TRD-1793404079574",
+      "timestamp": 1793404079574,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77376.679,
+      "quantity": 0.002152,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 61.3 to 63.7 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793403839615",
+      "timestamp": 1793403839615,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2247.4332,
+      "quantity": 0.074086,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 57.4 to 62.0 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793403779842",
+      "timestamp": 1793403779842,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 96.2981,
+      "quantity": 1.72904,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 57.6 to 58.4 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793403719598",
+      "timestamp": 1793403719598,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 2244.3773,
+      "quantity": 0.074085,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.11,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.56,
+      "realized_pnl_pct": -0.34,
+      "hold_duration_sec": 299,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,245.50 (Stop: $2,245.69, PnL: -0.09%)"
+    },
+    {
+      "id": "TRD-1793403419628",
+      "timestamp": 1793403419628,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2247.4532,
+      "quantity": 0.074085,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 67.0 to 68.0 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793403207549",
+      "timestamp": 1793403207549,
+      "symbol": "BTC/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 77261.35,
+      "quantity": 0.002156,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.41,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.26,
+      "realized_pnl_pct": -0.16,
+      "hold_duration_sec": 567,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $77,300.00 (+0.08%)"
+    },
+    {
+      "id": "TRD-1793403195628",
+      "timestamp": 1793403195628,
+      "symbol": "ETH/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 2245.3568,
+      "quantity": 0.074028,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.05,
+      "fee_usdt": 0.1662,
+      "realized_pnl": -0.62,
+      "realized_pnl_pct": -0.37,
+      "hold_duration_sec": 15,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $2,246.48 (Stop: $2,246.52, PnL: -0.12%)"
+    },
+    {
+      "id": "TRD-1793403179658",
+      "timestamp": 1793403179658,
+      "symbol": "ETH/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 2249.204,
+      "quantity": 0.074028,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-30 range high ($2,244.20) with 4.1x volume"
+    },
+    {
+      "id": "TRD-1793403171841",
+      "timestamp": 1793403171841,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 1.2549,
+      "quantity": 132.819966,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.51,
+      "fee_usdt": 0.1667,
+      "realized_pnl": -0.15,
+      "realized_pnl_pct": -0.09,
+      "hold_duration_sec": 592,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $1.26 (Locked Stop: $1.26, PnL: +0.16%)"
+    },
+    {
+      "id": "TRD-1793403170314",
+      "timestamp": 1793403170314,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 96.2618,
+      "quantity": 1.733543,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.71,
+      "fee_usdt": 0.1669,
+      "realized_pnl": 0.04,
+      "realized_pnl_pct": 0.02,
+      "hold_duration_sec": 530,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $96.31 (Locked Stop: $96.34, PnL: +0.27%)"
+    },
+    {
+      "id": "TRD-1793402639778",
+      "timestamp": 1793402639778,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 96.048,
+      "quantity": 1.733543,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 53.4 to 57.5 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793402639601",
+      "timestamp": 1793402639601,
+      "symbol": "BTC/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 77234.608,
+      "quantity": 0.002156,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-30 range high ($77,071.25) with 1.3x volume"
+    },
+    {
+      "id": "TRD-1793402617649",
+      "timestamp": 1793402617649,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 702.8284,
+      "quantity": 0.237086,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.46,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.21,
+      "realized_pnl_pct": -0.12,
+      "hold_duration_sec": 578,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $703.18 (Locked Stop: $704.40, PnL: +0.13%)"
+    },
+    {
+      "id": "TRD-1793402581588",
+      "timestamp": 1793402581588,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 77133.414,
+      "quantity": 0.002161,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.52,
+      "fee_usdt": 0.1667,
+      "realized_pnl": -0.15,
+      "realized_pnl_pct": -0.09,
+      "hold_duration_sec": 1202,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $77,172.00 (Locked Stop: $77,275.65, PnL: +0.17%)"
+    },
+    {
+      "id": "TRD-1793402579647",
+      "timestamp": 1793402579647,
+      "symbol": "XRP/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 1.2535,
+      "quantity": 132.819966,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 32.6 to 47.1 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793402567553",
+      "timestamp": 1793402567553,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 2240.929,
+      "quantity": 0.074371,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.49,
+      "fee_usdt": 0.1667,
+      "realized_pnl": -0.17,
+      "realized_pnl_pct": -0.1,
+      "hold_duration_sec": 1187,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $2,242.05 (Locked Stop: $2,245.40, PnL: +0.15%)"
+    },
+    {
+      "id": "TRD-1793402039601",
+      "timestamp": 1793402039602,
+      "symbol": "BNB/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 702.291,
+      "quantity": 0.237086,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 61.5 to 64.8 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793401773687",
+      "timestamp": 1793401773687,
+      "symbol": "BNB/USDT",
+      "setup_id": "orb",
+      "side": "SELL",
+      "price": 702.0888,
+      "quantity": 0.23716,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.34,
+      "fee_usdt": 0.1665,
+      "realized_pnl": -0.33,
+      "realized_pnl_pct": -0.2,
+      "hold_duration_sec": 214,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $702.44 (+0.05%)"
+    },
+    {
+      "id": "TRD-1793401559553",
+      "timestamp": 1793401559553,
+      "symbol": "BNB/USDT",
+      "setup_id": "orb",
+      "side": "BUY",
+      "price": 702.0709,
+      "quantity": 0.23716,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] ORB Breakout: Broke 2026-10-30 range high ($701.18) with 4.5x volume"
+    },
+    {
+      "id": "TRD-1793401502337",
+      "timestamp": 1793401502337,
+      "symbol": "SOL/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 95.962,
+      "quantity": 1.735894,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.41,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.26,
+      "realized_pnl_pct": -0.15,
+      "hold_duration_sec": 1142,
+      "reason": "\ud83d\udee1\ufe0f ATR Trailing Stop Hit at $96.01 (Locked Stop: $96.21, PnL: +0.10%)"
+    },
+    {
+      "id": "TRD-1793401379633",
+      "timestamp": 1793401379633,
+      "symbol": "ETH/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 2238.6888,
+      "quantity": 0.074371,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 46.2 to 49.2 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793401379587",
+      "timestamp": 1793401379587,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "BUY",
+      "price": 77044.513,
+      "quantity": 0.002161,
+      "cost_usdt": 166.67,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] Oversold Bounce: RSI bounced from 51.9 to 56.7 with green confirmation candle"
+    },
+    {
+      "id": "TRD-1793401333644",
+      "timestamp": 1793401333644,
+      "symbol": "BNB/USDT",
+      "setup_id": "ema_rsi",
+      "side": "SELL",
+      "price": 700.6795,
+      "quantity": 0.237818,
+      "cost_usdt": 166.67,
+      "proceeds_usdt": 166.47,
+      "fee_usdt": 0.1666,
+      "realized_pnl": -0.2,
+      "realized_pnl_pct": -0.12,
+      "hold_duration_sec": 1334,
+      "reason": "\ud83c\udfaf Take-Profit Target Hit at $701.03 (+0.13%)"
+    },
+    {
+      "id": "TRD-1793401141547",
+      "timestamp": 1793401141547,
+      "symbol": "BTC/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "SELL",
+      "price": 76943.509,
+      "quantity": 0.002161,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.11,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.55,
+      "realized_pnl_pct": -0.33,
+      "hold_duration_sec": 1,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $76,982.00 (Stop: $76,984.55, PnL: -0.08%)"
+    },
+    {
+      "id": "TRD-1793401139591",
+      "timestamp": 1793401139591,
+      "symbol": "BTC/USDT",
+      "setup_id": "reclaim_ma20",
+      "side": "BUY",
+      "price": 77044.513,
+      "quantity": 0.002161,
+      "cost_usdt": 166.66,
+      "fee_usdt": 0.1667,
+      "reason": "[\ud83c\udf10 FLEET ALERT] 20-MA Reclaimed: Closed above 20 Moving Average ($76,989.21) with 1.7x volume"
+    },
+    {
+      "id": "TRD-1793401061538",
+      "timestamp": 1793401061539,
+      "symbol": "BTC/USDT",
+      "setup_id": "oversold_bounce",
+      "side": "SELL",
+      "price": 76906.5275,
+      "quantity": 0.002162,
+      "cost_usdt": 166.66,
+      "proceeds_usdt": 166.11,
+      "fee_usdt": 0.1663,
+      "realized_pnl": -0.55,
+      "realized_pnl_pct": -0.33,
+      "hold_duration_sec": 101,
+      "reason": "\ud83d\udea8 Stop-Loss Hit at $76,945.00 (Stop: $76,958.63, PnL: -0.08%)"
     }
   ],
-  "session_start_balance": 10000.0,
-  "session_realized_pnl": 0.0,
-  "total_fees_paid": 0.0,
-  "consecutive_losses": 0,
-  "last_reset_time": 1793365000000
+  "peak_equity": 10000.987844894875,
+  "max_drawdown_pct": 1.0505251593562932,
+  "equity_history": [
+    {
+      "time": 1793413853512,
+      "equity": 9900.88,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413863516,
+      "equity": 9900.9,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413873591,
+      "equity": 9900.95,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413883616,
+      "equity": 9900.97,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413893739,
+      "equity": 9900.91,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413903858,
+      "equity": 9900.93,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413914089,
+      "equity": 9900.96,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413925508,
+      "equity": 9900.96,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413935533,
+      "equity": 9901.0,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413945545,
+      "equity": 9900.96,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413955630,
+      "equity": 9900.92,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413966075,
+      "equity": 9900.83,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413976301,
+      "equity": 9900.76,
+      "drawdown": 1.0,
+      "pnl": -35.8
+    },
+    {
+      "time": 1793413985633,
+      "equity": 9900.14,
+      "drawdown": 1.01,
+      "pnl": -35.83
+    },
+    {
+      "time": 1793413995845,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414005853,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414017540,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414027633,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414037721,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414047731,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414058289,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414068331,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414079515,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414089515,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414099527,
+      "equity": 9899.87,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414109607,
+      "equity": 9899.63,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414119665,
+      "equity": 9899.63,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414129843,
+      "equity": 9899.64,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414140290,
+      "equity": 9899.68,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414150353,
+      "equity": 9899.7,
+      "drawdown": 1.01,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793414161558,
+      "equity": 9899.24,
+      "drawdown": 1.02,
+      "pnl": -36.09
+    },
+    {
+      "time": 1793414171603,
+      "equity": 9899.41,
+      "drawdown": 1.02,
+      "pnl": -36.09
+    },
+    {
+      "time": 1793414181673,
+      "equity": 9899.42,
+      "drawdown": 1.02,
+      "pnl": -36.09
+    },
+    {
+      "time": 1793414191761,
+      "equity": 9899.46,
+      "drawdown": 1.02,
+      "pnl": -36.09
+    },
+    {
+      "time": 1793414201828,
+      "equity": 9899.47,
+      "drawdown": 1.02,
+      "pnl": -36.09
+    },
+    {
+      "time": 1793414211877,
+      "equity": 9899.33,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414222098,
+      "equity": 9899.39,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414232326,
+      "equity": 9899.33,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414243522,
+      "equity": 9899.28,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414253528,
+      "equity": 9899.27,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414263612,
+      "equity": 9899.34,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414273613,
+      "equity": 9899.37,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414283635,
+      "equity": 9899.38,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414293734,
+      "equity": 9899.4,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414304078,
+      "equity": 9899.4,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414314108,
+      "equity": 9899.38,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414324313,
+      "equity": 9899.38,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414334431,
+      "equity": 9899.26,
+      "drawdown": 1.02,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414345522,
+      "equity": 9899.5,
+      "drawdown": 1.01,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414355555,
+      "equity": 9899.54,
+      "drawdown": 1.01,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414365650,
+      "equity": 9899.55,
+      "drawdown": 1.01,
+      "pnl": -36.11
+    },
+    {
+      "time": 1793414375783,
+      "equity": 9899.35,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414386302,
+      "equity": 9899.35,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414396376,
+      "equity": 9899.35,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414407534,
+      "equity": 9899.35,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414417575,
+      "equity": 9899.31,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414427602,
+      "equity": 9899.31,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414437620,
+      "equity": 9899.29,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414447743,
+      "equity": 9899.26,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414457831,
+      "equity": 9899.29,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414467831,
+      "equity": 9899.29,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414477855,
+      "equity": 9899.28,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414488287,
+      "equity": 9899.26,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414498298,
+      "equity": 9899.27,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414508321,
+      "equity": 9899.3,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414519507,
+      "equity": 9899.3,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414529549,
+      "equity": 9899.3,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414539680,
+      "equity": 9899.34,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414549812,
+      "equity": 9899.34,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414559821,
+      "equity": 9899.35,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414571507,
+      "equity": 9899.35,
+      "drawdown": 1.02,
+      "pnl": -35.98
+    },
+    {
+      "time": 1793414581553,
+      "equity": 9899.09,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414591696,
+      "equity": 9899.09,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414603514,
+      "equity": 9899.05,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414613524,
+      "equity": 9899.08,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414623528,
+      "equity": 9899.08,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414633534,
+      "equity": 9899.08,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414643605,
+      "equity": 9899.1,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414653680,
+      "equity": 9899.08,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414664107,
+      "equity": 9899.08,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414675521,
+      "equity": 9899.08,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414685523,
+      "equity": 9899.02,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414695524,
+      "equity": 9899.0,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414705524,
+      "equity": 9899.05,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414715613,
+      "equity": 9899.06,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414725621,
+      "equity": 9899.06,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414735622,
+      "equity": 9899.07,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414746079,
+      "equity": 9899.07,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414756319,
+      "equity": 9899.14,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414766389,
+      "equity": 9899.11,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414777530,
+      "equity": 9899.14,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414787532,
+      "equity": 9899.14,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414797532,
+      "equity": 9899.1,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414807546,
+      "equity": 9899.1,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414817558,
+      "equity": 9899.1,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414827635,
+      "equity": 9899.13,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414839531,
+      "equity": 9899.05,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414849565,
+      "equity": 9899.05,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414859616,
+      "equity": 9899.05,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414869850,
+      "equity": 9899.05,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414881554,
+      "equity": 9899.05,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414891563,
+      "equity": 9899.02,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414901599,
+      "equity": 9899.02,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414911689,
+      "equity": 9899.0,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414922129,
+      "equity": 9899.0,
+      "drawdown": 1.02,
+      "pnl": -35.78
+    },
+    {
+      "time": 1793414932292,
+      "equity": 9898.69,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793414942308,
+      "equity": 9898.7,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793414953520,
+      "equity": 9898.7,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793414963620,
+      "equity": 9898.7,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793414973875,
+      "equity": 9898.7,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793414984332,
+      "equity": 9898.7,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793414995560,
+      "equity": 9898.73,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793415005661,
+      "equity": 9898.73,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793415015794,
+      "equity": 9898.73,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793415026300,
+      "equity": 9898.73,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793415036302,
+      "equity": 9898.73,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793415046333,
+      "equity": 9898.73,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793415057534,
+      "equity": 9898.77,
+      "drawdown": 1.02,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793415059685,
+      "equity": 9898.27,
+      "drawdown": 1.03,
+      "pnl": -35.77
+    },
+    {
+      "time": 1793415071566,
+      "equity": 9898.27,
+      "drawdown": 1.03,
+      "pnl": -35.77
+    },
+    {
+      "time": 1793415081671,
+      "equity": 9898.27,
+      "drawdown": 1.03,
+      "pnl": -35.77
+    },
+    {
+      "time": 1793415092302,
+      "equity": 9898.27,
+      "drawdown": 1.03,
+      "pnl": -35.77
+    },
+    {
+      "time": 1793415102314,
+      "equity": 9898.27,
+      "drawdown": 1.03,
+      "pnl": -35.77
+    },
+    {
+      "time": 1793415113595,
+      "equity": 9898.29,
+      "drawdown": 1.03,
+      "pnl": -35.77
+    },
+    {
+      "time": 1793415123596,
+      "equity": 9898.25,
+      "drawdown": 1.03,
+      "pnl": -35.77
+    },
+    {
+      "time": 1793415133646,
+      "equity": 9897.92,
+      "drawdown": 1.03,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793415143720,
+      "equity": 9897.92,
+      "drawdown": 1.03,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793415153809,
+      "equity": 9897.92,
+      "drawdown": 1.03,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793415164083,
+      "equity": 9897.93,
+      "drawdown": 1.03,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793415174100,
+      "equity": 9897.93,
+      "drawdown": 1.03,
+      "pnl": -36.36
+    },
+    {
+      "time": 1793415184429,
+      "equity": 9897.73,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415195692,
+      "equity": 9897.67,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415206313,
+      "equity": 9897.69,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415216313,
+      "equity": 9897.71,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415227517,
+      "equity": 9897.71,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415237577,
+      "equity": 9897.71,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415247651,
+      "equity": 9897.68,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415257743,
+      "equity": 9897.64,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415267815,
+      "equity": 9897.7,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415277878,
+      "equity": 9897.7,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415288109,
+      "equity": 9897.7,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415298356,
+      "equity": 9897.72,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415309429,
+      "equity": 9897.73,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415319554,
+      "equity": 9897.77,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415329612,
+      "equity": 9897.7,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415339742,
+      "equity": 9897.74,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415350094,
+      "equity": 9897.74,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415361525,
+      "equity": 9897.73,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415371529,
+      "equity": 9897.73,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415381534,
+      "equity": 9897.71,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415391536,
+      "equity": 9897.71,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415401576,
+      "equity": 9897.69,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415411633,
+      "equity": 9897.71,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415421776,
+      "equity": 9897.71,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415431821,
+      "equity": 9897.73,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415443536,
+      "equity": 9897.67,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415453713,
+      "equity": 9897.71,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415463889,
+      "equity": 9897.73,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415474065,
+      "equity": 9897.67,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415484079,
+      "equity": 9897.67,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415494360,
+      "equity": 9897.67,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415505525,
+      "equity": 9897.62,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415515605,
+      "equity": 9897.6,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415525614,
+      "equity": 9897.65,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415535836,
+      "equity": 9897.64,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415546076,
+      "equity": 9897.64,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415556092,
+      "equity": 9897.64,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415566286,
+      "equity": 9897.67,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415576288,
+      "equity": 9897.58,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415586289,
+      "equity": 9897.6,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415596378,
+      "equity": 9897.57,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415607510,
+      "equity": 9897.57,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415617557,
+      "equity": 9897.57,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415627614,
+      "equity": 9897.57,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415637620,
+      "equity": 9897.57,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415647633,
+      "equity": 9897.57,
+      "drawdown": 1.03,
+      "pnl": -35.75
+    },
+    {
+      "time": 1793415657637,
+      "equity": 9897.22,
+      "drawdown": 1.04,
+      "pnl": -36.38
+    },
+    {
+      "time": 1793415667866,
+      "equity": 9896.88,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415679514,
+      "equity": 9896.86,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415689516,
+      "equity": 9896.88,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415699596,
+      "equity": 9896.93,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415709636,
+      "equity": 9896.93,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415719650,
+      "equity": 9896.95,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415729818,
+      "equity": 9896.95,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415741508,
+      "equity": 9896.98,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415751530,
+      "equity": 9896.97,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415761605,
+      "equity": 9896.95,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415771607,
+      "equity": 9896.92,
+      "drawdown": 1.04,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415779689,
+      "equity": 9896.42,
+      "drawdown": 1.05,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415789745,
+      "equity": 9896.34,
+      "drawdown": 1.05,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415800061,
+      "equity": 9896.36,
+      "drawdown": 1.05,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415810290,
+      "equity": 9896.33,
+      "drawdown": 1.05,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415820330,
+      "equity": 9896.3,
+      "drawdown": 1.05,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415831519,
+      "equity": 9896.29,
+      "drawdown": 1.05,
+      "pnl": -36.39
+    },
+    {
+      "time": 1793415841605,
+      "equity": 9896.0,
+      "drawdown": 1.05,
+      "pnl": -36.4
+    },
+    {
+      "time": 1793415851775,
+      "equity": 9896.0,
+      "drawdown": 1.05,
+      "pnl": -36.4
+    },
+    {
+      "time": 1793415861807,
+      "equity": 9895.96,
+      "drawdown": 1.05,
+      "pnl": -36.4
+    },
+    {
+      "time": 1793415871808,
+      "equity": 9895.95,
+      "drawdown": 1.05,
+      "pnl": -36.4
+    },
+    {
+      "time": 1793415881824,
+      "equity": 9895.92,
+      "drawdown": 1.05,
+      "pnl": -36.4
+    },
+    {
+      "time": 1793415891875,
+      "equity": 9895.93,
+      "drawdown": 1.05,
+      "pnl": -36.4
+    }
+  ]
 }
