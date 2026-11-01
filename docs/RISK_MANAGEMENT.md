@@ -126,14 +126,29 @@ Before any paper order can be authorized, the Risk Manager evaluates five explic
 
 The **Kill Switch** is NEPTUNE's supreme safety interlock. It can be triggered automatically by circuit breakers or manually by the user via the Command Center header.
 
-### 5.1 Kill Switch Protocol
+### 5.1 Dual-Mode Kill Switch Protocol
+
+The Kill Switch operates in two distinct operational modes:
+
+#### Mode 1: `PAUSE_NEW_ORDERS` (Default Emergency Pause)
 1. **Immediate Ingress Gate Locking**: All pending candidate signals and Brain state transitions are aborted.
-2. **Cancellation of Pending Orders**: All open `LIMIT` or pending un-triggered orders are cancelled immediately in the SQLite ledger.
+2. **Cancellation of Pending Orders**: All open `LIMIT` or un-triggered orders are cancelled immediately in the SQLite ledger.
 3. **Open Position Preservation Policy**:
-   - **Open positions are NOT automatically dumped at market price**.
-   - Instead, active positions remain protected by their hard bracket stop-loss and take-profit orders in `POSITION_MONITORING`.
-   - The user is provided a single prominent "Market Close All Active Positions Now" button if manual liquidation is desired.
-4. **Broadcast Alert**: Dispatches a `CRITICAL` severity event to `/ws/system` and sounds an emergency chime in the UI workstation.
+   - Active open positions remain open and continue to be monitored by `POSITION_MONITORING` for hard bracket stop-loss and take-profit exits.
+   - Prevents unnecessary slippage realization if the issue is purely operational or upstream.
+4. **Broadcast Alert**: Dispatches a `CRITICAL` severity event to `/ws/system` notifying the dashboard.
+
+#### Mode 2: `LIQUIDATE_ALL_AND_HALT` (Emergency Liquidation & System Shutdown)
+1. **Immediate Ingress Gate Locking**: All pending candidate signals and Brain state transitions are aborted.
+2. **Cancellation of Pending Orders**: All open `LIMIT` or un-triggered orders are cancelled immediately.
+3. **Simulated Market Liquidation**:
+   - Immediately generates market exit orders for every open paper position.
+   - **Mandatory Execution Assumptions (Rules S-06, A-10)**: All liquidated fills MUST apply realistic paper execution assumptions:
+     - Taker fee ($0.1\%$).
+     - Slippage model ($0.05\%$ per side).
+     - Actual bid/ask spread at liquidation timestamp.
+   - Records full execution assumptions in `paper_orders` and `positions` tables with reason `EMERGENCY_KILL_SWITCH_LIQUIDATION`.
+4. **Broadcast Alert**: Dispatches a `CRITICAL` severity event across all WebSocket channels.
 
 ---
 

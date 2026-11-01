@@ -52,3 +52,12 @@ export function formatDurationMs(ms: number): string {
   return `${(ms / 60000).toFixed(1)}m`;
 }
 
+/**
+ * Convert ISO 8601 UTC string to Unix epoch seconds for Lightweight Charts.
+ * Per ADR-012, this conversion is restricted exclusively to the chart utility layer.
+ */
+export function toChartTime(isoString: string): number {
+  return Math.floor(new Date(isoString).getTime() / 1000);
+}
+
+

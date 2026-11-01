@@ -192,15 +192,81 @@
 
 ---
 
-### ADR-012: UTC-Only Timestamps Throughout Entire System
+### ADR-012: ISO 8601 UTC String Timestamps Throughout Backend and Persistence
+
+- **Status**: Accepted (Amended 2026-11-01)
+- **Date**: 2026-11-01
+- **Context**: Standardizing time representation across SQLite, Parquet, backend domain models, REST/WebSocket APIs, and frontend state.
+- **Decision**: Enforce **standardized ISO 8601 UTC strings** (e.g. `2026-11-01T20:00:00.000Z`) throughout all backend Pydantic models, SQLite database columns, REST API contracts, and WebSocket event payloads. Timestamp conversion to Unix seconds (`Math.floor(Date.parse(iso) / 1000)`) is performed **only in the frontend chart utility layer** (`frontend/app/lib/utils.ts` `toChartTime()`) for TradingView Lightweight Charts canvas compatibility.
+- **Rationale**:
+  - Unambiguous human-readable auditability in logs, database inspections, and JSON contracts.
+  - Native support in Pydantic v2 and TypeScript ISO string validation.
+  - Consistent timezone handling without ambiguity between milliseconds vs seconds.
+- **Alternatives Considered**: Integer epoch milliseconds everywhere. While fast, epoch integers reduce readability during debugging and audit logs.
+- **Consequences**: Frontend chart components must use the utility conversion helper when passing timestamps to Lightweight Charts.
+
+---
+
+### ADR-013: Simulation Path Partitioning and SQLite Summary Metrics
 
 - **Status**: Accepted
 - **Date**: 2026-11-01
-- **Context**: Handling time representations across diverse client operating systems, servers, database engines, and WebSocket streams.
-- **Decision**: Enforce **strictly 64-bit integer Unix epoch milliseconds in UTC** (`timestamp: int`) across all database columns, Pydantic schemas, Parquet tables, and WebSocket payloads.
+- **Context**: Avoiding filesystem fragmentation from generating 1,000 synthetic paths per approved signal.
+- **Decision**: 
+  - Store simulation metadata, assumptions, and terminal percentile metrics (`p5, p10, p25, p50, p75, p90, p95`, stop/target probabilities, MAE) directly in SQLite's `simulations` table.
+  - Stream full 1,000-path arrays ephemerally to the frontend via `/ws/simulation`.
+  - Persist full simulation trajectories using daily partitioned Parquet files (`storage/simulations/YYYY/MM/simulations_YYYY-MM-DD.parquet`) or on explicit user export, avoiding thousands of tiny independent Parquet files.
 - **Rationale**:
-  - Eliminates timezone conversion errors, daylight saving time ambiguities, and locale parsing mismatches.
-  - Numerical comparisons (`t1 < t2`) and sorting are dramatically faster than ISO-8601 string parsing.
-  - Native compatibility with JavaScript `Date.now()`, Python `time.time() * 1000`, and TradingView Lightweight Charts.
-- **Alternatives Considered**: ISO-8601 strings (`2026-11-01T14:40:00.000Z`), Unix epoch seconds. Seconds lack the sub-second granularity needed for order fill latency and slippage simulation; ISO strings require continuous CPU parsing.
-- **Consequences**: Human-readable date formatting is delegated strictly to the frontend presentation tier at render time.
+  - Prevents inode/file descriptor exhaustion and sluggish queries on Windows filesystems.
+  - Retains rapid historical analytics and percentile queries via SQLite without reading Parquet files for summary dashboards.
+- **Alternatives Considered**: One Parquet file per simulation. Rejected due to file fragmentation.
+- **Consequences**: Loading full 1,000-path history for past simulations queries the daily partition or export file.
+
+---
+
+### ADR-014: Cache-First Historical Market-Data Backfill
+
+- **Status**: Accepted
+- **Date**: 2026-11-01
+- **Context**: Avoiding public Binance REST IP rate limits (HTTP 429/418) during local development and frequent server hot-reloads.
+- **Decision**: Implement a strict **cache-first strategy** in `MarketDataService`. On startup or on-demand backfill, the service inspects existing local Parquet storage first, identifies the latest available closed candle timestamp, and only queries Binance REST for the incremental missing range (`latest_stored_time` to `now`). If local data is already fresh, zero REST calls are issued.
+- **Rationale**:
+  - Prevents IP rate bans on developer machines during testing and server reloads.
+  - Near-instantaneous backend startup when historical data already exists.
+- **Alternatives Considered**: Always fetch last 1,000 candles from Binance on startup. Rejected due to rate limit risk.
+- **Consequences**: The repository must support efficient timestamp max lookups and deduplication on append.
+
+---
+
+### ADR-015: Dual-Mode Emergency Kill Switch
+
+- **Status**: Accepted
+- **Date**: 2026-11-01
+- **Context**: Enabling granular emergency operational control over paper trading positions and order generation.
+- **Decision**: Implement two explicit kill-switch modes on `/api/v1/system/kill-switch`:
+  1. `PAUSE_NEW_ORDERS`: Halts all new signal generation and risk approvals; existing open paper positions remain active and continue monitoring bracket stop-loss and take-profit targets.
+  2. `LIQUIDATE_ALL_AND_HALT`: Halts all new signal generation and immediately executes simulated market orders to close all active open paper positions. Simulated liquidations MUST apply realistic paper execution assumptions (current bid/ask price, taker fee, and slippage).
+- **Rationale**:
+  - Gives the operator fine-grained choice between orderly pause and emergency capital protection.
+  - Enforces Rule `S-06` and `A-10` by recording realistic execution assumptions during emergency liquidation.
+- **Alternatives Considered**: Single boolean toggle that leaves positions unattended. Rejected due to operational ambiguity.
+- **Consequences**: API and frontend UI must support selecting the mode and confirming liquidation actions.
+
+---
+
+### ADR-016: Historical Backtesting Engine and Conservative Intrabar Ambiguity Resolution
+
+- **Status**: Accepted
+- **Date**: 2026-11-01
+- **Context**: Evaluating specialist agents and strategy candidates against historical candle data without look-ahead bias or optimistic intrabar assumptions.
+- **Decision**: 
+  1. Implement an event-driven deterministic replay engine (`HistoricalBacktestEngine`) advancing bar-by-bar, strictly withholding future candles from analytical agents.
+  2. Require conservative resolution of intrabar ambiguity: if both stop-loss and take-profit thresholds are breached within the same OHLC bar and intrabar tick sequence is unavailable, the execution simulator MUST resolve the exit as a Stop-Loss hit (`AMBIGUOUS_BAR_STOP`). Optimistic outcomes are strictly forbidden (Rules `S-05`, `S-06`).
+  3. Store backtest summaries in SQLite (`backtest_runs` and `strategy_metrics`) and comprehensive trade ledgers in Parquet (`storage/backtests/{backtest_id}_trades.parquet`), avoiding filesystem inode bloat.
+  4. Perform out-of-sample and walk-forward evaluations strictly via chronological time splits without random shuffling.
+- **Rationale**:
+  - Prevents backtest overfitting, look-ahead leakage, and artificial win-rate inflation.
+  - Preserves mathematical exactness by executing monetary calculations with Python `Decimal`.
+- **Alternatives Considered**: Optimistic first-hit assumption or 50/50 randomized resolution. Rejected as violating quantitative safety standards.
+- **Consequences**: Backtest performance metrics reflect conservative, realistic execution dynamics.
+

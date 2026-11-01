@@ -156,20 +156,31 @@ All timestamps are **strictly 64-bit integer Unix epoch milliseconds in UTC**.
 ### 2.6 Agent Execution Results (`/agents/{id}/results`)
 - **Method**: `GET`
 - **Path**: `/api/v1/agents/{id}/results`
-- **Description**: Retrieves the most recent execution input and output payloads for a specific agent.
-- **Path Parameters**: `id` (string, e.g., `momentum_analyst`)
+- **Description**: Retrieves the most recent execution input and output payloads for a specific specialist agent.
+- **Path Parameters**: `id` (string, e.g., `market_scanner`, `trend_analyst`, `momentum_analyst`, `volume_analyst`, `strategy_analyst`)
 - **Response Schema (`200 OK`)**:
 ```json
 {
   "agent_id": "momentum_analyst",
-  "timestamp": 1730471995000,
-  "execution_time_ms": 14.2,
-  "input_payload": { "symbol": "BTCUSDT", "timeframe": "15m" },
-  "output_payload": {
-    "rsi": 62.4,
-    "macd_histogram": 14.8,
-    "rsi_divergence": "NONE",
-    "momentum_score": 0.65
+  "execution_id": "8a3e7421-5a21-4d1a-bf47-a8b273891d4e",
+  "started_at": "2026-11-01T20:00:00.000Z",
+  "completed_at": "2026-11-01T20:00:00.012Z",
+  "duration_ms": 12.4,
+  "success": true,
+  "output": {
+    "timestamp": "2026-11-01T20:00:00.000Z",
+    "symbol": "BTCUSDT",
+    "timeframe": "15m",
+    "rsi": 55.4,
+    "macd_line": 24.50,
+    "macd_signal_line": 18.20,
+    "macd_histogram": 6.30,
+    "macd_histogram_slope": 1.20,
+    "momentum_direction": "BULLISH",
+    "momentum_score": 0.45,
+    "exhaustion_risk": false,
+    "divergence": "NONE",
+    "explanation": "Momentum BULLISH (score: +0.45, RSI: 55.4, MACD hist: 6.30). No exhaustion or divergence detected."
   }
 }
 ```
@@ -346,16 +357,25 @@ All timestamps are **strictly 64-bit integer Unix epoch milliseconds in UTC**.
 ### 2.13 System Control Endpoints (`/system/pause`, `/resume`, `/kill-switch`)
 - **`/system/pause`** (`POST`): Pauses Central Brain state progression; leaves positions active.
 - **`/system/resume`** (`POST`): Resumes normal operational state machine progression.
-- **`/system/kill-switch`** (`POST`): Immediate emergency halt; cancels all pending orders, freezes new order creation, alerts all clients.
-- **Response Schema (`200 OK`)**:
-```json
-{
-  "action": "KILL_SWITCH",
-  "status": "ENGAGED",
-  "timestamp": 1730472010000,
-  "message": "Kill switch activated: all new trading halted; open positions continue bracket monitoring."
-}
-```
+- **`/system/kill-switch`** (`POST`): Immediate emergency halt with dual-mode operational control:
+  - **Request Body**:
+    ```json
+    {
+      "mode": "PAUSE_NEW_ORDERS",  // or "LIQUIDATE_ALL_AND_HALT"
+      "reason": "Operator manual emergency stop"
+    }
+    ```
+  - **Response Schema (`200 OK`)**:
+    ```json
+    {
+      "action": "KILL_SWITCH",
+      "mode": "PAUSE_NEW_ORDERS",
+      "status": "ENGAGED",
+      "timestamp": "2026-11-01T21:05:00.000Z",
+      "open_positions_affected": 2,
+      "message": "Kill switch activated in PAUSE_NEW_ORDERS mode: new orders halted; open positions continue bracket monitoring."
+    }
+    ```
 
 ---
 

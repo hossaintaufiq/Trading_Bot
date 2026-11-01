@@ -280,25 +280,33 @@ storage/historical/
 *Example*:
 `storage/historical/BTCUSDT/15m/2026/03/2026-03.parquet`
 
-### 3.2 PyArrow Schema Specification
-```python
-import pyarrow as pa
+### 3.3 Simulation Trajectory Storage (Daily Partitioned Parquet)
 
-CANDLE_PARQUET_SCHEMA = pa.schema([
-    ("timestamp", pa.int64()),          # Unix epoch milliseconds (UTC)
-    ("open", pa.float64()),
-    ("high", pa.float64()),
-    ("low", pa.float64()),
-    ("close", pa.float64()),
-    ("volume", pa.float64()),
-    ("quote_volume", pa.float64()),
-    ("trades_count", pa.int32()),
-    ("taker_buy_volume", pa.float64()),
-    ("taker_buy_quote_volume", pa.float64())
-])
+To prevent filesystem fragmentation from thousands of tiny individual simulation files, full 1,000-path trajectory arrays are stored using daily partitions or on explicit user export:
+
 ```
-- **Compression**: `snappy` (optimal balance of CPU speed and $> 80\%$ space compression).
-- **Row Group Size**: 10,000 candles per row group for rapid predicate pushdown filtering.
+storage/simulations/
+└── {YYYY}/
+    └── {MM}/
+        └── simulations_{YYYY}-{MM}-{DD}.parquet
+```
+
+Each row in the simulation partition table contains:
+- `simulation_id` (string, UUID): Foreign key to SQLite `simulations.simulation_id`.
+- `path_index` (int32): 0 to 999.
+- `step_index` (int32): 0 to horizon.
+- `projected_price` (float64): Simulated price step.
+- `projected_time` (string): ISO 8601 UTC timestamp.
+
+Summary statistics (`p5, p10, p25, p50, p75, p90, p95`, barrier hit probabilities, MAE) are always stored directly in SQLite for instant query performance without touching Parquet.
+
+### 3.4 Cache-First Historical Backfill Policy
+
+To prevent IP rate-limiting from public exchange endpoints (Binance HTTP 429/418):
+1. `MarketDataService` checks local Parquet archives on startup before issuing network requests.
+2. Queries the latest stored candle timestamp for the requested symbol/timeframe.
+3. If local data is present, issues a REST request only for the missing range (`latest_timestamp + 1` to `now`).
+4. If local data is completely absent, fetches the initial historical backfill limit and persists it to Parquet.
 
 ---
 

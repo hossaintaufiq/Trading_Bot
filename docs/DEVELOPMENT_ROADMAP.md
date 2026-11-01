@@ -19,10 +19,11 @@ gantt
     dateFormat  YYYY-MM-DD
     section Phase 1: Foundations
     M1: Foundation & Architecture Specs         :done,    m1, 2026-11-01, 2026-11-03
-    M2: Data Infrastructure & Storage Tier     :active,  m2, 2026-11-03, 2026-11-08
+    M2: Data Infrastructure & Storage Tier     :done,    m2, 2026-11-03, 2026-11-08
+    M2.1: Live Exchange Integration Verification:done,    m2_1, 2026-11-08, 2026-11-09
     section Phase 2: Core Engines
-    M3: Backend Core, FSM & Agent Swarm Stubs   :         m3, 2026-11-08, 2026-11-14
-    M4: Strategy Engine & Historical Backtester :         m4, 2026-11-14, 2026-11-19
+    M3: Deterministic Analysis Engine           :done,    m3, 2026-11-09, 2026-11-14
+    M4: Strategy Engine & Historical Backtester :active,  m4, 2026-11-14, 2026-11-19
     M5: Time Machine Simulation Engine          :         m5, 2026-11-19, 2026-11-24
     M6: Risk Gatekeeper & Paper Matching Engine :         m6, 2026-11-24, 2026-11-29
     section Phase 3: Presentation Tier
@@ -69,20 +70,20 @@ gantt
 
 ---
 
-### Milestone 3 — Backend Core, FSM & Agent Swarm
-- **Scope**: FastAPI application server, WebSocket hub, BaseAgent abstraction, 10 specialist agent stubs with typed I/O contracts, and Central Brain finite state machine.
+### Milestone 3 — Deterministic Analysis Engine (Complete)
+- **Scope**: Pure mathematical indicator library (`app.analytics.indicators`), and five deterministic specialist analysis agents implementing `BaseAgent`: `market_scanner`, `trend_analyst`, `momentum_analyst`, `volume_analyst`, and `strategy_analyst`.
 - **Deliverables**:
-  - FastAPI server setup with Lifespan management and CORS configuration.
-  - Asynchronous WebSocket hub (`/ws/*`) with channel broadcast mechanics.
-  - `BaseAgent` class with timeout safeguards and latency profiling.
-  - All 10 specialist agent implementations with Pydantic contracts.
-  - 11-State Central Brain state machine driver (`app/brain/state_machine.py`).
-  - Core `/health`, `/markets`, and `/agents` REST endpoints.
+  - Pure mathematical functions: EMA, SMA, ATR, ADX (with +DI/-DI), RSI, MACD, Bollinger Bands, Keltner Channels, VWAP, OBV.
+  - `MarketScannerAgent`: regime classification (`TRENDING_BULL`, `TRENDING_BEAR`, `RANGING` squeeze, `VOLATILE`, `UNCERTAIN`).
+  - `TrendAnalystAgent`: multi-EMA stack alignment, ADX strength, warm-up confidence discount when history is incomplete.
+  - `MomentumAnalystAgent`: RSI dynamics, MACD histogram acceleration, divergence and exhaustion flags.
+  - `VolumeAnalystAgent`: relative volume, anomaly surges ($>2.5\sigma$), VWAP deviation, OBV accumulation/distribution.
+  - `StrategyAnalystAgent`: multi-factor confluence evaluation, conflict detection forcing `NO_SIGNAL`, Rule A-09 closed candle enforcement, Decimal monetary calculations for stops/targets.
 - **Success Criteria**:
-  - Central Brain steps deterministically through states on closed candle triggers.
-  - All 10 agents execute within their latency budgets ($< 50$ ms).
-  - WebSocket hub broadcasts mock events to concurrent subscribers with $< 10$ ms internal latency.
-- **Effort Rating**: **XL** (Extra Large)
+  - 100% deterministic repeatable calculations with synthetic fixtures.
+  - Strict Rule A-09 enforcement (open candles rejected).
+  - 60 passing tests across the backend test suite (0 failures, 0 skipped).
+- **Effort Rating**: **L** (Large)
 
 ---
 
