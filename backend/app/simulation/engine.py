@@ -222,7 +222,9 @@ class HistoricalBacktestEngine:
                 c_idx = candle_index.get(pos.symbol, {}).get(ts)
                 if c_idx is None:
                     continue
-                sub_candles = sym_candles[:c_idx + 1]
+                # Lookback window capped at 300 candles for constant-time indicator evaluation
+                start_idx = max(0, c_idx + 1 - 300)
+                sub_candles = sym_candles[start_idx : c_idx + 1]
 
                 # Compute current ATR for trailing stop calculation
                 curr_atr = None
@@ -304,11 +306,12 @@ class HistoricalBacktestEngine:
                     continue
 
                 # Rule S-05 Look-ahead protection:
-                # Slice ONLY up to current candle index
+                # Slice ONLY up to current candle index with capped lookback window (300 bars)
                 c_idx = candle_index.get(sym, {}).get(ts)
                 if c_idx is None:
                     continue
-                sub_candles = sym_candles[:c_idx + 1]
+                start_idx = max(0, c_idx + 1 - 300)
+                sub_candles = sym_candles[start_idx : c_idx + 1]
                 if len(sub_candles) < 30:
                     continue  # Warm-up requirement
 

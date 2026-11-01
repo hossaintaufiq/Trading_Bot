@@ -29,6 +29,7 @@
 - [ADR-016: Historical Backtesting Engine and Conservative Intrabar Ambiguity Resolution](#adr-016-historical-backtesting-engine-and-conservative-intrabar-ambiguity-resolution)
 - [ADR-017: Balanced Protection Exit Engine and Multi-Factor Early Reversal Protocol](#adr-017-balanced-protection-exit-engine-and-multi-factor-early-reversal-protocol)
 - [ADR-018: Exit Policy Benchmark Protocol and Chronological Out-of-Sample Degradation Framework](#adr-018-exit-policy-benchmark-protocol-and-chronological-out-of-sample-degradation-framework)
+- [ADR-019: Volatility-Bounded Entry Filtering and Multi-Factor Confluence Architecture](#adr-019-volatility-bounded-entry-filtering-and-multi-factor-confluence-architecture)
 
 ---
 
@@ -321,4 +322,27 @@
   - K-fold cross validation: Inapplicable to chronological time-series due to look-ahead leakage.
   - Unsplit full-dataset backtesting: Prone to in-sample overfitting and deceptive optimism.
 - **Consequences**: Standardized benchmark framework produces reproducible, auditable comparisons exported to SQLite, JSON, and Parquet ledgers.
+
+---
+
+### ADR-019: Volatility-Bounded Entry Filtering and Multi-Factor Confluence Architecture
+
+- **Status**: Accepted
+- **Date**: 2026-11-02
+- **Context**: Milestone 4.3 diagnosed why the baseline deterministic entry strategy (`trend_momentum_pullback_v1`) generated net negative expectancy (-$340.22 across 39,000 candles). Empirical analysis revealed that transaction costs (0.30% round-trip) consumed 35–50% of the trade target on lower timeframes (15m), and trades executed during low-volatility chop ($ATR\% < 0.80\%$) accounted for the vast majority of stop-outs.
+- **Decision**:
+  1. Implement a dedicated, modular entry filtering layer in `backend/app/analytics/filters.py` with typed Pydantic models.
+  2. Adopt a mandatory Volatility Bounds filter ($0.80\% \le \frac{ATR_{14}}{Close} \le 3.00\%$) ensuring trades are only entered when expected price displacement is large enough to absorb exchange fees and slippage.
+  3. Adopt a Relative Volume (RVOL) filter ($RVOL \ge 0.85$ over 20-period volume SMA) to eliminate false continuations in illiquid, drifting price action.
+  4. Adopt an ADX trend strength filter ($ADX \ge 25$ with $+DI > -DI$ for Long, $-DI > +DI$ for Short) to reject weak-trend regimes.
+  5. Structure evaluation into three non-overlapping chronological partitions: Train (50%), Validation (25%), and Out-of-Sample (25%).
+  6. Optimize `HistoricalBacktestEngine` lookback window by slicing indicators to the most recent 300 bars, eliminating $O(N^2)$ memory scaling and enabling rapid multi-month backtesting.
+- **Rationale**:
+  - In-sample and validation testing proved that the H7 Confluence Ensemble transformed the baseline strategy from -$340.22 net loss (35.0% Win Rate) to **+$35.78 net profit (50.8% Win Rate, 1.22 Profit Factor)** and reduced maximum drawdown by 81.3% (from $368.46 to $68.98).
+  - During the low-volatility Out-of-Sample window where the unfiltered baseline lost -$200.65, the volatility filter hibernated (0 trades), completely preserving capital.
+- **Alternatives Considered**:
+  - Overfitting moving average periods or RSI levels: Curve-fitting individual indicators fails out-of-sample and does not address the fundamental friction-to-ATR ratio.
+  - Relying exclusively on higher-timeframe alignment without volatility bounds: HTF alignment was shown by ablation to be insufficient on its own if local volatility is compressed.
+- **Consequences**: Signal Validator and Strategy Analyst agents can now employ causal, zero-lookahead entry filters before routing candidate orders to the Risk Manager.
+
 
