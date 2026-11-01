@@ -334,6 +334,17 @@ class PaperExecutionSimulator:
         except Exception:
             holding_duration = 0.0
 
+        raw_entry = position.raw_entry_price
+        risk_unit = position.initial_risk_per_unit
+        pos_size = position.position_size
+
+        mfe_pct = float(position.mfe / raw_entry * Decimal("100.0")) if raw_entry > Decimal("0") else 0.0
+        mae_pct = float(position.mae / raw_entry * Decimal("100.0")) if raw_entry > Decimal("0") else 0.0
+        mfe_r = float(position.mfe / risk_unit) if risk_unit > Decimal("0") else 0.0
+        mae_r = float(position.mae / risk_unit) if risk_unit > Decimal("0") else 0.0
+        mfe_cash = (position.mfe * pos_size).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        mae_cash = (position.mae * pos_size).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
         return SimulatedTrade(
             trade_id=f"trd_{uuid.uuid4().hex[:12]}",
             symbol=position.symbol,
@@ -363,6 +374,12 @@ class PaperExecutionSimulator:
             reversal_detection_timestamp=position.reversal_detection_timestamp,
             mfe=position.mfe.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
             mae=position.mae.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+            mfe_pct=round(mfe_pct, 4),
+            mae_pct=round(mae_pct, 4),
+            mfe_r=round(mfe_r, 4),
+            mae_r=round(mae_r, 4),
+            mfe_cash=mfe_cash,
+            mae_cash=mae_cash,
             holding_duration_seconds=holding_duration,
             reversal_reasons=list(position.reversal_reason_codes),
             reversal_superseded=getattr(position, "reversal_superseded", False),

@@ -32,6 +32,15 @@ from app.agents.strategy_analyst import StrategyAnalystAgent, StrategyAnalystInp
 from app.agents.trend_analyst import TrendAnalystAgent, TrendAnalystInput
 from app.agents.volume_analyst import VolumeAnalystAgent, VolumeAnalystInput
 from app.analytics.indicators import calculate_atr
+from app.analytics.filters import (
+    filter_confluence_ensemble,
+    filter_higher_timeframe_alignment,
+    filter_momentum_confirmation,
+    filter_regime_confidence,
+    filter_trend_strength_adx,
+    filter_volatility_bounds,
+    filter_volume_confirmation,
+)
 from app.config.settings import get_settings
 from app.data.market.validator import CandleValidator, ValidatedCandle
 from app.data.repositories.parquet_repo import ParquetMarketDataRepository
@@ -85,9 +94,58 @@ class HistoricalBacktestEngine:
             conservative_ambiguity=config.conservative_ambiguous_bars,
         )
 
+    def _evaluate_candidate_filter(
+        self,
+        cand,
+        candles: List[ValidatedCandle],
+        curr_ts: str,
+        htf_candles: Optional[List[ValidatedCandle]] = None,
+    ) -> tuple[bool, str]:
+        """Evaluate entry filter at raw candidate signal stage (Milestone 4.3.1)."""
+        f = self.config.entry_filter
+        if not f:
+            return True, "No filter configured"
+
+        if f == "H1_ADX_25":
+            dec = filter_trend_strength_adx(candles, cand.direction, min_adx=25.0, require_di=True)
+        elif f == "H1_ADX_30":
+            dec = filter_trend_strength_adx(candles, cand.direction, min_adx=30.0, require_di=True)
+        elif f == "H2_HTF_ALIGNMENT":
+            dec = filter_higher_timeframe_alignment(curr_ts, cand.direction, htf_candles or candles)
+        elif f == "H3_MOMENTUM":
+            dec = filter_momentum_confirmation(candles, cand.direction, min_rsi=40.0, max_rsi=62.0, require_macd_accel=True)
+        elif f == "H4_RVOL_85":
+            dec = filter_volume_confirmation(candles, cand.direction, min_rvol=0.85)
+        elif f == "H4_RVOL_100":
+            dec = filter_volume_confirmation(candles, cand.direction, min_rvol=1.00)
+        elif f == "H5_VOLATILITY_BOUNDS":
+            dec = filter_volatility_bounds(candles, cand.direction, min_vol_pct=0.80, max_vol_pct=3.00)
+        elif f == "H6_REGIME":
+            dec = filter_regime_confidence(
+                "TRENDING_BULL" if cand.direction == "LONG" else "TRENDING_BEAR",
+                0.65,
+                cand.direction,
+                0.65,
+            )
+        elif f == "H7_CONFLUENCE":
+            dec = filter_confluence_ensemble(
+                candles=candles,
+                direction=cand.direction,
+                current_ts=curr_ts,
+                htf_candles=htf_candles,
+                min_adx=25.0,
+                min_rvol=0.85,
+                min_vol_pct=0.80,
+            )
+        else:
+            return True, "Unrecognized filter"
+
+        return dec.passed, dec.rejection_reason or "Approved"
+
     async def run(
         self,
         candles_by_symbol: Optional[Dict[str, List[ValidatedCandle]]] = None,
+        htf_candles_by_symbol: Optional[Dict[str, List[ValidatedCandle]]] = None,
     ) -> BacktestResult:
         """
         Execute event-driven backtest.
@@ -148,6 +206,13 @@ class HistoricalBacktestEngine:
         open_positions: List[ActivePosition] = []
         completed_trades: List[SimulatedTrade] = []
         equity_curve: List[EquityPoint] = []
+        pipeline_counts: Dict[str, int] = {
+            "candidate_signals": 0,
+            "filter_accepted_signals": 0,
+            "filter_rejected_signals": 0,
+            "risk_approved_signals": 0,
+            "risk_rejected_signals": 0,
+        }
 
         # 3. Main Event Loop — Step forward through time chronologically
         for step_idx, ts in enumerate(all_timestamps):
@@ -374,6 +439,23 @@ class HistoricalBacktestEngine:
 
                 if strat_out.output.evaluation_outcome in ("LONG", "SHORT") and strat_out.output.candidates:
                     cand = strat_out.output.candidates[0]
+                    pipeline_counts["candidate_signals"] += 1
+
+                    # Candidate-level filtering before Risk Manager (Milestone 4.3.1)
+                    if self.config.entry_filter:
+                        htf_series = htf_candles_by_symbol.get(sym) if htf_candles_by_symbol else None
+                        filter_passed, filter_reason = self._evaluate_candidate_filter(
+                            cand=cand,
+                            candles=sub_candles,
+                            curr_ts=ts,
+                            htf_candles=htf_series,
+                        )
+                        if not filter_passed:
+                            pipeline_counts["filter_rejected_signals"] += 1
+                            continue
+                        pipeline_counts["filter_accepted_signals"] += 1
+                    else:
+                        pipeline_counts["filter_accepted_signals"] += 1
 
                     # Total portfolio equity for risk sizing
                     curr_pos_val = sum(p.position_size * p.current_price for p in open_positions) + sum(p.position_size * p.current_price for p in newly_opened_positions)
@@ -391,6 +473,7 @@ class HistoricalBacktestEngine:
                     )
 
                     if risk_eval.approved and risk_eval.position_size:
+                        pipeline_counts["risk_approved_signals"] += 1
                         # Simulate paper entry
                         new_pos = self.execution_simulator.simulate_entry(
                             symbol=sym,
@@ -418,6 +501,8 @@ class HistoricalBacktestEngine:
                         cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
                         cash_equity -= cash_outflow
                         newly_opened_positions.append(new_pos)
+                    else:
+                        pipeline_counts["risk_rejected_signals"] += 1
 
             open_positions.extend(newly_opened_positions)
 
@@ -463,6 +548,7 @@ class HistoricalBacktestEngine:
             equity_curve=equity_curve,
             initial_capital=self.config.initial_capital,
             timeframe=self.config.timeframe,
+            pipeline_counts=pipeline_counts,
         )
 
         result = BacktestResult(
