@@ -51,6 +51,17 @@ def calculate_backtest_metrics(
             performance_by_symbol={},
             performance_by_timeframe={},
             performance_by_regime={},
+            performance_by_exit_reason={},
+            average_mfe=Decimal("0.00"),
+            average_mae=Decimal("0.00"),
+            average_holding_duration_seconds=0.0,
+            reversal_metrics={
+                "total_reversal_detections": 0,
+                "total_reversal_exits": 0,
+                "total_reversal_superseded": 0,
+                "average_reversal_exit_pnl": 0.0,
+                "performance_by_combination": {},
+            },
         )
 
     # 1. Basic trade counts & P&L aggregates
@@ -61,21 +72,21 @@ def calculate_backtest_metrics(
     losing_trades = len(losing_trades_list)
     win_rate = float(winning_trades / total_trades)
 
-    gross_profit = sum(t.gross_pnl for t in trades if t.gross_pnl > Decimal("0"))
-    gross_loss = abs(sum(t.gross_pnl for t in trades if t.gross_pnl < Decimal("0")))
-    net_profit = sum(t.net_pnl for t in trades)
+    gross_profit = sum((t.gross_pnl for t in trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+    gross_loss = abs(sum((t.gross_pnl for t in trades if t.gross_pnl < Decimal("0")), Decimal("0.00")))
+    net_profit = sum((t.net_pnl for t in trades), Decimal("0.00"))
 
-    total_fees = sum(t.fees for t in trades)
-    total_slippage = sum(t.slippage_cost for t in trades)
-    total_spread = sum(t.spread_cost for t in trades)
+    total_fees = sum((t.fees for t in trades), Decimal("0.00"))
+    total_slippage = sum((t.slippage_cost for t in trades), Decimal("0.00"))
+    total_spread = sum((t.spread_cost for t in trades), Decimal("0.00"))
 
     average_win = (
-        (sum(t.net_pnl for t in winning_trades_list) / Decimal(str(winning_trades)))
+        (sum((t.net_pnl for t in winning_trades_list), Decimal("0.00")) / Decimal(str(winning_trades)))
         if winning_trades > 0
         else Decimal("0.00")
     )
     average_loss = (
-        abs(sum(t.net_pnl for t in losing_trades_list) / Decimal(str(losing_trades)))
+        abs(sum((t.net_pnl for t in losing_trades_list), Decimal("0.00")) / Decimal(str(losing_trades)))
         if losing_trades > 0
         else Decimal("0.00")
     )
@@ -187,12 +198,12 @@ def calculate_backtest_metrics(
         sym_trades = [t for t in trades if t.symbol == sym]
         sym_wins = [t for t in sym_trades if t.net_pnl > Decimal("0")]
         sym_losses = [t for t in sym_trades if t.net_pnl < Decimal("0")]
-        sym_gross_profit = sum(t.gross_pnl for t in sym_trades if t.gross_pnl > Decimal("0"))
-        sym_gross_loss = abs(sum(t.gross_pnl for t in sym_trades if t.gross_pnl < Decimal("0")))
+        sym_gross_profit = sum((t.gross_pnl for t in sym_trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+        sym_gross_loss = abs(sum((t.gross_pnl for t in sym_trades if t.gross_pnl < Decimal("0")), Decimal("0.00")))
         perf_by_sym[sym] = {
             "total_trades": len(sym_trades),
             "win_rate": round(len(sym_wins) / len(sym_trades), 4) if sym_trades else 0.0,
-            "net_pnl": float(sum(t.net_pnl for t in sym_trades)),
+            "net_pnl": float(sum((t.net_pnl for t in sym_trades), Decimal("0.00"))),
             "profit_factor": round(float(sym_gross_profit / sym_gross_loss), 2) if sym_gross_loss > Decimal("0") else (999.0 if sym_gross_profit > Decimal("0") else 0.0),
         }
 
@@ -202,7 +213,7 @@ def calculate_backtest_metrics(
         perf_by_tf[tf_key] = {
             "total_trades": len(tf_trades),
             "win_rate": round(len(tf_wins) / len(tf_trades), 4) if tf_trades else 0.0,
-            "net_pnl": float(sum(t.net_pnl for t in tf_trades)),
+            "net_pnl": float(sum((t.net_pnl for t in tf_trades), Decimal("0.00"))),
         }
 
     for reg in set(t.market_regime for t in trades):
@@ -211,8 +222,70 @@ def calculate_backtest_metrics(
         perf_by_reg[reg] = {
             "total_trades": len(reg_trades),
             "win_rate": round(len(reg_wins) / len(reg_trades), 4) if reg_trades else 0.0,
-            "net_pnl": float(sum(t.net_pnl for t in reg_trades)),
+            "net_pnl": float(sum((t.net_pnl for t in reg_trades), Decimal("0.00"))),
         }
+
+    perf_by_exit_reason: Dict[str, Dict[str, Any]] = {}
+    for reason in set(t.exit_reason for t in trades):
+        reason_trades = [t for t in trades if t.exit_reason == reason]
+        reason_wins = [t for t in reason_trades if t.net_pnl > Decimal("0")]
+        reason_gross_profit = sum((t.gross_pnl for t in reason_trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+        reason_gross_loss = abs(sum((t.gross_pnl for t in reason_trades if t.gross_pnl < Decimal("0")), Decimal("0.00")))
+        perf_by_exit_reason[reason] = {
+            "total_trades": len(reason_trades),
+            "win_rate": round(len(reason_wins) / len(reason_trades), 4) if reason_trades else 0.0,
+            "net_pnl": float(sum((t.net_pnl for t in reason_trades), Decimal("0.00"))),
+            "profit_factor": round(float(reason_gross_profit / reason_gross_loss), 2) if reason_gross_loss > Decimal("0") else (999.0 if reason_gross_profit > Decimal("0") else 0.0),
+        }
+
+    # 7. MFE, MAE, Duration & Reversal Confirmation Analytics
+    avg_mfe = sum((t.mfe for t in trades), Decimal("0.00")) / Decimal(str(total_trades))
+    avg_mae = sum((t.mae for t in trades), Decimal("0.00")) / Decimal(str(total_trades))
+    avg_duration = float(np.mean([t.holding_duration_seconds for t in trades])) if trades else 0.0
+
+    rev_exits = [t for t in trades if t.exit_reason == "REVERSAL_CONFIRMED"]
+    rev_superseded = [t for t in trades if t.reversal_superseded]
+    rev_detections_count = len(rev_exits) + len(rev_superseded)
+    rev_avg_pnl = (
+        float(sum((t.net_pnl for t in rev_exits), Decimal("0.00")) / Decimal(str(len(rev_exits))))
+        if rev_exits
+        else 0.0
+    )
+
+    combo_perf: Dict[str, Dict[str, Any]] = {}
+    for t in trades:
+        if t.reversal_reasons:
+            domains = set()
+            for r in t.reversal_reasons:
+                if "TREND" in r:
+                    domains.add("TREND")
+                elif "MOMENTUM" in r:
+                    domains.add("MOMENTUM")
+                elif "VOLUME" in r:
+                    domains.add("VOLUME")
+                elif "REGIME" in r:
+                    domains.add("REGIME")
+                else:
+                    domains.add(r)
+            combo_key = "+".join(sorted(domains)) if domains else "+".join(sorted(t.reversal_reasons))
+            if combo_key not in combo_perf:
+                combo_perf[combo_key] = {"trades": 0, "wins": 0, "net_pnl": 0.0}
+            combo_perf[combo_key]["trades"] += 1
+            if t.net_pnl > Decimal("0"):
+                combo_perf[combo_key]["wins"] += 1
+            combo_perf[combo_key]["net_pnl"] += float(t.net_pnl)
+
+    for k, v in combo_perf.items():
+        v["win_rate"] = round(v["wins"] / v["trades"], 4) if v["trades"] > 0 else 0.0
+        v["net_pnl"] = round(v["net_pnl"], 2)
+
+    reversal_metrics = {
+        "total_reversal_detections": rev_detections_count,
+        "total_reversal_exits": len(rev_exits),
+        "total_reversal_superseded": len(rev_superseded),
+        "average_reversal_exit_pnl": round(rev_avg_pnl, 2),
+        "performance_by_combination": combo_perf,
+    }
 
     return BacktestMetrics(
         total_trades=total_trades,
@@ -240,5 +313,10 @@ def calculate_backtest_metrics(
         performance_by_symbol=perf_by_sym,
         performance_by_timeframe=perf_by_tf,
         performance_by_regime=perf_by_reg,
+        performance_by_exit_reason=perf_by_exit_reason,
+        average_mfe=avg_mfe.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        average_mae=avg_mae.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        average_holding_duration_seconds=round(avg_duration, 1),
+        reversal_metrics=reversal_metrics,
     )
 
