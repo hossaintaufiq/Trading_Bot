@@ -346,16 +346,25 @@ All timestamps are **strictly 64-bit integer Unix epoch milliseconds in UTC**.
 ### 2.13 System Control Endpoints (`/system/pause`, `/resume`, `/kill-switch`)
 - **`/system/pause`** (`POST`): Pauses Central Brain state progression; leaves positions active.
 - **`/system/resume`** (`POST`): Resumes normal operational state machine progression.
-- **`/system/kill-switch`** (`POST`): Immediate emergency halt; cancels all pending orders, freezes new order creation, alerts all clients.
-- **Response Schema (`200 OK`)**:
-```json
-{
-  "action": "KILL_SWITCH",
-  "status": "ENGAGED",
-  "timestamp": 1730472010000,
-  "message": "Kill switch activated: all new trading halted; open positions continue bracket monitoring."
-}
-```
+- **`/system/kill-switch`** (`POST`): Immediate emergency halt with dual-mode operational control:
+  - **Request Body**:
+    ```json
+    {
+      "mode": "PAUSE_NEW_ORDERS",  // or "LIQUIDATE_ALL_AND_HALT"
+      "reason": "Operator manual emergency stop"
+    }
+    ```
+  - **Response Schema (`200 OK`)**:
+    ```json
+    {
+      "action": "KILL_SWITCH",
+      "mode": "PAUSE_NEW_ORDERS",
+      "status": "ENGAGED",
+      "timestamp": "2026-11-01T21:05:00.000Z",
+      "open_positions_affected": 2,
+      "message": "Kill switch activated in PAUSE_NEW_ORDERS mode: new orders halted; open positions continue bracket monitoring."
+    }
+    ```
 
 ---
 
