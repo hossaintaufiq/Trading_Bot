@@ -121,3 +121,20 @@ class ISimulationRepository(Protocol):
     async def load_simulation_paths(self, simulation_id: str) -> pd.DataFrame:
         ...
 
+
+class IBacktestRepository(Protocol):
+    """Interface for backtest run summaries and trade outputs."""
+
+    async def save_backtest_run(self, run_data: dict) -> str:
+        """Save backtest metadata summary. Returns backtest_id."""
+        ...
+
+    async def get_backtest_run(self, backtest_id: str) -> Optional[dict]:
+        ...
+
+    async def list_backtest_runs(
+        self, strategy_id: Optional[str] = None, limit: int = 50
+    ) -> List[dict]:
+        ...
+
+

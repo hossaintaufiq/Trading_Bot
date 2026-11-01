@@ -251,3 +251,22 @@
   - Enforces Rule `S-06` and `A-10` by recording realistic execution assumptions during emergency liquidation.
 - **Alternatives Considered**: Single boolean toggle that leaves positions unattended. Rejected due to operational ambiguity.
 - **Consequences**: API and frontend UI must support selecting the mode and confirming liquidation actions.
+
+---
+
+### ADR-016: Historical Backtesting Engine and Conservative Intrabar Ambiguity Resolution
+
+- **Status**: Accepted
+- **Date**: 2026-11-01
+- **Context**: Evaluating specialist agents and strategy candidates against historical candle data without look-ahead bias or optimistic intrabar assumptions.
+- **Decision**: 
+  1. Implement an event-driven deterministic replay engine (`HistoricalBacktestEngine`) advancing bar-by-bar, strictly withholding future candles from analytical agents.
+  2. Require conservative resolution of intrabar ambiguity: if both stop-loss and take-profit thresholds are breached within the same OHLC bar and intrabar tick sequence is unavailable, the execution simulator MUST resolve the exit as a Stop-Loss hit (`AMBIGUOUS_BAR_STOP`). Optimistic outcomes are strictly forbidden (Rules `S-05`, `S-06`).
+  3. Store backtest summaries in SQLite (`backtest_runs` and `strategy_metrics`) and comprehensive trade ledgers in Parquet (`storage/backtests/{backtest_id}_trades.parquet`), avoiding filesystem inode bloat.
+  4. Perform out-of-sample and walk-forward evaluations strictly via chronological time splits without random shuffling.
+- **Rationale**:
+  - Prevents backtest overfitting, look-ahead leakage, and artificial win-rate inflation.
+  - Preserves mathematical exactness by executing monetary calculations with Python `Decimal`.
+- **Alternatives Considered**: Optimistic first-hit assumption or 50/50 randomized resolution. Rejected as violating quantitative safety standards.
+- **Consequences**: Backtest performance metrics reflect conservative, realistic execution dynamics.
+
