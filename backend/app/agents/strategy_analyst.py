@@ -188,9 +188,29 @@ class StrategyAnalystAgent(BaseAgent[StrategyAnalystInput, StrategyAnalystOutput
             if direction == "LONG":
                 stop_dec = entry_dec - risk_amount
                 target_dec = entry_dec + reward_amount
+                if stop_dec <= Decimal("0"):
+                    return StrategyAnalystOutput(
+                        timestamp=input_data.timestamp,
+                        symbol=input_data.symbol,
+                        timeframe=input_data.timeframe,
+                        evaluation_outcome="NO_SIGNAL",
+                        candidates=[],
+                        conflicting_factors=["Invalid stop loss: calculated stop is non-positive."],
+                        explanation="NO_SIGNAL: Stop loss <= 0 is invalid for spot paper trading.",
+                    )
             else:
                 stop_dec = entry_dec + risk_amount
                 target_dec = entry_dec - reward_amount
+                if target_dec <= Decimal("0"):
+                    return StrategyAnalystOutput(
+                        timestamp=input_data.timestamp,
+                        symbol=input_data.symbol,
+                        timeframe=input_data.timeframe,
+                        evaluation_outcome="NO_SIGNAL",
+                        candidates=[],
+                        conflicting_factors=["Invalid take profit: calculated target is non-positive."],
+                        explanation="NO_SIGNAL: Target price <= 0 is invalid.",
+                    )
 
             # Confidence weighting
             combined_conf = float(
@@ -245,3 +265,4 @@ class StrategyAnalystAgent(BaseAgent[StrategyAnalystInput, StrategyAnalystOutput
             conflicting_factors=conflicts,
             explanation=explanation,
         )
+

@@ -82,10 +82,11 @@ class VolumeAnalystAgent(BaseAgent[VolumeAnalystInput, VolumeAnalystOutput]):
         if curr_vol_ma and curr_vol_ma > 0:
             vol_ratio = curr_vol / curr_vol_ma
 
-        # Volume Anomaly Detection (> 2.5 std devs over recent window)
+        # Volume Anomaly Detection (> 2.5 std devs over historical baseline excluding current bar)
         recent_vols = volumes[-max(50, input_data.volume_ma_period):]
-        vol_mean = float(np.mean(recent_vols))
-        vol_std = float(np.std(recent_vols, ddof=0))
+        baseline_vols = recent_vols[:-1] if len(recent_vols) > 1 else recent_vols
+        vol_mean = float(np.mean(baseline_vols))
+        vol_std = float(np.std(baseline_vols, ddof=0))
         is_anomaly = bool(vol_std > 0 and curr_vol > (vol_mean + (input_data.anomaly_std_threshold * vol_std)))
 
         # Calculate VWAP
@@ -147,3 +148,4 @@ class VolumeAnalystAgent(BaseAgent[VolumeAnalystInput, VolumeAnalystOutput]):
             volume_score=round(score, 3),
             explanation=" ".join(exp_parts),
         )
+

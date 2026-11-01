@@ -603,3 +603,4 @@ class TestStrategyAnalystAgent:
         # Reward = 6.0 * 1.5 = 9.0 -> Target = entry - 9.0
         assert cand.suggested_take_profit == pytest.approx(latest_close - 9.0)
         assert cand.risk_reward_ratio >= 1.5
+

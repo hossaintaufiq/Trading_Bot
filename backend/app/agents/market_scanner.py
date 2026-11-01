@@ -99,8 +99,7 @@ class MarketScannerAgent(BaseAgent[MarketScannerInput, MarketScannerOutput]):
             rolling_atr_mean = float(np.mean(valid_atrs[-50:])) if len(valid_atrs) >= 10 else curr_atr
             atr_ratio = (curr_atr / rolling_atr_mean) if (curr_atr and rolling_atr_mean and rolling_atr_mean > 0) else 1.0
 
-            _, _, _, bw_vals = calculate_bollinger_bands(closes, period=input_data.bb_period)
-            bb_upper, _, bb_lower, _ = calculate_bollinger_bands(closes, period=input_data.bb_period)
+            bb_upper, _, bb_lower, bw_vals = calculate_bollinger_bands(closes, period=input_data.bb_period)
             curr_bw = bw_vals[-1]
 
             kc_upper, _, kc_lower = calculate_keltner_channels(highs, lows, closes, ema_period=20, atr_period=10)
@@ -202,3 +201,4 @@ class MarketScannerAgent(BaseAgent[MarketScannerInput, MarketScannerOutput]):
             global_market_state=global_state,
             explanation=global_exp,
         )
+

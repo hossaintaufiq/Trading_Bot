@@ -179,3 +179,4 @@ class TrendAnalystAgent(BaseAgent[TrendAnalystInput, TrendAnalystOutput]):
             confidence_discount=confidence_discount,
             explanation=" ".join(explanation_parts),
         )
+

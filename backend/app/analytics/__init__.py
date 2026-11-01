@@ -26,3 +26,4 @@ __all__ = [
     "calculate_sma",
     "calculate_vwap",
 ]
+

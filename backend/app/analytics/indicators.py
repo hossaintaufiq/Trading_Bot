@@ -144,22 +144,21 @@ def calculate_adx(
         tr[i] = max(hl, hc, lc)
 
     # Wilder smoothing for TR and DMs
-    smooth_tr = sum(tr[:period])
-    smooth_plus_dm = sum(plus_dm[:period])
-    smooth_minus_dm = sum(minus_dm[:period])
+    # First valid directional changes occur on bars 1..period (period items)
+    smooth_tr = sum(tr[1 : period + 1])
+    smooth_plus_dm = sum(plus_dm[1 : period + 1])
+    smooth_minus_dm = sum(minus_dm[1 : period + 1])
 
     dx: List[Optional[float]] = [None] * n
 
     for i in range(period, n):
-        if i == period:
-            p_di = 100.0 * (smooth_plus_dm / smooth_tr) if smooth_tr > 0 else 0.0
-            m_di = 100.0 * (smooth_minus_dm / smooth_tr) if smooth_tr > 0 else 0.0
-        else:
+        if i > period:
             smooth_tr = smooth_tr - (smooth_tr / period) + tr[i]
             smooth_plus_dm = smooth_plus_dm - (smooth_plus_dm / period) + plus_dm[i]
             smooth_minus_dm = smooth_minus_dm - (smooth_minus_dm / period) + minus_dm[i]
-            p_di = 100.0 * (smooth_plus_dm / smooth_tr) if smooth_tr > 0 else 0.0
-            m_di = 100.0 * (smooth_minus_dm / smooth_tr) if smooth_tr > 0 else 0.0
+
+        p_di = 100.0 * (smooth_plus_dm / smooth_tr) if smooth_tr > 0 else 0.0
+        m_di = 100.0 * (smooth_minus_dm / smooth_tr) if smooth_tr > 0 else 0.0
 
         plus_di_out[i] = float(p_di)
         minus_di_out[i] = float(m_di)
@@ -206,8 +205,12 @@ def calculate_rsi(closes: Sequence[float], period: int = 14) -> List[Optional[fl
     avg_gain = sum(gains[1:period + 1]) / period
     avg_loss = sum(losses[1:period + 1]) / period
 
-    if avg_loss == 0.0:
+    if avg_loss == 0.0 and avg_gain == 0.0:
+        out[period] = 50.0
+    elif avg_loss == 0.0:
         out[period] = 100.0
+    elif avg_gain == 0.0:
+        out[period] = 0.0
     else:
         rs = avg_gain / avg_loss
         out[period] = float(100.0 - (100.0 / (1.0 + rs)))
@@ -216,7 +219,9 @@ def calculate_rsi(closes: Sequence[float], period: int = 14) -> List[Optional[fl
         avg_gain = ((avg_gain * (period - 1)) + gains[i]) / period
         avg_loss = ((avg_loss * (period - 1)) + losses[i]) / period
 
-        if avg_loss == 0.0:
+        if avg_loss == 0.0 and avg_gain == 0.0:
+            out[i] = 50.0
+        elif avg_loss == 0.0:
             out[i] = 100.0
         elif avg_gain == 0.0:
             out[i] = 0.0
@@ -373,3 +378,4 @@ def calculate_obv(
         out[i] = float(curr_obv)
 
     return out
+
