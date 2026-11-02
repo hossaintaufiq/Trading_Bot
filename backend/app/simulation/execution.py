@@ -52,6 +52,13 @@ class PaperExecutionSimulator:
         strategy_metadata: dict,
         exit_policy: str = "FIXED_BRACKET",
         theoretical_take_profit: Optional[Decimal] = None,
+        information_availability_cutoff: Optional[str] = None,
+        candle_close_timestamp: Optional[str] = None,
+        order_creation_timestamp: Optional[str] = None,
+        risk_approval_timestamp: Optional[str] = None,
+        risk_approval_token: Optional[str] = None,
+        earliest_eligible_execution_timestamp: Optional[str] = None,
+        execution_policy: str = "LEGACY_CLOSE_FILL",
     ) -> ActivePosition:
         """
         Execute simulated market entry with slippage and spread friction.
@@ -91,6 +98,13 @@ class PaperExecutionSimulator:
             strategy_metadata=strategy_metadata,
             exit_policy=exit_policy,
             theoretical_take_profit=theoretical_take_profit or take_profit,
+            information_availability_cutoff=information_availability_cutoff,
+            candle_close_timestamp=candle_close_timestamp,
+            order_creation_timestamp=order_creation_timestamp,
+            risk_approval_timestamp=risk_approval_timestamp,
+            risk_approval_token=risk_approval_token,
+            earliest_eligible_execution_timestamp=earliest_eligible_execution_timestamp,
+            execution_policy=execution_policy,
         )
 
     def evaluate_candle_bracket(
@@ -383,5 +397,13 @@ class PaperExecutionSimulator:
             holding_duration_seconds=holding_duration,
             reversal_reasons=list(position.reversal_reason_codes),
             reversal_superseded=getattr(position, "reversal_superseded", False),
+            information_availability_cutoff=position.information_availability_cutoff,
+            candle_close_timestamp=position.candle_close_timestamp,
+            order_creation_timestamp=position.order_creation_timestamp,
+            risk_approval_timestamp=position.risk_approval_timestamp,
+            risk_approval_token=position.risk_approval_token,
+            earliest_eligible_execution_timestamp=position.earliest_eligible_execution_timestamp,
+            execution_policy=position.execution_policy,
+            raw_entry_price=position.raw_entry_price,
         )
 

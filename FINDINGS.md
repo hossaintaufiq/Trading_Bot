@@ -706,6 +706,29 @@ Milestone 4.6.2.3 executed a read-only forensic audit of dataset `v2.0.0-news-hi
 6. **Deduplication Cluster Integrity:**
    - 1,421 clusters across 1,431 articles: 1,413 singleton clusters, 8 multi-article clusters (26 articles collapsed via SimHash $\le 3$). Zero false merges across assets or distinct events.
 7. **Authoritative Decision:** **PASS WITH LIMITATIONS**. Strategy experiments may proceed in Milestone 4.6.3 subject to the architectural prerequisite that `SimulationEngine` is refactored to next-open fills, forward macro dates are excluded, GDELT is barred from intraday execution, and frozen dataset `v2.0.0` remains untouched.
+---
+
+### 8.14 Milestone 4.6.2.4: Point-in-Time Execution Scheduling & Backtesting Engine Integration
+Milestone 4.6.2.4 implemented and verified an event-time-aware execution scheduling contract within the historical simulation engine (`HistoricalBacktestEngine`), eliminating the potential look-ahead bias of same-candle close execution:
+1. **The Formal Execution Contract (ADR-026):**
+   - Established mandatory 9-coordinate execution provenance (`signal_timestamp`, `information_availability_cutoff`, `candle_close_timestamp`, `order_creation_timestamp`, `risk_approval_timestamp`, `risk_approval_token`, `earliest_eligible_execution_timestamp`, `actual_fill_timestamp`, `actual_fill_price`, `execution_policy`).
+   - Governed under two distinct policy versions: `ExecutionPolicy.LEGACY_CLOSE_FILL` (preserving historical baseline reproducibility) and `ExecutionPolicy.NEXT_ELIGIBLE_PRICE` (enforcing strict next-bar open fills for news and production research).
+2. **Point-in-Time Execution Scheduler (`PointInTimeExecutionScheduler`):**
+   - Candidate signals approved at candle close $T$ are scheduled and executed strictly at Bar $T+1$ Open. Same-candle fills at $T$ Close, Open, or intrabar are prohibited and raise fatal `ValueError` exceptions.
+   - Handled market-data interruptions: gaps exceeding `max_execution_gap_bars` (default 3) trigger deterministic order expiry.
+   - Handled opening gaps: market opens that gap beyond the proposed stop loss reject the order prior to fill.
+   - Pre-fill invariant re-verification: portfolio limits and circuit breakers (5.0% max drawdown, 2.0% daily loss) are re-verified immediately before execution.
+3. **News Intelligence Boundary (`NewsIntelligenceBoundary`):**
+   - Serves as an immutable gatekeeper filtering external events visible at decision cutoff $T_{\text{close}}$.
+   - Enforces strict point-in-time constraints: excludes forward scheduled events (quarantining FOMC Nov 5, 2026 and CPI Nov 13, 2026), bars GDELT articles from intraday (< 1d) backtests, and isolates future revisions.
+4. **Preservation of Cost Assumptions & Risk Authority:**
+   - Preserves 100% of NEPTUNE's 0.30% round-trip friction model (0.10% taker fee, 0.05% slippage, 0.01% half-spread) using exact Python `Decimal` accounting.
+   - Risk Manager remains the sole authorization authority; requires cryptographic tokens and treats pending scheduled orders as committed risk slots.
+5. **Empirical Verification (18 Test Scenarios):**
+   - All 18 targeted test cases in `backend/tests/unit/test_milestone_4_6_2_4_scheduling.py` passed deterministically.
+   - Full test suite verified: 206/206 backend tests passing, 4/4 frontend vitest tests passing, Next.js production build succeeded with 0 errors.
+   - Market dataset `v2.0.0` (420 files, tree SHA-256 `b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`) and news dataset `v2.0.0-news-historical` (1,499 records) remain 100% bit-for-bit identical.
+6. **Authoritative Decision:** **PASS**. The simulation engine is now point-in-time certified for future news-gated strategy experiments in Milestone 4.6.3.
 
 ---
 
@@ -723,6 +746,7 @@ Milestone 4.6.2.3 executed a read-only forensic audit of dataset `v2.0.0-news-hi
 - **[ADR-023: Immutable News Storage, Multi-Stage Deduplication & Point-in-Time Temporal Gate](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-023-immutable-news-storage-multi-stage-deduplication--point-in-time-temporal-gate)**
 - **[ADR-024: 15-Category Event Taxonomy, Asset Relevance Isolation & Macroeconomic Calendar Registry](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-024-15-category-event-taxonomy-asset-relevance-isolation--macroeconomic-calendar-registry)**
 - **[ADR-025: Two-Stage Deterministic Classification Remediation, 100% Historical Coverage & Next-Available-Price Execution Synchronization](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-025-two-stage-deterministic-classification-remediation-100-historical-coverage--next-available-price-execution-synchronization)**
+- **[ADR-026: Deterministic Point-in-Time Execution Scheduling, Next-Eligible-Price Policy & Simulation Engine Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-026-deterministic-point-in-time-execution-scheduling-next-eligible-price-policy--simulation-engine-integration)**
 
 
 ### Research & Audit Documents
@@ -779,6 +803,9 @@ Milestone 4.6.2.3 executed a read-only forensic audit of dataset `v2.0.0-news-hi
 - **Milestone 4.6.2.3 Macro Provenance Audit:** [`docs/research/MILESTONE_4_6_2_3_MACRO_PROVENANCE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_3_MACRO_PROVENANCE.md)
 - **Milestone 4.6.2.3 Point-in-Time Integration Audit:** [`docs/research/MILESTONE_4_6_2_3_PIT_INTEGRATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_3_PIT_INTEGRATION.md)
 - **Milestone 4.6.2.3 Final Forensic Audit Report:** [`docs/research/MILESTONE_4_6_2_3_FINAL_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_3_FINAL_AUDIT.md)
+- **Milestone 4.6.2.4 Execution Contract:** [`docs/research/MILESTONE_4_6_2_4_EXECUTION_CONTRACT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_4_EXECUTION_CONTRACT.md)
+- **Milestone 4.6.2.4 Engine Integration:** [`docs/research/MILESTONE_4_6_2_4_ENGINE_INTEGRATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_4_ENGINE_INTEGRATION.md)
+- **Milestone 4.6.2.4 Validation Report:** [`docs/research/MILESTONE_4_6_2_4_VALIDATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_4_VALIDATION_REPORT.md)
 
 
 ---

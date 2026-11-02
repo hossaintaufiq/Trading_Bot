@@ -6,8 +6,28 @@ portfolio equity curves, and performance evaluation metrics.
 All monetary calculations strictly use Python Decimal (Rule A-01).
 """
 from decimal import Decimal
+from enum import Enum
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field
+
+
+class ExecutionPolicy(str, Enum):
+    """
+    Execution policy versions governing order fill timing and pricing.
+    - LEGACY_CLOSE_FILL: Fills immediately at current candle close price (Milestone 4.1-4.5 baseline).
+    - NEXT_ELIGIBLE_PRICE: Strict point-in-time policy. Fills at next eligible candle open with friction.
+    """
+    LEGACY_CLOSE_FILL = "LEGACY_CLOSE_FILL"
+    NEXT_ELIGIBLE_PRICE = "NEXT_ELIGIBLE_PRICE"
+
+
+class OrderStatus(str, Enum):
+    """Lifecycle status of a scheduled order in the point-in-time simulation."""
+    SCHEDULED = "SCHEDULED"
+    FILLED = "FILLED"
+    REJECTED = "REJECTED"
+    EXPIRED = "EXPIRED"
+    CANCELLED = "CANCELLED"
 
 
 class BacktestConfig(BaseModel):
@@ -36,9 +56,47 @@ class BacktestConfig(BaseModel):
     trailing_atr_multiplier: Decimal = Decimal("2.0")
     trailing_activation_threshold_r: Decimal = Decimal("1.0")
     entry_filter: Optional[str] = None           # None, H1_ADX_25, H1_ADX_30, H4_RVOL_85, H5_VOLATILITY_BOUNDS, H7_CONFLUENCE
+    execution_policy: str = "LEGACY_CLOSE_FILL"   # LEGACY_CLOSE_FILL or NEXT_ELIGIBLE_PRICE
+    max_execution_gap_bars: int = 3              # Max missing bars before order expires
     save_to_db: bool = False
     save_to_parquet: bool = False
     output_dir: Optional[str] = None
+
+
+class ScheduledOrder(BaseModel):
+    """
+    Formal execution-time contract for scheduled orders awaiting market fill.
+    Ensures complete provenance and prevents look-ahead bias.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    order_id: str
+    signal_id: str
+    symbol: str
+    timeframe: str
+    direction: str                              # LONG or SHORT
+    signal_timestamp: str                       # ISO 8601 UTC
+    information_availability_cutoff: str       # ISO 8601 UTC (candle close timestamp of decision)
+    candle_close_timestamp: str                # ISO 8601 UTC (finalized candle close)
+    order_creation_timestamp: str              # ISO 8601 UTC
+    risk_approval_timestamp: str               # ISO 8601 UTC
+    risk_approval_token: str
+    earliest_eligible_execution_timestamp: str  # ISO 8601 UTC (>= candle_close_timestamp)
+    actual_fill_timestamp: Optional[str] = None
+    actual_fill_price: Optional[Decimal] = None
+    raw_fill_price: Optional[Decimal] = None
+    execution_policy: str = "NEXT_ELIGIBLE_PRICE"
+    status: OrderStatus = OrderStatus.SCHEDULED
+    position_size: Decimal
+    stop_loss: Decimal
+    take_profit: Optional[Decimal] = None
+    rejection_reason: Optional[str] = None
+    market_regime: str
+    strategy_metadata: Dict[str, Any] = Field(default_factory=dict)
+    exit_policy: str = "BALANCED"
+    theoretical_take_profit: Optional[Decimal] = None
+    scheduled_bar_index: int = 0
 
 
 class SimulatedTrade(BaseModel):
@@ -85,6 +143,16 @@ class SimulatedTrade(BaseModel):
     reversal_reasons: List[str] = Field(default_factory=list)
     reversal_superseded: bool = False
 
+    # Execution contract provenance fields (Milestone 4.6.2.4)
+    information_availability_cutoff: Optional[str] = None
+    candle_close_timestamp: Optional[str] = None
+    order_creation_timestamp: Optional[str] = None
+    risk_approval_timestamp: Optional[str] = None
+    risk_approval_token: Optional[str] = None
+    earliest_eligible_execution_timestamp: Optional[str] = None
+    execution_policy: str = "LEGACY_CLOSE_FILL"
+    raw_entry_price: Optional[Decimal] = None
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -127,6 +195,14 @@ class SimulatedTrade(BaseModel):
             "holding_duration_seconds": self.holding_duration_seconds,
             "reversal_reasons": self.reversal_reasons,
             "reversal_superseded": self.reversal_superseded,
+            "information_availability_cutoff": self.information_availability_cutoff,
+            "candle_close_timestamp": self.candle_close_timestamp,
+            "order_creation_timestamp": self.order_creation_timestamp,
+            "risk_approval_timestamp": self.risk_approval_timestamp,
+            "risk_approval_token": self.risk_approval_token,
+            "earliest_eligible_execution_timestamp": self.earliest_eligible_execution_timestamp,
+            "execution_policy": self.execution_policy,
+            "raw_entry_price": float(self.raw_entry_price) if self.raw_entry_price is not None else None,
         }
 
 
@@ -153,6 +229,13 @@ class ActivePosition:
         strategy_metadata: Dict[str, Any],
         exit_policy: str = "BALANCED",
         theoretical_take_profit: Optional[Decimal] = None,
+        information_availability_cutoff: Optional[str] = None,
+        candle_close_timestamp: Optional[str] = None,
+        order_creation_timestamp: Optional[str] = None,
+        risk_approval_timestamp: Optional[str] = None,
+        risk_approval_token: Optional[str] = None,
+        earliest_eligible_execution_timestamp: Optional[str] = None,
+        execution_policy: str = "LEGACY_CLOSE_FILL",
     ):
         self.position_id = position_id
         self.signal_id = signal_id
@@ -176,6 +259,15 @@ class ActivePosition:
         self.exit_policy = exit_policy
         self.current_price = entry_price
         self.unrealized_pnl = Decimal("0")
+
+        # Execution contract provenance fields
+        self.information_availability_cutoff = information_availability_cutoff
+        self.candle_close_timestamp = candle_close_timestamp
+        self.order_creation_timestamp = order_creation_timestamp
+        self.risk_approval_timestamp = risk_approval_timestamp
+        self.risk_approval_token = risk_approval_token
+        self.earliest_eligible_execution_timestamp = earliest_eligible_execution_timestamp
+        self.execution_policy = execution_policy
 
         # Balanced Protection tracking fields
         self.initial_risk_per_unit = abs(raw_entry_price - stop_loss)

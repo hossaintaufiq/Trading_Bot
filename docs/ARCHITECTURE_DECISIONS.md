@@ -33,6 +33,10 @@
 - [ADR-020: Dataset Versioning, Provenance Tracking, and Timeframe-Independent Chronological Research Framework](#adr-020-dataset-versioning-provenance-tracking-and-timeframe-independent-chronological-research-framework)
 - [ADR-021: Model-Agnostic Financial Forecasting Contract & Deferred Kronos Inference Protocol](#adr-021-model-agnostic-financial-forecasting-contract--deferred-kronos-inference-protocol)
 - [ADR-022: Kronos Foundation Model Experimental Integration & Gated Confirmation Protocol](#adr-022-kronos-foundation-model-experimental-integration--gated-confirmation-protocol)
+- [ADR-023: Immutable News Storage, Multi-Stage Deduplication & Point-in-Time Temporal Gate](#adr-023-immutable-news-storage-multi-stage-deduplication--point-in-time-temporal-gate)
+- [ADR-024: 15-Category Event Taxonomy, Asset Relevance Isolation & Macroeconomic Calendar Registry](#adr-024-15-category-event-taxonomy-asset-relevance-isolation--macroeconomic-calendar-registry)
+- [ADR-025: Two-Stage Deterministic Classification Remediation, 100% Historical Coverage & Next-Available-Price Execution Synchronization](#adr-025-two-stage-deterministic-classification-remediation-100-historical-coverage--next-available-price-execution-synchronization)
+- [ADR-026: Deterministic Point-in-Time Execution Scheduling, Next-Eligible-Price Policy & Simulation Engine Integration](#adr-026-deterministic-point-in-time-execution-scheduling-next-eligible-price-policy--simulation-engine-integration)
 
 ---
 
@@ -513,3 +517,29 @@
 - **Consequences**:
   - NEPTUNE now possesses a historically rich, 100% temporally populated, point-in-time verified news and macro event foundation suitable for controlled strategy experiments.
   - Same-candle look-ahead bias is architecturally impossible in backtesting simulations.
+
+
+## ADR-026: Deterministic Point-in-Time Execution Scheduling, Next-Eligible-Price Policy & Simulation Engine Integration
+
+- **Status**: Accepted
+- **Date**: 2026-11-03
+- **Context**: Milestone 4.6.2.3 forensic audit demonstrated that while point-in-time temporal rules were defined in `temporal.py`, the backtest simulation loop (`HistoricalBacktestEngine`) filled orders instantaneously at `curr_candle.close`, creating an impossible physical fill and potential look-ahead bias for news-gated strategy experiments.
+- **Decision**:
+  1. **Formal Execution-Time Contract**:
+     - Codified mandatory 9-coordinate execution provenance (`signal_timestamp`, `information_availability_cutoff`, `candle_close_timestamp`, `order_creation_timestamp`, `risk_approval_timestamp`, `risk_approval_token`, `earliest_eligible_execution_timestamp`, `actual_fill_timestamp`, `actual_fill_price`, `execution_policy`).
+  2. **PointInTimeExecutionScheduler Component**:
+     - Introduced `PointInTimeExecutionScheduler` managing `ScheduledOrder` lifecycle.
+     - Enforces next-eligible-price execution: orders approved at candle close $T$ execute strictly at Bar $T+1$ Open.
+     - Same-candle execution raises fatal `ValueError`.
+     - Deterministic sorting by `(candle_close_timestamp, signal_id, symbol)` eliminates concurrency ambiguity.
+     - Handled data gaps: gaps exceeding `max_execution_gap_bars` trigger deterministic order expiry.
+     - Handled stop-loss opening gaps: market opens gapping past stop loss reject orders prior to fill.
+  3. **NewsIntelligenceBoundary Component**:
+     - Integrated `NewsIntelligenceBoundary` enforcing point-in-time availability, revision isolation, cluster deduplication, GDELT intraday prohibition, and quarantine of forward-scheduled macro releases.
+  4. **Friction & Risk Manager Authority Preservation**:
+     - Preserved exact 0.30% round-trip friction model with Decimal accounting.
+     - Risk Manager remains sole authorization authority; requires cryptographic token for scheduling and re-verifies circuit breakers prior to execution.
+  5. **Backward Compatibility via Policy Versioning**:
+     - Introduced `ExecutionPolicy.LEGACY_CLOSE_FILL` (default for legacy regression tests) and `ExecutionPolicy.NEXT_ELIGIBLE_PRICE` (mandatory for news research).
+- **Consequences**:
+  - The historical simulation engine is fully integrated and point-in-time compliant. News-gated strategy experiments can proceed in Milestone 4.6.3 under zero look-ahead bias.
