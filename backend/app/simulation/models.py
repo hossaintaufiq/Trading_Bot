@@ -35,6 +35,7 @@ class BacktestConfig(BaseModel):
     exit_policy: str = "BALANCED"                 # BALANCED, FIXED_BRACKET, AGGRESSIVE, TREND_FOLLOWING
     trailing_atr_multiplier: Decimal = Decimal("2.0")
     trailing_activation_threshold_r: Decimal = Decimal("1.0")
+    entry_filter: Optional[str] = None           # None, H1_ADX_25, H1_ADX_30, H4_RVOL_85, H5_VOLATILITY_BOUNDS, H7_CONFLUENCE
     save_to_db: bool = False
     save_to_parquet: bool = False
     output_dir: Optional[str] = None
@@ -74,6 +75,12 @@ class SimulatedTrade(BaseModel):
     reversal_detection_timestamp: Optional[str] = None
     mfe: Decimal = Decimal("0.00")
     mae: Decimal = Decimal("0.00")
+    mfe_pct: float = 0.0
+    mae_pct: float = 0.0
+    mfe_r: float = 0.0
+    mae_r: float = 0.0
+    mfe_cash: Decimal = Decimal("0.00")
+    mae_cash: Decimal = Decimal("0.00")
     holding_duration_seconds: float = 0.0
     reversal_reasons: List[str] = Field(default_factory=list)
     reversal_superseded: bool = False
@@ -111,6 +118,12 @@ class SimulatedTrade(BaseModel):
             "reversal_detection_timestamp": self.reversal_detection_timestamp,
             "mfe": float(self.mfe),
             "mae": float(self.mae),
+            "mfe_pct": round(float(self.mfe_pct), 4),
+            "mae_pct": round(float(self.mae_pct), 4),
+            "mfe_r": round(float(self.mfe_r), 4),
+            "mae_r": round(float(self.mae_r), 4),
+            "mfe_cash": float(self.mfe_cash),
+            "mae_cash": float(self.mae_cash),
             "holding_duration_seconds": self.holding_duration_seconds,
             "reversal_reasons": self.reversal_reasons,
             "reversal_superseded": self.reversal_superseded,
@@ -219,7 +232,18 @@ class BacktestMetrics(BaseModel):
     performance_by_exit_reason: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
     average_mfe: Decimal = Decimal("0.00")
     average_mae: Decimal = Decimal("0.00")
+    average_mfe_pct: float = 0.0
+    average_mae_pct: float = 0.0
+    average_mfe_r: float = 0.0
+    average_mae_r: float = 0.0
+    average_mfe_cash: Decimal = Decimal("0.00")
+    average_mae_cash: Decimal = Decimal("0.00")
     average_holding_duration_seconds: float = 0.0
+    candidate_signals: int = 0
+    filter_accepted_signals: int = 0
+    filter_rejected_signals: int = 0
+    risk_approved_signals: int = 0
+    risk_rejected_signals: int = 0
     reversal_metrics: Dict[str, Any] = Field(default_factory=dict)
 
     model_config = ConfigDict(arbitrary_types_allowed=True)

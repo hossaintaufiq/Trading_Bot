@@ -18,11 +18,13 @@ def calculate_backtest_metrics(
     equity_curve: List[EquityPoint],
     initial_capital: Decimal,
     timeframe: str = "15m",
+    pipeline_counts: Optional[Dict[str, int]] = None,
 ) -> BacktestMetrics:
     """
     Compute comprehensive quantitative performance metrics from a trade ledger and equity curve.
     """
     total_trades = len(trades)
+    p_counts = pipeline_counts or {}
 
     if total_trades == 0:
         return BacktestMetrics(
@@ -54,7 +56,18 @@ def calculate_backtest_metrics(
             performance_by_exit_reason={},
             average_mfe=Decimal("0.00"),
             average_mae=Decimal("0.00"),
+            average_mfe_pct=0.0,
+            average_mae_pct=0.0,
+            average_mfe_r=0.0,
+            average_mae_r=0.0,
+            average_mfe_cash=Decimal("0.00"),
+            average_mae_cash=Decimal("0.00"),
             average_holding_duration_seconds=0.0,
+            candidate_signals=p_counts.get("candidate_signals", 0),
+            filter_accepted_signals=p_counts.get("filter_accepted_signals", 0),
+            filter_rejected_signals=p_counts.get("filter_rejected_signals", 0),
+            risk_approved_signals=p_counts.get("risk_approved_signals", 0),
+            risk_rejected_signals=p_counts.get("risk_rejected_signals", 0),
             reversal_metrics={
                 "total_reversal_detections": 0,
                 "total_reversal_exits": 0,
@@ -219,10 +232,25 @@ def calculate_backtest_metrics(
     for reg in set(t.market_regime for t in trades):
         reg_trades = [t for t in trades if t.market_regime == reg]
         reg_wins = [t for t in reg_trades if t.net_pnl > Decimal("0")]
+        reg_gross_profit = sum((t.gross_pnl for t in reg_trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+        reg_gross_loss = abs(sum((t.gross_pnl for t in reg_trades if t.gross_pnl < Decimal("0")), Decimal("0.00")))
+        reg_net_pnl = sum((t.net_pnl for t in reg_trades), Decimal("0.00"))
+        reg_fees = sum((t.fees for t in reg_trades), Decimal("0.00"))
+        reg_slip = sum((t.slippage_cost for t in reg_trades), Decimal("0.00"))
+        reg_spread = sum((t.spread_cost for t in reg_trades), Decimal("0.00"))
+        reg_duration = [t.holding_duration_seconds for t in reg_trades if t.holding_duration_seconds > 0]
         perf_by_reg[reg] = {
             "total_trades": len(reg_trades),
             "win_rate": round(len(reg_wins) / len(reg_trades), 4) if reg_trades else 0.0,
-            "net_pnl": float(sum((t.net_pnl for t in reg_trades), Decimal("0.00"))),
+            "gross_profit": float(reg_gross_profit),
+            "gross_loss": float(reg_gross_loss),
+            "net_pnl": float(reg_net_pnl),
+            "expectancy_per_trade": float(reg_net_pnl / Decimal(str(len(reg_trades)))) if reg_trades else 0.0,
+            "profit_factor": round(float(reg_gross_profit / reg_gross_loss), 2) if reg_gross_loss > Decimal("0") else (999.0 if reg_gross_profit > Decimal("0") else 0.0),
+            "total_fees": float(reg_fees),
+            "total_slippage": float(reg_slip),
+            "total_spread": float(reg_spread),
+            "avg_holding_duration_seconds": round(float(np.mean(reg_duration)), 1) if reg_duration else 0.0,
         }
 
     perf_by_exit_reason: Dict[str, Dict[str, Any]] = {}
@@ -241,6 +269,12 @@ def calculate_backtest_metrics(
     # 7. MFE, MAE, Duration & Reversal Confirmation Analytics
     avg_mfe = sum((t.mfe for t in trades), Decimal("0.00")) / Decimal(str(total_trades))
     avg_mae = sum((t.mae for t in trades), Decimal("0.00")) / Decimal(str(total_trades))
+    avg_mfe_pct = float(np.mean([getattr(t, "mfe_pct", 0.0) for t in trades])) if trades else 0.0
+    avg_mae_pct = float(np.mean([getattr(t, "mae_pct", 0.0) for t in trades])) if trades else 0.0
+    avg_mfe_r = float(np.mean([getattr(t, "mfe_r", 0.0) for t in trades])) if trades else 0.0
+    avg_mae_r = float(np.mean([getattr(t, "mae_r", 0.0) for t in trades])) if trades else 0.0
+    avg_mfe_cash = sum((getattr(t, "mfe_cash", Decimal("0.00")) for t in trades), Decimal("0.00")) / Decimal(str(total_trades))
+    avg_mae_cash = sum((getattr(t, "mae_cash", Decimal("0.00")) for t in trades), Decimal("0.00")) / Decimal(str(total_trades))
     avg_duration = float(np.mean([t.holding_duration_seconds for t in trades])) if trades else 0.0
 
     rev_exits = [t for t in trades if t.exit_reason == "REVERSAL_CONFIRMED"]
@@ -316,7 +350,18 @@ def calculate_backtest_metrics(
         performance_by_exit_reason=perf_by_exit_reason,
         average_mfe=avg_mfe.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
         average_mae=avg_mae.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        average_mfe_pct=round(avg_mfe_pct, 4),
+        average_mae_pct=round(avg_mae_pct, 4),
+        average_mfe_r=round(avg_mfe_r, 4),
+        average_mae_r=round(avg_mae_r, 4),
+        average_mfe_cash=avg_mfe_cash.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        average_mae_cash=avg_mae_cash.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
         average_holding_duration_seconds=round(avg_duration, 1),
+        candidate_signals=p_counts.get("candidate_signals", 0),
+        filter_accepted_signals=p_counts.get("filter_accepted_signals", 0),
+        filter_rejected_signals=p_counts.get("filter_rejected_signals", 0),
+        risk_approved_signals=p_counts.get("risk_approved_signals", 0),
+        risk_rejected_signals=p_counts.get("risk_rejected_signals", 0),
         reversal_metrics=reversal_metrics,
     )
 

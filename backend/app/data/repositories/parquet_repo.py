@@ -83,6 +83,36 @@ class ParquetMarketDataRepository:
             return None
         return None
 
+    async def get_earliest_candle_time(
+        self, symbol: str, timeframe: str
+    ) -> Optional[datetime]:
+        """
+        Return the timestamp of the earliest stored closed candle.
+        Scans partition files from first in sorted list.
+        """
+        files = self._find_all_partition_files(symbol, timeframe)
+        if not files:
+            return None
+
+        earliest_file = files[0]
+        try:
+            table = pq.read_table(earliest_file, columns=["timestamp"])
+            if table.num_rows == 0:
+                return None
+            ts_val = table.column("timestamp")[0].as_py()
+            if isinstance(ts_val, (int, float)):
+                sec = ts_val / 1000.0 if ts_val > 1e11 else float(ts_val)
+                return datetime.fromtimestamp(sec, tz=timezone.utc)
+            elif isinstance(ts_val, str):
+                cleaned = ts_val.replace("Z", "+00:00")
+                dt = datetime.fromisoformat(cleaned)
+                return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+            elif isinstance(ts_val, datetime):
+                return ts_val if ts_val.tzinfo else ts_val.replace(tzinfo=timezone.utc)
+        except Exception:
+            return None
+        return None
+
     async def save_candles(
         self, symbol: str, timeframe: str, df: pd.DataFrame
     ) -> int:
@@ -116,10 +146,13 @@ class ParquetMarketDataRepository:
 
         total_saved = 0
 
+        # Standard columns to persist
+        std_cols = ["timestamp", "open", "high", "low", "close", "volume", "quote_volume", "trades_count"]
+
         # Group by year and month
         for (year, month), group in df.groupby(["_year", "_month"]):
             file_path = self._get_partition_path(symbol, timeframe, int(year), int(month))
-            clean_cols = [c for c in group.columns if not c.startswith("_")]
+            clean_cols = [c for c in std_cols if c in group.columns]
             group_clean = group[clean_cols].copy()
 
             if os.path.exists(file_path):
@@ -168,7 +201,7 @@ class ParquetMarketDataRepository:
         if not tables:
             return pd.DataFrame(columns=["timestamp", "open", "high", "low", "close", "volume"])
 
-        combined_table = pa.concat_tables(tables)
+        combined_table = pa.concat_tables(tables, promote_options="default")
         df = combined_table.to_pandas()
 
         if df.empty:

@@ -138,3 +138,21 @@ class IBacktestRepository(Protocol):
         ...
 
 
+class IHistoricalDatasetRepository(Protocol):
+    """Interface for historical dataset metadata and version tracking."""
+
+    async def save_dataset_meta(self, record: dict) -> str:
+        """Upsert dataset metadata. Returns dataset_id."""
+        ...
+
+    async def get_dataset_meta(self, dataset_id: str) -> Optional[dict]:
+        """Fetch dataset metadata by dataset_id."""
+        ...
+
+    async def list_datasets(
+        self, dataset_version: Optional[str] = None
+    ) -> List[dict]:
+        """List tracked dataset metadata records."""
+        ...
+
+
