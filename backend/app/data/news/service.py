@@ -2,8 +2,9 @@
 NEPTUNE News Ingestion & Management Service (`service.py`)
 
 Central orchestrator for historical news acquisition, revision tracking,
-multi-stage event clustering, Parquet export, and data-quality reporting.
-Governed by: Rule S-05, Rule S-08, ADR-001, ADR-023.
+deterministic event classification, multi-stage event clustering, Parquet export,
+and data-quality reporting.
+Governed by: Rule S-05, Rule S-08, ADR-001, ADR-023, ADR-024.
 """
 import hashlib
 import json
@@ -15,8 +16,10 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from app.config.settings import get_settings
 from app.data.news.binance_client import BinanceNewsClient
+from app.data.news.classifier import DeterministicNewsClassifier
 from app.data.news.deduplication import NewsEventClusterer
 from app.data.news.gdelt_client import GdeltGkgClient
+from app.data.news.macro_calendar import HistoricalMacroCalendarRegistry
 from app.data.news.models import NewsIngestionRun, NewsSourceType
 from app.data.news.parquet_exporter import NewsParquetExporter
 from app.data.news.quality_reporter import NewsQualityReporter
@@ -27,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class NewsDataService:
-    """Service orchestrating news ingestion, deduplication, and persistence."""
+    """Service orchestrating news ingestion, classification, deduplication, and persistence."""
 
     def __init__(
         self,
@@ -43,6 +46,7 @@ class NewsDataService:
         self.storage_root = storage_root
         self.binance_client = BinanceNewsClient()
         self.gdelt_client = GdeltGkgClient()
+        self.classifier = DeterministicNewsClassifier()
         self.clusterer = NewsEventClusterer()
         self.parquet_exporter = NewsParquetExporter(
             db_path=self.db_path, storage_root=self.storage_root
@@ -59,16 +63,16 @@ class NewsDataService:
         """
         Bounded, resumable ingestion of Binance official announcements.
         Fetches summaries, retrieves full detail payloads, detects version bumps,
-        and saves immutable article identities and version records.
+        classifies events & relevance, and saves immutable article identities and version records.
         """
-        run_id = f"run_binance_{uuid.uuid4().hex[:12]}"
+        run_id = f"run_binance_cat{catalog_id}_{uuid.uuid4().hex[:8]}"
         now_dt = datetime.now(timezone.utc)
         now_iso = to_iso_utc(now_dt)
 
         run = NewsIngestionRun(
             run_id=run_id,
             source=NewsSourceType.BINANCE_ANNOUNCEMENTS,
-            target_asset="MULTI",
+            target_asset=f"CAT_{catalog_id}",
             status="RUNNING",
             started_at=now_iso,
         )
@@ -82,13 +86,13 @@ class NewsDataService:
 
         try:
             for page in range(start_page, start_page + max_pages):
-                logger.info(f"Fetching Binance catalog page {page}...")
+                logger.info(f"Fetching Binance catalog {catalog_id} page {page}...")
                 catalog_data = await self.binance_client.fetch_catalog_page(
                     catalog_id=catalog_id, page_no=page, page_size=page_size
                 )
                 articles_list = catalog_data.get("articles") or []
                 if not articles_list:
-                    logger.info(f"No more articles found at page {page}.")
+                    logger.info(f"No more articles found in catalog {catalog_id} at page {page}.")
                     break
 
                 for item in articles_list:
@@ -100,6 +104,21 @@ class NewsDataService:
                             detail, collected_at=now_dt
                         )
 
+                        # Classify article
+                        cls_result = self.classifier.classify_article(
+                            title=article.title,
+                            body_text=version.body_text,
+                            source=article.source.value,
+                            pairs=version.pairs,
+                        )
+                        article.event_category = cls_result["event_category"]
+                        article.relevance_classification = cls_result["relevance_classification"]
+                        article.affected_assets = cls_result["affected_assets"]
+                        article.classification_evidence = cls_result["classification_evidence"]
+                        article.classifier_version = cls_result["classifier_version"]
+                        article.confidence_score = cls_result["confidence_score"]
+                        article.classified_at = cls_result["classified_at"]
+
                         # Check existing article
                         existing_art = await self.repo.find_article_by_source_record(
                             source="binance_announcements", source_record_id=code
@@ -108,7 +127,6 @@ class NewsDataService:
                             await self.repo.save_article(article.to_dict())
                             new_articles_count += 1
                         else:
-                            # Update metadata if needed
                             await self.repo.save_article(article.to_dict())
 
                         # Check existing version
@@ -186,6 +204,7 @@ class NewsDataService:
 
         return {
             "run_id": run_id,
+            "catalog_id": catalog_id,
             "status": "COMPLETED",
             "records_processed": total_processed,
             "new_articles": new_articles_count,
@@ -202,7 +221,7 @@ class NewsDataService:
     ) -> Dict[str, Any]:
         """
         Download and ingest a single 15-minute GDELT GKG archive in memory.
-        Filters for target crypto assets (BTC, ETH, BNB), records PARTIALLY_VERIFIED articles.
+        Filters for target crypto assets, classifies events & relevance, and records PARTIALLY_VERIFIED articles.
         """
         run_id = f"run_gdelt_{uuid.uuid4().hex[:12]}"
         now_dt = datetime.now(timezone.utc)
@@ -219,7 +238,7 @@ class NewsDataService:
         await self.repo.record_ingestion_run(run.to_dict())
 
         try:
-            # Download archive with MD5 verification
+            # Download archive with optional MD5 verification
             archive_bytes = await self.gdelt_client.download_archive(
                 archive_url=archive_url, expected_md5=expected_md5
             )
@@ -234,13 +253,27 @@ class NewsDataService:
 
             articles_saved = 0
             for article, version in records:
+                # Classify article
+                cls_result = self.classifier.classify_article(
+                    title=article.title,
+                    body_text=version.body_text,
+                    source=article.source.value,
+                    pairs=version.pairs,
+                )
+                article.event_category = cls_result["event_category"]
+                article.relevance_classification = cls_result["relevance_classification"]
+                article.affected_assets = cls_result["affected_assets"]
+                article.classification_evidence = cls_result["classification_evidence"]
+                article.classifier_version = cls_result["classifier_version"]
+                article.confidence_score = cls_result["confidence_score"]
+                article.classified_at = cls_result["classified_at"]
+
                 existing = await self.repo.find_article_by_url(article.url)
                 if not existing:
                     await self.repo.save_article(article.to_dict())
                     await self.repo.save_article_version(version.to_dict())
                     articles_saved += 1
                 else:
-                    # Update metadata or existing versions
                     await self.repo.save_article(article.to_dict())
                     latest_ver = await self.repo.get_latest_article_version(article.article_id)
                     if not latest_ver:
@@ -285,6 +318,51 @@ class NewsDataService:
             )
             raise
 
+    async def ingest_macro_calendar_events(self) -> Dict[str, Any]:
+        """
+        Source C: Ingest canonical historical macroeconomic and protocol milestones.
+        All records are verified with official public URLs and exact release timestamps.
+        """
+        events = HistoricalMacroCalendarRegistry.get_canonical_events()
+        saved_count = 0
+        for ev in events:
+            await self.repo.save_macro_event(ev.to_dict())
+            saved_count += 1
+
+        return {
+            "source": "macro_calendar",
+            "events_saved": saved_count,
+            "status": "COMPLETED",
+        }
+
+    async def classify_all_articles(self) -> Dict[str, Any]:
+        """
+        Run the deterministic classifier on all articles currently in SQLite,
+        updating their categories, relevance labels, and affected assets.
+        """
+        articles = await self.repo.list_all_articles(limit=50000)
+        updated_count = 0
+
+        for art in articles:
+            latest_ver = await self.repo.get_latest_article_version(art["article_id"])
+            body_text = latest_ver.get("body_text") if latest_ver else None
+            pairs = latest_ver.get("pairs") if latest_ver else []
+
+            cls_res = self.classifier.classify_article(
+                title=art["title"],
+                body_text=body_text,
+                source=art["source"],
+                pairs=pairs,
+            )
+            await self.repo.update_article_classification(art["article_id"], cls_res)
+            updated_count += 1
+
+        return {
+            "articles_classified": updated_count,
+            "classifier_version": self.classifier.VERSION,
+            "status": "COMPLETED",
+        }
+
     async def cluster_all_articles(self) -> Dict[str, Any]:
         """
         Execute multi-stage event clustering over all stored articles and persist clusters.
@@ -295,6 +373,7 @@ class NewsDataService:
                 """
                 SELECT a.article_id, a.url, a.canonical_url, a.domain, a.title,
                        a.normalized_title, a.entities_json, a.source, a.source_verification_status,
+                       a.event_category, a.relevance_classification,
                        v.available_at, v.published_at, v.provider_seen_at, v.created_at
                 FROM news_articles a
                 LEFT JOIN news_article_versions v ON a.article_id = v.article_id AND v.version_number = 1
