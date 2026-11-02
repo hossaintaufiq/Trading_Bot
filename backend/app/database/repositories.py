@@ -155,4 +155,68 @@ class IHistoricalDatasetRepository(Protocol):
         """List tracked dataset metadata records."""
         ...
 
+class INewsRepository(Protocol):
+    """Interface for immutable news articles, revision history, event clusters, and ingestion runs."""
+
+    async def save_article(self, article: dict) -> str:
+        """Save core article record. Returns article_id."""
+        ...
+
+    async def save_article_version(self, version: dict) -> str:
+        """Save immutable article version. Returns version_id."""
+        ...
+
+    async def get_article(self, article_id: str) -> Optional[dict]:
+        """Fetch article by article_id."""
+        ...
+
+    async def get_article_versions(self, article_id: str) -> List[dict]:
+        """List all versions of an article sorted by version_number asc."""
+        ...
+
+    async def get_latest_article_version(self, article_id: str) -> Optional[dict]:
+        """Fetch the latest version of an article."""
+        ...
+
+    async def find_article_by_source_record(self, source: str, source_record_id: str) -> Optional[dict]:
+        """Find article by source and source record ID."""
+        ...
+
+    async def find_article_by_url(self, url: str) -> Optional[dict]:
+        """Find article by exact URL."""
+        ...
+
+    async def find_article_by_canonical_url(self, canonical_url: str) -> Optional[dict]:
+        """Find article by canonical URL."""
+        ...
+
+    async def find_articles_by_normalized_title(self, normalized_title: str) -> List[dict]:
+        """Find articles with exact normalized title."""
+        ...
+
+    async def save_event_cluster(self, cluster: dict, member_article_ids: List[tuple]) -> str:
+        """Save event cluster with member article mappings (article_id, simhash_distance). Returns cluster_id."""
+        ...
+
+    async def get_event_cluster(self, cluster_id: str) -> Optional[dict]:
+        """Fetch event cluster by cluster_id."""
+        ...
+
+    async def get_cluster_members(self, cluster_id: str) -> List[dict]:
+        """List members of a cluster."""
+        ...
+
+    async def list_clusters(
+        self, primary_symbol: Optional[str] = None, limit: int = 100
+    ) -> List[dict]:
+        """List event clusters sorted by earliest_available_at desc."""
+        ...
+
+    async def record_ingestion_run(self, run_data: dict) -> str:
+        """Record or update ingestion run. Returns run_id."""
+        ...
+
+    async def get_ingestion_run(self, run_id: str) -> Optional[dict]:
+        """Get ingestion run state."""
+        ...
 

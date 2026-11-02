@@ -577,6 +577,17 @@ Prior to committing to Milestone 4.6.1 ingestion, empirical verification was exe
 2. **GDELT 2.0 Ingestion Proof & DOC API Rate Limiting:** The interactive DOC API (`api.gdeltproject.org`) proved feasibility by returning point-in-time indexed records for BTC/ETH/BNB (June 2026), but triggered aggressive IP rate limiting (`HTTP 429`) upon consecutive calls. Batch historical ETL must ingest raw 15-minute GKG master CSV archives (`data.gdeltproject.org/gdeltv2/`) or Google BigQuery to achieve reproducible, unthrottled point-in-time extraction.
 3. **Syndication Clustering & Control Groups:** Empirical audits of June 1, 2026 news confirmed multi-outlet syndication across 1–8 hours (e.g., MicroStrategy reporting). Event clustering (SimHash <= 3 over 24h, triggering only on earliest t_avail) is required to prevent echo-chamber over-trading. Furthermore, research design was refined to include frequency-matched and exposure-matched technical controls to isolate true news alpha from transaction fee reduction effects.
 
+
+---
+
+### 8.8 Milestone 4.6.1: Immutable News Data Foundation & Empirical Ingestion
+Milestone 4.6.1 established the complete historical news data engineering infrastructure under `backend/app/data/news/`:
+1. **Schema & Revision Immutability (`005_news_schema.sql`)**: Implemented relational schema separating core article identities (`news_articles`) from immutable publisher revisions (`news_article_versions`). When article content or headlines are revised, new version records are created with incremented version counters. Historical version rows and raw response payloads are strictly immutable.
+2. **Point-in-Time Temporal Gate**: Established explicit timestamp semantics distinguishing `published_at`, `updated_at`, `provider_seen_at`, `first_seen_at`, `collected_at`, and `available_at`. Enforced a mandatory 5-minute latency buffer for editorial sources ($t_{\text{avail}} = t_{\text{seen}} + 300\text{s}$) and prohibited silent promotion of unverified timestamps to point-in-time status.
+3. **Six-Stage Deduplication & Clustering Engine**: Implemented an automated pipeline (Exact URL, Canonical URL, Normalized Headline, 64-bit sliding 4-gram SimHash with Hamming distance $\le 3$, Entity/Symbol overlap, and a 24-hour chronological sliding window). Clustered articles form `news_event_clusters` governed by the earliest availability timestamp ($t_{\text{avail, min}}$) to eliminate echo-chamber over-trading.
+4. **Empirical Ingestion Sample & Cryptographic Manifest**: Successfully ingested a bounded sample of 66 articles (60 Binance Announcements, 6 GDELT GKG crypto records) with 100% success. Partitioned records were exported to Parquet (`storage/news/`) and registered in `storage/exports/milestone_4_6_1/news_dataset_manifest.json` with composite SHA-256 `58c4272ace3d148e85cd031d484a17bcb69eac4234e3f50bd2403d65d1db1084`.
+5. **Research Isolation Invariant**: In compliance with safety rules, news intelligence remains strictly quarantined in the data layer; direct connection to the Central Brain, Risk Manager, or paper execution engine is prohibited until positive expectancy is demonstrated.
+
 ## 9. Conclusion & Strategic Research Roadmap
 
 ### 8.1 Key Scientific Takeaways
@@ -602,6 +613,7 @@ Prior to committing to Milestone 4.6.1 ingestion, empirical verification was exe
 - **[ADR-020: Dataset Versioning & Chronological Framework](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-020-dataset-versioning-provenance-tracking-and-timeframe-independent-chronological-research-framework)**
 - **[ADR-021: Model-Agnostic Financial Forecasting Contract](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-021-model-agnostic-financial-forecasting-contract--deferred-kronos-inference-protocol)**
 - **[ADR-022: Kronos Foundation Model Experimental Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-022-kronos-foundation-model-experimental-integration--gated-confirmation-protocol)**
+- **[ADR-023: Immutable News Storage, Multi-Stage Deduplication & Point-in-Time Temporal Gate](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-023-immutable-news-storage-multi-stage-deduplication--point-in-time-temporal-gate)**
 
 ### Research & Audit Documents
 - **Milestone 4.1.1 Audit:** [`docs/audits/MILESTONE_4_1_1_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_1_1_AUDIT.md)
@@ -625,6 +637,7 @@ Prior to committing to Milestone 4.6.1 ingestion, empirical verification was exe
 - **Milestone 4.5.1 Results Synthesis:** [`docs/audits/MILESTONE_4_5_1_RESULTS.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_RESULTS.md)
 - **Milestone 4.6.0 News Feasibility:** [`docs/research/MILESTONE_4_6_0_NEWS_DATA_FEASIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_0_NEWS_DATA_FEASIBILITY.md)
 - **Milestone 4.6.0.1 Source Validation & Proof:** [`docs/research/MILESTONE_4_6_0_1_NEWS_SOURCE_VALIDATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_0_1_NEWS_SOURCE_VALIDATION.md)
+- **Milestone 4.6.1 News Foundation Report:** [`docs/research/MILESTONE_4_6_1_IMPLEMENTATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_1_IMPLEMENTATION_REPORT.md)
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*

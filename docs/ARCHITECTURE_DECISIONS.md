@@ -418,3 +418,36 @@
   - Autonomous model-driven trade execution (Group B): Rejected due to catastrophic fee churn and circuit breaker violation.
   - Fine-tuning Kronos on proprietary exchange data: Deferred until post-v1.
 - **Consequences**: Kronos remains isolated in the analytics layer; the Central Brain and Risk Manager maintain sole authority over trade authorization.
+
+---
+
+### ADR-023: Immutable News Storage, Multi-Stage Deduplication & Point-in-Time Temporal Gate
+
+- **Status**: Accepted
+- **Date**: 2026-11-03
+- **Context**: Milestone 4.6.1 establishes the data foundation for historical news research. In financial NLP backtesting, look-ahead bias routinely creeps in through retroactive headline edits, lack of publication timestamps, syndicated duplication, and crawler propagation delays.
+- **Decision**:
+  1. **Two-Tier Storage & Verification Taxonomy**:
+     - *Tier 1 (Official Exchange Announcements)*: Binance Public CMS notices recorded as `POINT_IN_TIME_VERIFIED` with millisecond UTC precision.
+     - *Tier 2 (Global Editorial & Wire)*: GDELT 2.0 raw 15-minute GKG master CSV archives recorded as `PARTIALLY_VERIFIED`. The interactive DOC API is prohibited for batch historical ingestion due to IP rate limits (`HTTP 429`).
+  2. **Strict Revision Immutability**:
+     - Core article identity records (`news_articles`) and revision records (`news_article_versions`) are strictly append-only.
+     - When an article text, headline, or category is modified by the publisher, a new version row is appended with an incremented version counter and SHA-256 payload hash. Historical version rows are never mutated or deleted.
+  3. **Point-in-Time Latency Buffer & Temporal Invariants**:
+     - Explicitly distinguish between `published_at`, `updated_at`, `provider_seen_at`, `first_seen_at`, `collected_at`, and `available_at`.
+     - Editorial articles without verified publisher timestamps have `published_at = None` and enforce a conservative 5-minute latency buffer ($t_{\text{avail}} = t_{\text{seen}} + 300\text{s}$).
+     - The system strictly forbids promoting a partially verified timestamp to point-in-time verified status.
+  4. **Multi-Stage Event Deduplication & Clustering**:
+     - Implement a 6-stage pipeline: (1) Exact URL, (2) Canonical URL (tracking params stripped), (3) Exact Normalized Headline, (4) 64-bit sliding 4-gram SimHash (Hamming distance $\le 3$), (5) Entity & category overlap, and (6) 24-hour chronological sliding window.
+     - Merged articles form immutable `news_event_clusters` governed by the earliest availability timestamp ($t_{\text{avail, min}}$). Distinct events separated by $> 24\text{ hours}$ or distinct assets are never merged.
+  5. **Hybrid Parquet + SQLite Storage & Research Isolation**:
+     - Relational indices and cluster mappings are persisted in SQLite (WAL mode, Rule `S-08`).
+     - Bulk historical articles and version records are partitioned into Parquet (`storage/news/{source}/{YYYY}/`).
+     - News data remains strictly quarantined within `app/data/news/` and research analytics. Direct connection to the Central Brain, Risk Manager, or paper execution engine is prohibited until positive expectancy is validated.
+- **Rationale**:
+  - Eliminates revisionism bias and look-ahead data leakage.
+  - Mitigates wire syndication echo chambers that trigger false volatility spikes.
+  - Maintains compliance with modular monolith, SQLite single-process WAL, and paper-trading safety rules.
+- **Consequences**:
+  - News datasets can be independently verified, exported, and audited via reproducible cryptographic manifests.
+
