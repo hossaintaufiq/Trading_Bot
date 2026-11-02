@@ -511,6 +511,7 @@ An adversarial, evidence-based audit was executed on commit `f0957a0` to verify 
 - **Milestone 4.5.1 Economic Reconciliation:** [`docs/audits/MILESTONE_4_5_1_ECONOMIC_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_ECONOMIC_RECONCILIATION.md)
 - **Milestone 4.5.1 Resource Reproducibility:** [`docs/audits/MILESTONE_4_5_1_RESOURCE_REPRODUCIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_RESOURCE_REPRODUCIBILITY.md)
 - **Milestone 4.5.1 Results Synthesis:** [`docs/audits/MILESTONE_4_5_1_RESULTS.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_RESULTS.md)
+- **Milestone 4.6.0 News Feasibility:** [`docs/research/MILESTONE_4_6_0_NEWS_DATA_FEASIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_0_NEWS_DATA_FEASIBILITY.md)
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*
