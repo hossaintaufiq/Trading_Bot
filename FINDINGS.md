@@ -430,3 +430,4 @@ Per [ADR-021](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*
+
