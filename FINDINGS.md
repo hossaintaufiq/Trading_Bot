@@ -60,8 +60,19 @@ Finally, we introduce a formal model-agnostic forecasting contract ([`IForecaste
    - [7.1 Design of the IForecaster Protocol](#71-design-of-the-iforecaster-protocol)
    - [7.2 Input Fingerprinting & Look-Ahead Isolation](#72-input-fingerprinting--look-ahead-isolation)
    - [7.3 Architectural Isolation of GPU Dependencies (ADR-021)](#73-architectural-isolation-of-gpu-dependencies-adr-021)
-8. [Conclusion & Strategic Research Roadmap](#8-conclusion--strategic-research-roadmap)
-9. [Architecture Decision Records & Audit Index](#9-architecture-decision-records--audit-index)
+   - [7.4 Pretrained Foundation Model Benchmark: Kronos-mini (Milestone 4.5)](#74-pretrained-foundation-model-benchmark-kronos-mini-milestone-45)
+   - [7.5 Independent Forensic Audit of the Kronos Foundation Model Integration (Milestone 4.5.1)](#75-milestone-451-independent-forensic-audit-of-the-kronos-foundation-model-integration)
+8. [Natural Language & Macro Event Intelligence: Historical News Feasibility (Milestone 4.6.0)](#8-natural-language--macro-event-intelligence-historical-news-feasibility-milestone-460)
+   - [8.1 Core Quantitative Research Question & Motivation](#81-core-quantitative-research-question--motivation)
+   - [8.2 Historical News Source Evaluation & Verification Matrix](#82-historical-news-source-evaluation--verification-matrix)
+   - [8.3 The Point-in-Time Revisionism Trap & Latency Invariant](#83-the-point-in-time-revisionism-trap--latency-invariant)
+   - [8.4 Recommended Two-Tier Acquisition Architecture](#84-recommended-two-tier-acquisition-architecture)
+   - [8.5 Four-Group Experimental Design & Statistical Protocol](#85-four-group-experimental-design--statistical-protocol)
+   - [8.6 Feasibility Assessment & Conditional Go Recommendation](#86-feasibility-assessment--conditional-go-recommendation)
+9. [Conclusion & Strategic Research Roadmap](#9-conclusion--strategic-research-roadmap)
+   - [9.1 Key Scientific Takeaways](#91-key-scientific-takeaways)
+   - [9.2 Recommended Research Directions (Milestone 5.0+)](#92-recommended-research-directions-milestone-50)
+10. [Architecture Decision Records & Audit Index](#10-architecture-decision-records--audit-index)
 
 ---
 
@@ -465,7 +476,102 @@ An adversarial, evidence-based audit was executed on commit `f0957a0` to verify 
 
 ---
 
-## 8. Conclusion & Strategic Research Roadmap
+## 8. Natural Language & Macro Event Intelligence: Historical News Feasibility (Milestone 4.6.0)
+
+Following the empirical evaluation of deterministic indicators (Milestones 4.3–4.4) and deep learning foundation models (Milestone 4.5), NEPTUNE investigated the feasibility of incorporating timestamped historical news and macroeconomic event streams into its quantitative research engine.
+
+### 8.1 Core Quantitative Research Question & Motivation
+Traditional quantitative finance frequently assumes that market sentiment drives short-term price momentum. However, in high-frequency and intraday cryptocurrency markets, news dissemination is notoriously noisy, syndicated, and subject to rapid algorithmic absorption.
+
+> **Research Hypothesis:**  
+> *Can timestamped natural language news and macro event data provide incremental predictive or economic value beyond NEPTUNE's deterministic technical-analysis baseline under realistic exchange execution friction (0.30% round trip)?*
+
+Our feasibility research specifically addresses whether news should be utilized as:
+1. An **entry breakout trigger** (predicting the direction and magnitude of price continuation).
+2. A **defensive regime veto** (invalidating technical setups ahead of volatile macro announcements).
+
+---
+
+### 8.2 Historical News Source Evaluation & Verification Matrix
+An empirical audit was conducted across ten candidate historical data providers to separate verified programmatic capabilities from assumptions:
+
+| Provider / Source | Historical Coverage | Timestamp Precision | Free Historical Access | Verified API Status | Primary Feasibility Constraint |
+|---|:---:|:---:|:---:|:---:|---|
+| **CCData (CryptoCompare Min-API)** | 2017–Present | Seconds (Unix epoch) | Blocked (`401` Key Required) | Commercial API Key required | Lacks edit history; overwrites revisions |
+| **CryptoPanic Developer API** | 2017–Present | Seconds (ISO-8601 UTC) | Latest 200 posts only | Paid "Developer PRO" required | Headlines only; full body text not hosted |
+| **GDELT Project 2.0 (GKG)** | Feb 2015–Present | 15-Minute Slices | **100% Free & Open** | **Public (BigQuery / GCS)** | High noise ratio; requires domain whitelist |
+| **NewsAPI.org** | 2019–Present | Seconds (UTC) | Last 30 days only | Paid Business Tier ($449/mo) | Free tier strictly limited to 30 days |
+| **Alpha Vantage News Sentiment** | 2022–Present | Seconds (UTC) | 25 calls/day, recent only | Free tier throttled | Inadequate historical depth for 34-month backtest |
+| **Binance CMS Announcements** | 2017–Present | Milliseconds (UTC) | **100% Free & Open** | **Public Endpoint (`000000`)** | Limited to exchange operational events |
+| **CoinDesk / Cointelegraph Scraping** | 2013–Present | Seconds (UTC) | ToS Violation / Cloudflare | Scrape with high ban risk | Severe revision bias (retroactive edits) |
+| **Hugging Face Academic Dumps** | 2021–2023 | Date only (`YYYY-MM-DD`) | 100% Free | Static repository snapshots | Lacks intraday hour/minute timestamps |
+
+---
+
+### 8.3 The Point-in-Time Revisionism Trap & Latency Invariant
+A primary failure mode in published quantitative NLP backtests is **revision bias** and **hindsight headline rationalization**:
+1. Journalists routinely update breaking headlines hours after publication to reflect price action (e.g., changing *"SEC Files Motion"* to *"Bitcoin Plunges as SEC Sues Exchange"*).
+2. Scraped historical articles reflect the **final revised text**, introducing catastrophic look-ahead bias into backtests.
+3. Furthermore, network propagation, crawling latency, and database indexing impose a physical delay between real-world occurrence and algorithmic consumption.
+
+#### The Simulation Invariant
+To prevent look-ahead bias, financial simulations must differentiate between four distinct temporal coordinates:
+
+$$egin{aligned}
+t_{\text{event}} & \le t_{\text{pub}} \le t_{\text{seen}} \le t_{\text{avail}} \le T_{\text{decision}} \\
+\text{where: } \quad & t_{\text{avail}} = t_{\text{pub}} + \Delta t_{\text{buffer}} \quad (\Delta t_{\text{buffer}} \ge 300 \text{ seconds / 5 minutes})
+\end{aligned}$$
+
+An article is strictly ineligible for evaluation at candle close $T$ unless its local system availability timestamp $t_{\text{avail}}$ is less than or equal to $T$.
+
+---
+
+### 8.4 Recommended Two-Tier Acquisition Architecture
+To establish point-in-time historical integrity without commercial licensing fees, NEPTUNE adopts a **Two-Tier Hybrid Architecture**:
+1. **Tier 1 (Deterministic Operational & Macro Events):**
+   - **Binance Official Announcements API:** Ingests all listing, delisting, token swap, and maintenance notices with millisecond UTC timestamps.
+   - **Macroeconomic Calendar Registry:** Static, authoritative schedule of FOMC interest rate announcements, CPI releases, and Bitcoin halving blocks.
+2. **Tier 2 (Curated Editorial Narrative Stream):**
+   - **GDELT 2.0 Historical Extraction:** Query Google BigQuery public GDELT dataset for articles matching domain whitelists (`coindesk.com`, `cointelegraph.com`, `decrypt.co`, `theblock.co`) covering BTC, ETH, and BNB across 2024–2026.
+   - Enforce the mandatory 5-minute latency buffer ($t_{\text{avail}} = t_{\text{pub}} + 300\text{s}$) to eliminate look-ahead leakage.
+
+---
+
+### 8.5 Four-Group Experimental Design & Statistical Protocol
+To rigorously evaluate whether news sentiment adds true incremental value, a four-group ablation study is formulated for the out-of-sample window (`OOS_FULL`: 2026-01-01 to 2026-11-01):
+
+```
+========================================================================================
+FOUR-GROUP EXPERIMENTAL MATRIX (OOS_FULL: 2026-01-01 to 2026-11-01)
+========================================================================================
+Group ID   Strategy Description                       Alpha Drivers
+----------------------------------------------------------------------------------------
+Group A    Technical-Only Baseline (Established)      H7 Confluence + BALANCED Exit
+Group B    Pure News Directional Strategy             High-Impact Sentiment Spikes Only
+Group C    Hybrid Technical + News Confirmation Gate  H7 Setup confirmed/vetoed by News
+Group D    Quad Hybrid (Technical + News + Kronos)    H7 Setup + News Gate + Kronos Forecaster
+========================================================================================
+```
+
+#### Evaluation Rules & Cost Standardization
+- **Standard Execution Friction:** 0.10% maker fee, 0.10% taker fee, 0.05% slippage per side (0.30% round trip).
+- **Risk Management:** 5.0% Max Drawdown Circuit Breaker strictly enforced via `RiskManager.check_drawdown()`.
+- **Reaction Windows:** 1h (immediate momentum), 4h (intermediate drift), 24h (macro absorption).
+- **Statistical Testing:** Cumulative Abnormal Return (CAR) event study, binomial sign test against $H_0: p = 0.50$, Benjamini-Hochberg False Discovery Rate (FDR) control at $\alpha = 0.05$, and stationary bootstrap confidence intervals. Minimum sample size threshold: $N \ge 100$ independent events per asset.
+
+---
+
+### 8.6 Feasibility Assessment & Conditional Go Recommendation
+
+The Quantitative Systems Group issued a formal recommendation of **`CONDITIONAL GO`** for Milestone 4.6, subject to four non-negotiable architectural constraints:
+1. **Mandatory Point-in-Time Latency Buffer:** Every historical news record must enforce $t_{\text{avail}} \ge t_{\text{pub}} + 5\text{ minutes}$. No article may be evaluated at its raw claimed publication second.
+2. **Strict Invariant Isolation:** News intelligence must remain strictly within `backend/app/analytics/research/` during experimental validation. It **MUST NOT** be connected to the Central Brain, Risk Manager, or paper execution engine until positive expectancy is proven.
+3. **Realistic Execution Friction (0.30%):** All economic simulations must incorporate the authoritative 0.30% round-trip cost model.
+4. **Defensive Veto Orientation:** Focus quantitative hypothesis testing on whether news can act as a **defensive trade veto** (preventing trades ahead of high-volatility macro announcements), rather than attempting to predict directional breakout rallies from text sentiment.
+
+---
+
+## 9. Conclusion & Strategic Research Roadmap
 
 ### 8.1 Key Scientific Takeaways
 1. **Deterministic Threshold Tuning is a Dead End:** Minor variations in ADX thresholds, RSI bands, or moving average lengths cannot overcome exchange friction in single-timeframe breakout trading.
@@ -479,7 +585,7 @@ An adversarial, evidence-based audit was executed on commit `f0957a0` to verify 
 
 ---
 
-## 9. Architecture Decision Records & Audit Index
+## 10. Architecture Decision Records & Audit Index
 
 ### Architectural Records
 - **[ADR-001: SQLite Relational Database Engine](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-001-sqlite-relational-database-engine)**
