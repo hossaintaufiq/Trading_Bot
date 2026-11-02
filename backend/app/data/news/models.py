@@ -166,6 +166,9 @@ class MacroEventRecord(BaseModel):
     timestamp_precision: TimestampPrecision = TimestampPrecision.SECOND
     description: Optional[str] = None
     raw_payload_sha256: str
+    first_observed_at: Optional[str] = None
+    collected_at: Optional[str] = None
+    revision_observed_at: Optional[str] = None
     created_at: str
 
     def to_dict(self) -> Dict[str, Any]:

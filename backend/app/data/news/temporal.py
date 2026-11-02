@@ -230,3 +230,109 @@ def is_eligible_at_candle_close(
         candle_close_dt = candle_close_dt.astimezone(timezone.utc)
 
     return dt_avail <= candle_close_dt
+
+
+class PointInTimeExecutionSynchronizer:
+    """
+    Formalizes the Next-Available-Price Execution Rule:
+    1. An event is eligible for Candle T if and only if available_at <= T_close.
+    2. Decisions are emitted at or after T_close.
+    3. Orders execute strictly at T+1 Open.
+    4. Execution at T_close, T_open, or intrabar is strictly banned as look-ahead bias.
+    5. Revisions observed after T_close are invisible to Candle T.
+    """
+
+    @staticmethod
+    def resolve_execution_schedule(
+        event_available_at_iso: Optional[str],
+        bar_open_dt: datetime,
+        bar_close_dt: datetime,
+        next_bar_open_dt: datetime,
+        status: SourceVerificationStatus,
+        timeframe_minutes: int = 60,
+    ) -> Dict[str, Any]:
+        """
+        Determines whether an event can trigger an order for Bar T, and schedules execution at Bar T+1 Open.
+        """
+        if status == SourceVerificationStatus.REJECTED:
+            return {
+                "eligible": False,
+                "reason": "Status is REJECTED",
+                "execution_target_dt": None,
+                "execution_price_type": None,
+            }
+
+        # GDELT / PARTIALLY_VERIFIED restrictions
+        if status == SourceVerificationStatus.PARTIALLY_VERIFIED and timeframe_minutes < 60:
+            return {
+                "eligible": False,
+                "reason": "PARTIALLY_VERIFIED source precision insufficient for sub-hourly execution",
+                "execution_target_dt": None,
+                "execution_price_type": None,
+            }
+
+        if not is_eligible_at_candle_close(event_available_at_iso, bar_close_dt, status):
+            return {
+                "eligible": False,
+                "reason": "Event available after candle close or invalid timestamp",
+                "execution_target_dt": None,
+                "execution_price_type": None,
+            }
+
+        return {
+            "eligible": True,
+            "decision_bar_close": to_iso_utc(bar_close_dt),
+            "execution_target_dt": to_iso_utc(next_bar_open_dt),
+            "execution_price_type": "NEXT_BAR_OPEN",
+            "reason": None,
+        }
+
+    @staticmethod
+    def assert_no_lookahead(
+        decision_bar_close_dt: datetime,
+        execution_dt: datetime,
+        execution_price_type: str,
+    ) -> None:
+        """
+        Validates that execution does not violate point-in-time invariants.
+        Raises ValueError if look-ahead execution is attempted.
+        """
+        if decision_bar_close_dt.tzinfo is None:
+            decision_bar_close_dt = decision_bar_close_dt.replace(tzinfo=timezone.utc)
+        if execution_dt.tzinfo is None:
+            execution_dt = execution_dt.replace(tzinfo=timezone.utc)
+
+        if execution_dt < decision_bar_close_dt:
+            raise ValueError(
+                f"Look-ahead violation: Execution at {execution_dt.isoformat()} occurs before decision bar close {decision_bar_close_dt.isoformat()}"
+            )
+
+        if execution_price_type.upper() in ("CURRENT_CLOSE", "CURRENT_OPEN", "INTRABAR", "BAR_CLOSE"):
+            raise ValueError(
+                f"Look-ahead violation: Same-candle execution price type '{execution_price_type}' is forbidden. Must execute at NEXT_BAR_OPEN."
+            )
+
+    @staticmethod
+    def filter_visible_version(
+        versions: list,
+        as_of_dt: datetime,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Filters article versions to return the latest version available at as_of_dt.
+        Versions created or available after as_of_dt are completely invisible.
+        """
+        if as_of_dt.tzinfo is None:
+            as_of_dt = as_of_dt.replace(tzinfo=timezone.utc)
+
+        visible = []
+        for v in versions:
+            avail_str = v.get("available_at") or v.get("first_seen_at")
+            if avail_str:
+                dt_avail = parse_iso_utc(avail_str)
+                if dt_avail and dt_avail <= as_of_dt:
+                    visible.append(v)
+
+        if not visible:
+            return None
+        visible.sort(key=lambda x: x.get("version_number", 1))
+        return visible[-1]

@@ -88,6 +88,14 @@ class SqliteNewsRepository:
             if "research_available_at" not in v_cols:
                 cur.execute("ALTER TABLE news_article_versions ADD COLUMN research_available_at TEXT")
 
+            m_cols = [r[1] for r in cur.execute("PRAGMA table_info(news_macro_events)").fetchall()]
+            if "first_observed_at" not in m_cols:
+                cur.execute("ALTER TABLE news_macro_events ADD COLUMN first_observed_at TEXT")
+            if "collected_at" not in m_cols:
+                cur.execute("ALTER TABLE news_macro_events ADD COLUMN collected_at TEXT")
+            if "revision_observed_at" not in m_cols:
+                cur.execute("ALTER TABLE news_macro_events ADD COLUMN revision_observed_at TEXT")
+
             conn.commit()
 
     async def save_article(self, article: Dict[str, Any]) -> str:
@@ -489,6 +497,11 @@ class SqliteNewsRepository:
         if not isinstance(affected_assets_json, str):
             affected_assets_json = json.dumps(event.get("affected_assets", []))
 
+        created_ts = event.get("created_at") or datetime.now(timezone.utc).isoformat()
+        first_obs = event.get("first_observed_at") or created_ts
+        coll_ts = event.get("collected_at") or created_ts
+        rev_ts = event.get("revision_observed_at") or created_ts
+
         with self._get_connection() as conn:
             conn.execute(
                 """
@@ -497,8 +510,9 @@ class SqliteNewsRepository:
                     actual_release_at, source, source_url, source_record_id,
                     affected_assets_json, relevance_classification,
                     source_verification_status, timestamp_precision,
-                    description, raw_payload_sha256, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    description, raw_payload_sha256,
+                    first_observed_at, collected_at, revision_observed_at, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """,
                 (
                     macro_event_id,
@@ -515,7 +529,10 @@ class SqliteNewsRepository:
                     event.get("timestamp_precision", "second"),
                     event.get("description"),
                     event["raw_payload_sha256"],
-                    event["created_at"],
+                    first_obs,
+                    coll_ts,
+                    rev_ts,
+                    created_ts,
                 ),
             )
             conn.commit()

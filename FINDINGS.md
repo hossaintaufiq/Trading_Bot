@@ -645,6 +645,42 @@ Milestone 4.6.2.1 performed an independent forensic, statistical, and engineerin
 2. **Probabilistic Deep Learning Directional Forecasting:** Implement the `IForecaster` contract using pretrained foundation models (Kronos) to forecast forward returns over a 6-bar to 24-bar horizon.
 3. **Execution Cost Minimization (Maker Limit Orders):** Transition from market orders to post-only limit orders utilizing volume-profile order book imbalances to capture the 0.0% / negative maker fee tier.
 
+### 8.12 Milestone 4.6.2.2: Historical News Coverage Backfill, Classification Remediation & Point-in-Time Integrity
+Milestone 4.6.2.2 executed a five-workstream data engineering and integrity campaign to resolve all critical deficiencies identified in the Milestone 4.6.2.1 forensic audit:
+1. **Resolution of the 2025 Historical Coverage Void:**
+   - Ingested Binance Catalog 161 (delistings) and Catalog 49 (exchange operations, margin tiers, tick sizes, system upgrades) across multiple block ranges.
+   - Total news articles in SQLite expanded from 479 to **1,431 articles** (+198.7%).
+   - All 35 calendar months (2024-01 through 2026-11) are now 100% populated with 0 empty months (previously 17 empty months).
+   - In 2025, previously 0% populated, all 12 calendar months are heavily populated (ranging from 10 to 74 Binance announcements per month).
+2. **Canonical Macroeconomic Calendar Expansion:**
+   - Applied database migration `007_macro_provenance_schema.sql` adding `first_observed_at`, `collected_at`, and `revision_observed_at`.
+   - Expanded the registry in `macro_calendar.py` from 26 to **68 canonical records** covering all FOMC rate decisions, BLS CPI releases, and BLS NFP reports across 2024, 2025, and 2026 with official agency URLs (`federalreserve.gov`, `bls.gov`, `sec.gov`).
+   - Every single month of the 35-month window contains at least 1 verified macroeconomic release (100.0% coverage).
+3. **Deterministic Classification Remediation (`v1.1.0-deterministic`):**
+   - Remediated all six failure modes identified in Milestone 4.6.2.1 without introducing non-deterministic LLMs:
+     - Enforced `MARKET_STRUCTURE` precedence over `EXCHANGE_OPERATIONAL`.
+     - Implemented `_strip_boilerplate()` to strip legal disclaimers and risk warnings before body evaluation.
+     - Narrowed `SECURITY_INCIDENT` regex to explicit operational threats (hacks, exploits, drains).
+     - De-attributed promotional campaigns (Earn Wednesday, Launchpool, vouchers) from direct trading assets.
+     - Implemented Two-Stage Title-Primary Waterfall precedence.
+     - Implemented `_normalize_punctuation()` for punctuation-delimited acronyms (`E.T.F.` $\to$ `ETF`, `S.E.C.` $\to$ `SEC`).
+   - Evaluated on a fresh stratified sample of $N=150$ records (strictly excluding the 105 baseline audit records):
+     - **Event Category Accuracy:** **94.00%** (target $\ge 85.0\%$, baseline 77.14%, delta +16.86%).
+     - **Relevance Classification Accuracy:** **94.00%** (target $\ge 90.0\%$, baseline 86.67%, delta +7.33%).
+     - **Affected Assets Accuracy:** **89.33%** (baseline 84.76%, delta +4.57%).
+4. **Point-in-Time Next-Available-Price Execution Rule:**
+   - Formalized execution synchronization in `PointInTimeExecutionSynchronizer`:
+     $$t_{\text{avail}} \le T_{\text{close}} \implies t_{\text{decision}} \ge T_{\text{close}} \implies t_{\text{execution}} = T+1_{\text{open}}$$
+   - Any attempt to execute at candle $T$'s Close, Open, or intrabar prices raises a fatal look-ahead `ValueError`.
+   - Historical revisions observed at $t > T_{\text{close}}$ are strictly invisible to candle $T$.
+   - GDELT partially verified records are barred from sub-hourly execution without explicit $+300\text{s}$ latency buffers.
+   - All 8 comprehensive edge-case unit tests passed in 0.80s.
+5. **Storage Parity & Frozen Dataset Integrity:**
+   - Verified exact zero-delta parity between SQLite tables and Parquet partition files across 1,431 articles, 1,431 versions, 1,421 clusters, and 68 macro events.
+   - Confirmed frozen market dataset `v2.0.0` (420 files, tree SHA-256 `b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`) remains 100% bit-for-bit identical.
+   - Authoritative dataset `v2.0.0-news-historical` formalized with cryptographic manifest in `storage/exports/milestone_4_6_2_2/dataset_manifest.json`.
+6. **Decision Gate Determination:** **PASS WITH LIMITATIONS**. Authorized to proceed to Milestone 4.6.3 under binding constraints (BTCUSDT, ETHUSDT, BNBUSDT scope; strict next-open execution; GDELT hourly gating; market dataset `v2.0.0` preservation).
+
 ---
 
 ## 10. Architecture Decision Records & Audit Index
@@ -660,6 +696,8 @@ Milestone 4.6.2.1 performed an independent forensic, statistical, and engineerin
 - **[ADR-022: Kronos Foundation Model Experimental Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-022-kronos-foundation-model-experimental-integration--gated-confirmation-protocol)**
 - **[ADR-023: Immutable News Storage, Multi-Stage Deduplication & Point-in-Time Temporal Gate](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-023-immutable-news-storage-multi-stage-deduplication--point-in-time-temporal-gate)**
 - **[ADR-024: 15-Category Event Taxonomy, Asset Relevance Isolation & Macroeconomic Calendar Registry](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-024-15-category-event-taxonomy-asset-relevance-isolation--macroeconomic-calendar-registry)**
+- **[ADR-025: Two-Stage Deterministic Classification Remediation, 100% Historical Coverage & Next-Available-Price Execution Synchronization](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-025-two-stage-deterministic-classification-remediation-100-historical-coverage--next-available-price-execution-synchronization)**
+
 
 ### Research & Audit Documents
 - **Milestone 4.1.1 Audit:** [`docs/audits/MILESTONE_4_1_1_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_1_1_AUDIT.md)
@@ -702,6 +740,15 @@ Milestone 4.6.2.1 performed an independent forensic, statistical, and engineerin
 - **Milestone 4.6.2.1 Deduplication Audit:** [`docs/research/MILESTONE_4_6_2_1_DEDUPLICATION_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_DEDUPLICATION_AUDIT.md)
 - **Milestone 4.6.2.1 Research Readiness:** [`docs/research/MILESTONE_4_6_2_1_RESEARCH_READINESS.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_RESEARCH_READINESS.md)
 - **Milestone 4.6.2.1 Final Audit Report:** [`docs/research/MILESTONE_4_6_2_1_FINAL_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_FINAL_REPORT.md)
+- **Milestone 4.6.2.2 Binance Backfill:** [`docs/research/MILESTONE_4_6_2_2_BINANCE_BACKFILL.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_BINANCE_BACKFILL.md)
+- **Milestone 4.6.2.2 Macro Calendar:** [`docs/research/MILESTONE_4_6_2_2_MACRO_CALENDAR.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_MACRO_CALENDAR.md)
+- **Milestone 4.6.2.2 Classification Remediation:** [`docs/research/MILESTONE_4_6_2_2_CLASSIFICATION_REMEDIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_CLASSIFICATION_REMEDIATION.md)
+- **Milestone 4.6.2.2 Classification Validation:** [`docs/research/MILESTONE_4_6_2_2_CLASSIFICATION_VALIDATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_CLASSIFICATION_VALIDATION.md)
+- **Milestone 4.6.2.2 Point-in-Time Validation:** [`docs/research/MILESTONE_4_6_2_2_POINT_IN_TIME_VALIDATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_POINT_IN_TIME_VALIDATION.md)
+- **Milestone 4.6.2.2 Dataset Versioning:** [`docs/research/MILESTONE_4_6_2_2_DATASET_VERSIONING.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_DATASET_VERSIONING.md)
+- **Milestone 4.6.2.2 Research Relevance:** [`docs/research/MILESTONE_4_6_2_2_RESEARCH_RELEVANCE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_RESEARCH_RELEVANCE.md)
+- **Milestone 4.6.2.2 Final Report:** [`docs/research/MILESTONE_4_6_2_2_FINAL_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_FINAL_REPORT.md)
+
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*

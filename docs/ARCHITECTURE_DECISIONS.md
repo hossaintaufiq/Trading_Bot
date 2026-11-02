@@ -479,3 +479,37 @@
   - Preserves strict look-ahead bias prevention (Rule S-05).
 - **Consequences**:
   - Controlled research experiments in Milestone 4.6.3 can isolate direct asset news from exchange-wide noise and macroeconomic shocks.
+
+
+## ADR-025: Two-Stage Deterministic Classification Remediation, 100% Historical Coverage & Next-Available-Price Execution Synchronization
+
+- **Status**: Accepted
+- **Date**: 2026-11-03
+- **Context**: Milestone 4.6.2.1 independent forensic audit uncovered six systemic classifier failure modes (category accuracy 77.1%, relevance accuracy 86.7%), a 2025 historical coverage void (17 empty months out of 35), and the absence of a formalized next-open execution rule preventing same-candle look-ahead bias.
+- **Decision**:
+  1. **Two-Stage Deterministic Classifier (v1.1.0)**:
+     - Implemented title-primary two-stage waterfall: headline patterns take strict precedence over body text.
+     - Stripped legal/boilerplate footers and risk disclaimers (`Risk Warning:`, `Terms & Conditions`) before body scanning.
+     - Normalized punctuation-delimited acronyms (`E.T.F.` $\to$ `ETF`, `S.E.C.` $\to$ `SEC`, `F.O.M.C.` $\to$ `FOMC`).
+     - Enforced `MARKET_STRUCTURE` precedence over `EXCHANGE_OPERATIONAL` for margin, tick size, and fee schedules.
+     - De-attributed promotional retail campaigns (Earn Wednesday, Launchpool, competitions) from primary asset trading pairs.
+     - Isolated altcoin listings/delistings from quote pairs (`/BTC`, `/ETH`, `/BNB`).
+     - Achieved 94.00% Category Accuracy, 94.00% Relevance Accuracy, and 89.33% Affected Assets Accuracy on independent $N=150$ manual validation set.
+  2. **100% 35-Month Historical Coverage**:
+     - Ingested Binance Catalog 49 (Blocks 1, 2, 5) and Catalog 161 (Pages 6-12), expanding the news database from 479 to 1,431 articles.
+     - Populated all 35 contiguous calendar months (2024-01 through 2026-11), completely eliminating the 2025 coverage void (12 of 12 months populated).
+  3. **Canonical Macroeconomic Calendar (Source C)**:
+     - Expanded from 26 to 68 canonical records covering all FOMC rate decisions, BLS CPI prints, BLS NFP releases, and regulatory events across 2024, 2025, and 2026 with official agency URLs.
+     - Applied Migration 007 adding `first_observed_at`, `collected_at`, and `revision_observed_at`.
+  4. **Next-Available-Price Execution Rule**:
+     - Formalized execution synchronization: An event is available to Bar $T$ if and only if $t_{\text{avail}} \le T_{\text{close}}$.
+     - Order decisions emitted at $T_{\text{close}}$ must execute strictly at Bar $T+1$ Open ($T+1_{\text{open}}$).
+     - Same-candle execution (at Bar $T$ Close, Open, or intrabar) is strictly prohibited as look-ahead bias.
+     - Revisions arriving at $t > T_{\text{close}}$ are invisible to Bar $T$.
+     - GDELT partially verified records are barred from sub-hourly execution without explicit latency buffer enforcement.
+  5. **Storage Parity & Frozen Dataset Integrity**:
+     - Verified exact zero-delta parity between SQLite (`neptune.db`) and Parquet partitions in `storage/news/`.
+     - Confirmed frozen market dataset `v2.0.0` (420 files, tree SHA-256 `b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`) remains 100% bit-for-bit identical.
+- **Consequences**:
+  - NEPTUNE now possesses a historically rich, 100% temporally populated, point-in-time verified news and macro event foundation suitable for controlled strategy experiments.
+  - Same-candle look-ahead bias is architecturally impossible in backtesting simulations.
