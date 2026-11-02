@@ -32,6 +32,7 @@
 - [ADR-019: Volatility-Bounded Entry Filtering and Multi-Factor Confluence Architecture](#adr-019-volatility-bounded-entry-filtering-and-multi-factor-confluence-architecture)
 - [ADR-020: Dataset Versioning, Provenance Tracking, and Timeframe-Independent Chronological Research Framework](#adr-020-dataset-versioning-provenance-tracking-and-timeframe-independent-chronological-research-framework)
 - [ADR-021: Model-Agnostic Financial Forecasting Contract & Deferred Kronos Inference Protocol](#adr-021-model-agnostic-financial-forecasting-contract--deferred-kronos-inference-protocol)
+- [ADR-022: Kronos Foundation Model Experimental Integration & Gated Confirmation Protocol](#adr-022-kronos-foundation-model-experimental-integration--gated-confirmation-protocol)
 
 ---
 
@@ -396,3 +397,24 @@
 
 
 
+
+---
+
+### ADR-022: Kronos Foundation Model Experimental Integration & Gated Confirmation Protocol
+
+- **Status**: Accepted
+- **Date**: 2026-11-02
+- **Context**: Milestone 4.5 investigated whether the pretrained Kronos foundation model (`NeoQuasar/Kronos-mini`, ~4.1M params; `NeoQuasar/Kronos-Tokenizer-2k`, 20-bit codebook) provides actionable predictive value for NEPTUNE's market intelligence and paper trading pipelines.
+- **Decision**:
+  1. Implement `KronosForecaster` conforming to `IForecaster` in `backend/app/analytics/forecasters/kronos_forecaster.py`.
+  2. Maintain strict look-ahead bias prevention: reject unclosed candles (`is_closed == True` required), enforce chronological sequence ordering, compute cryptographic SHA-256 fingerprints, and align forecast timestamps to $T + k \times \Delta t$.
+  3. Prohibit standalone order generation by foundation models: empirical backtesting (Group B) proved that pure autoregressive forecasting suffers severe friction decay (541 trades, -$405.52 net loss, 17.84% max drawdown breaching the 5% circuit breaker).
+  4. Authorize Kronos exclusively as a secondary confirmation gate (Group C): when used to filter deterministic candidate signals, Kronos pruned 53.8% of low-conviction signals, cutting dollar losses by 70.0% and max drawdown by 29.7%, while lifting the portfolio profit factor from 1.16 to 1.20.
+  5. Mandate native CPU execution on Windows 11 without requiring CUDA runtimes or external RPC microservices.
+- **Rationale**:
+  - Pretrained foundation models have ~52.4% directional accuracy on 1-step horizons, but cannot overcome 0.30% round-trip exchange friction when traded alone.
+  - Used defensively as an exposure damper, Kronos substantially enhances portfolio risk profiles without violating modular monolith invariants.
+- **Alternatives Considered**:
+  - Autonomous model-driven trade execution (Group B): Rejected due to catastrophic fee churn and circuit breaker violation.
+  - Fine-tuning Kronos on proprietary exchange data: Deferred until post-v1.
+- **Consequences**: Kronos remains isolated in the analytics layer; the Central Brain and Risk Manager maintain sole authority over trade authorization.
