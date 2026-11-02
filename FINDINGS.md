@@ -430,6 +430,41 @@ We conducted an empirical three-group ablation study under realistic 0.30% round
 
 ---
 
+### 7.5 Milestone 4.5.1: Independent Forensic Audit of the Kronos Foundation Model Integration
+
+An adversarial, evidence-based audit was executed on commit `f0957a0` to verify model weights, temporal validity, statistical significance, risk manager compliance, and economic accounting.
+
+#### 7.5.1 Architectural Fidelity & Pretrained Weight Verification (Audit A)
+- **Model Parameters:** Exactly **4,108,032 parameters** across 80 safetensor keys, matching upstream `NeoQuasar/Kronos-mini` bit-for-bit with **0 missing keys, 0 unexpected keys, and 0 tensor mismatches**.
+- **Tokenizer Codebook:** Exactly **3,958,042 parameters** across 96 safetensor keys, matching `NeoQuasar/Kronos-Tokenizer-2k`. The 20-bit BSQ accurately maps continuous OHLCV inputs into dual 10-bit sub-codebooks ($1,024 + 1,024 = 2,048$ centroids).
+- **Initialization & Determinism:** 0 weights were randomly initialized. Seeded evaluation (`torch.manual_seed(42)`) is **100% bit-exact reproducible** ($\max |\hat{y}_1 - \hat{y}_2| = 0.00000000$).
+
+#### 7.5.2 Temporal Integrity & Sample Independence (Audit B)
+- **Timeline Integrity:** All 1,350 predictions in `forecast_predictions.parquet` were audited against frozen dataset `v2.0.0` (SHA256: `b4c139f8...`): 0 look-ahead violations, 0 target alignment errors, 0 unclosed candles, and 0 price mismatches across 100 random ground-truth checks.
+- **Sample Independence Finding:** The 1,350 records originate from **exactly 450 unique forecast origins** ($T$) evaluated across 3 horizons ($H \in \{1, 4, 12\}$). Because nested horizons at the same origin are serially and cross-sectionally correlated, hypothesis testing must evaluate each horizon independently at $N=450$.
+
+#### 7.5.3 Statistical Validity & Naive Baselines (Audit C)
+- **Hypothesis Testing ($H_0: p = 0.50$):**
+  - **$H=1$:** Directional accuracy of **52.44%** ($N=450$) yields a two-sided binomial p-value of **$p = 0.3222$** (**not statistically significant**). The 95% Wilson confidence interval is **[47.83%, 57.02%]**, which comfortably spans 50.0%.
+  - **$H=4$:** Accuracy degrades to **48.44%** ($p = 0.5400$), indistinguishable from random guessing.
+  - **$H=12$:** Accuracy collapses to **42.67%** ($p = 0.0021$, **statistically significantly worse than a coin flip**).
+- **Comparison Against Naive Baselines:**
+  - A simple **Previous-Close Persistence Baseline** (predicting zero price change) achieves **52.00%** accuracy at $H=1$ and outperforms Kronos in point-forecast accuracy (**MAPE 0.89% vs Kronos 1.10%**; MAE $213.70 vs $268.53).
+- **Economic Infeasibility:** At 0.30% round-trip exchange friction, a 52.44% directional hit rate yields an expected net loss of **-0.246% per trade**, confirming that raw Kronos forecasts cannot overcome exchange fees.
+
+#### 7.5.4 Risk Manager Forensics: Why Group B Breached 5% Drawdown (Audit D)
+- **Forensic Discovery:** In `_simulate_kronos_pure_strategy`, the simulation loop executed 541 trades without calling `RiskManager.check_drawdown()`. It was designed as an unconstrained time-series study to observe pure ML drift.
+- **Drawdown Evolution:** The portfolio breached the 5.0% circuit breaker at **Trade #21** on January 18, 2026. Had Rule S-04 been enforced in the simulation loop, trading would have been halted immediately, **capping drawdown at -5.12% (-$51.15)** and preventing -$354.37 in subsequent losses. This demonstrates the critical protective necessity of Rule S-04.
+
+#### 7.5.5 Economic & Small-Sample Survivorship Reconciliation (Audit E & F)
+- **Group A (26 trades, -$10.21):** All 26 trades occurred on BTCUSDT. ETHUSDT and BNBUSDT generated 0 trades because their choppy 2026 regimes failed the H7 multi-timeframe trend confluence filter.
+- **Group C (12 trades, -$3.06):** Kronos confirmed 12 trades and rejected 14. While net dollar losses fell, the win rate actually **dropped from 42.31% to 33.33%** (4 wins, 8 losses). The -$7.15 "improvement" was driven purely by fee savings from trading less ($5.25 in fees vs $11.67). With $N=12$, this sample is statistically indistinguishable from noise ($t = 0.32, p = 0.75$).
+
+#### 7.5.6 CPU Benchmark & Latency Reconciliation (Audit G)
+- **Discrepancy Reconciled:** The statistical loop reported $H=1$ latency of **50.41 ms** due to end-to-end pandas extraction, timestamp conversions, and uncertainty parsing. The isolated microbenchmark reported **46.80 ms** on warm tensors. Independent audit re-runs confirmed a median latency of **56.05 ms** ($p_{95} = 86.54 \text{ ms}$) on a 4-core desktop CPU with zero GPU dependencies.
+
+---
+
 ## 8. Conclusion & Strategic Research Roadmap
 
 ### 8.1 Key Scientific Takeaways
@@ -467,6 +502,15 @@ We conducted an empirical three-group ablation study under realistic 0.30% round
 - **Milestone 4.4.1 Run Manifest Audit:** [`docs/audits/MILESTONE_4_4_1_RUN_MANIFEST_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_4_1_RUN_MANIFEST_AUDIT.md)
 - **Milestone 4.4.1 Walk-Forward Audit:** [`docs/audits/MILESTONE_4_4_1_WALK_FORWARD_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_4_1_WALK_FORWARD_AUDIT.md)
 - **Milestone 4.4.1 Results Synthesis:** [`docs/audits/MILESTONE_4_4_1_RESULTS.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_4_1_RESULTS.md)
+- **Milestone 4.5 Integration Report:** [`docs/audits/MILESTONE_4_5_KRONOS_INTEGRATION.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_KRONOS_INTEGRATION.md)
+- **Milestone 4.5 Results Synthesis:** [`docs/audits/MILESTONE_4_5_RESULTS.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_RESULTS.md)
+- **Milestone 4.5.1 Fidelity Audit:** [`docs/audits/MILESTONE_4_5_1_IMPLEMENTATION_FIDELITY.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_IMPLEMENTATION_FIDELITY.md)
+- **Milestone 4.5.1 Temporal Integrity Audit:** [`docs/audits/MILESTONE_4_5_1_TEMPORAL_INTEGRITY.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_TEMPORAL_INTEGRITY.md)
+- **Milestone 4.5.1 Statistical Validity Audit:** [`docs/audits/MILESTONE_4_5_1_STATISTICAL_VALIDITY.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_STATISTICAL_VALIDITY.md)
+- **Milestone 4.5.1 Risk Manager Audit:** [`docs/audits/MILESTONE_4_5_1_RISK_MANAGER_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_RISK_MANAGER_AUDIT.md)
+- **Milestone 4.5.1 Economic Reconciliation:** [`docs/audits/MILESTONE_4_5_1_ECONOMIC_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_ECONOMIC_RECONCILIATION.md)
+- **Milestone 4.5.1 Resource Reproducibility:** [`docs/audits/MILESTONE_4_5_1_RESOURCE_REPRODUCIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_RESOURCE_REPRODUCIBILITY.md)
+- **Milestone 4.5.1 Results Synthesis:** [`docs/audits/MILESTONE_4_5_1_RESULTS.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_RESULTS.md)
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*
