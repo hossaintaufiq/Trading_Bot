@@ -683,6 +683,32 @@ Milestone 4.6.2.2 executed a five-workstream data engineering and integrity camp
 
 ---
 
+### 8.13 Milestone 4.6.2.3: Independent News Research Readiness & Point-in-Time Integration Audit
+Milestone 4.6.2.3 executed a read-only forensic audit of dataset `v2.0.0-news-historical` and the backtest execution pipeline to determine whether the news infrastructure is genuinely ready for news-gated strategy experiments:
+1. **Reconciliation of Classifier Accuracy Discrepancy:**
+   - Identified the root cause of the baseline discrepancy in Milestone 4.6.2.2 report (77.14% / 86.67% / 84.76%): an unverified console print placeholder in `scratch/validate_150_sample.py` was mistakenly copied into documentation.
+   - The authoritative Milestone 4.6.2.1 audited baseline ($N=105$) was re-verified: Category Accuracy 65.71% (69/105), Relevance Accuracy 83.81% (88/105), Affected Assets Accuracy 80.95% (85/105).
+   - The remediated `v1.1.0-deterministic` classifier evaluated on the fresh $N=150$ validation sample (100% disjoint from the 105 baseline set) achieved: Category Accuracy **94.00%** (Wilson 95% CI: [88.99%, 96.81%], true delta **+28.29%**), Relevance Accuracy **94.00%** (Wilson 95% CI: [88.99%, 96.81%], true delta **+10.19%**), Affected Assets Accuracy **89.33%** (Wilson 95% CI: [83.38%, 93.33%], true delta **+8.38%**).
+2. **Macroeconomic Provenance & Forward-Calendar Hazard:**
+   - 100% of official agency URLs (38 `bls.gov`, 23 `federalreserve.gov`, 4 `sec.gov`, 3 protocol announcements) verified across all 68 records.
+   - **Forward-Calendar Isolation:** Identified that 2 records (FOMC rate decision on 2026-11-05 and BLS CPI release on 2026-11-13) represent future scheduled events relative to the audit date (`2026-11-03`). These 2 forward entries must be quarantined (`actual_release_time <= '2026-11-03 23:59:59 UTC'`) during historical backtesting.
+   - Identified 4 structural events where actual confirmed public disclosure differed from nominal calendar times (Dencun on-chain finalized, Halving block mined, Bitcoin/Ethereum Spot ETF approvals).
+3. **GDELT Temporal Ineligibility for Intraday Research:**
+   - Confirmed that `published_at` is `NULL` for all 66 GDELT records, and the $+300\text{s}$ buffer accounts only for GDELT zip packaging cadence, not 15–120 minute web crawler ingestion lag.
+   - Binding Rule: GDELT records remain strictly prohibited from intraday candle-close synchronization.
+4. **End-to-End SimulationEngine Point-in-Time Disconnect:**
+   - Discovered that while `PointInTimeExecutionSynchronizer` is codified in `temporal.py`, `SimulationEngine` (`backend/app/simulation/engine.py` line 345) fills orders at `curr_candle.close` and has no news wiring.
+   - Milestone 4.6.3 must refactor the simulation engine to support next-bar open fills (`curr_candle.close` -> `next_candle.open`) before executing news-gated strategy experiments.
+5. **Reconciled 35-Month Temporal Mapping:**
+   - Coverage spans 2024-01 through 2026-11 (35 months). Month 2026-11 is a partial month (through Nov 3; 2 Binance articles, 0 verified macro releases).
+   - High research density ($\ge 5$ strict-PIT asset-relevant events) is maintained across 32 of 35 months (91.4%); 3 months are moderate density (2024-07, 2024-08, 2026-11); 0 months are empty.
+   - Asset-relevant events total 313 for BTC, 199 for ETH, and 265 for BNB (777 total event occurrences, mean 22.2/month).
+6. **Deduplication Cluster Integrity:**
+   - 1,421 clusters across 1,431 articles: 1,413 singleton clusters, 8 multi-article clusters (26 articles collapsed via SimHash $\le 3$). Zero false merges across assets or distinct events.
+7. **Authoritative Decision:** **PASS WITH LIMITATIONS**. Strategy experiments may proceed in Milestone 4.6.3 subject to the architectural prerequisite that `SimulationEngine` is refactored to next-open fills, forward macro dates are excluded, GDELT is barred from intraday execution, and frozen dataset `v2.0.0` remains untouched.
+
+---
+
 ## 10. Architecture Decision Records & Audit Index
 
 ### Architectural Records
@@ -748,6 +774,11 @@ Milestone 4.6.2.2 executed a five-workstream data engineering and integrity camp
 - **Milestone 4.6.2.2 Dataset Versioning:** [`docs/research/MILESTONE_4_6_2_2_DATASET_VERSIONING.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_DATASET_VERSIONING.md)
 - **Milestone 4.6.2.2 Research Relevance:** [`docs/research/MILESTONE_4_6_2_2_RESEARCH_RELEVANCE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_RESEARCH_RELEVANCE.md)
 - **Milestone 4.6.2.2 Final Report:** [`docs/research/MILESTONE_4_6_2_2_FINAL_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_2_FINAL_REPORT.md)
+- **Milestone 4.6.2.3 Classifier Reconciliation:** [`docs/research/MILESTONE_4_6_2_3_CLASSIFIER_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_3_CLASSIFIER_RECONCILIATION.md)
+- **Milestone 4.6.2.3 Relevance & Coverage Audit:** [`docs/research/MILESTONE_4_6_2_3_RELEVANCE_COVERAGE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_3_RELEVANCE_COVERAGE.md)
+- **Milestone 4.6.2.3 Macro Provenance Audit:** [`docs/research/MILESTONE_4_6_2_3_MACRO_PROVENANCE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_3_MACRO_PROVENANCE.md)
+- **Milestone 4.6.2.3 Point-in-Time Integration Audit:** [`docs/research/MILESTONE_4_6_2_3_PIT_INTEGRATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_3_PIT_INTEGRATION.md)
+- **Milestone 4.6.2.3 Final Forensic Audit Report:** [`docs/research/MILESTONE_4_6_2_3_FINAL_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_3_FINAL_AUDIT.md)
 
 
 ---
