@@ -146,10 +146,13 @@ class ParquetMarketDataRepository:
 
         total_saved = 0
 
+        # Standard columns to persist
+        std_cols = ["timestamp", "open", "high", "low", "close", "volume", "quote_volume", "trades_count"]
+
         # Group by year and month
         for (year, month), group in df.groupby(["_year", "_month"]):
             file_path = self._get_partition_path(symbol, timeframe, int(year), int(month))
-            clean_cols = [c for c in group.columns if not c.startswith("_")]
+            clean_cols = [c for c in std_cols if c in group.columns]
             group_clean = group[clean_cols].copy()
 
             if os.path.exists(file_path):

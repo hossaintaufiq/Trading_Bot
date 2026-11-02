@@ -35,6 +35,10 @@ class BackfillDatasetSummary(BaseModel):
     elapsed_seconds: float
     status: str
     message: str = ""
+    gap_events: int = 0
+    total_missing_candles: int = 0
+    duplicate_count: int = 0
+    sha256_fingerprint: str = ""
 
 
 class HistoricalDataBackfiller:
@@ -183,4 +187,137 @@ class HistoricalDataBackfiller:
             elapsed_seconds=round(time.time() - t0, 2),
             status="SUCCESS" if total_saved > 0 or len(final_df) >= target_candles else "PARTIAL",
             message=f"Added {total_saved} candles. Total stored: {len(final_df)}.",
+        )
+
+    async def backfill_range(
+        self,
+        symbol: str,
+        timeframe: str,
+        start_date: datetime,
+        end_date: datetime,
+        batch_size: int = 1000,
+    ) -> BackfillDatasetSummary:
+        """
+        Backfill historical candles between start_date and end_date (inclusive).
+        Paginates chronologically forward from start_date to end_date.
+        Validates all candles, drops duplicates, enforces sequence continuity,
+        and saves to monthly Parquet partitions.
+        """
+        import hashlib
+        t0 = time.time()
+        sym_clean = symbol.upper().replace("/", "")
+
+        if start_date.tzinfo is None:
+            start_date = start_date.replace(tzinfo=timezone.utc)
+        if end_date.tzinfo is None:
+            end_date = end_date.replace(tzinfo=timezone.utc)
+
+        start_ms = int(start_date.timestamp() * 1000)
+        end_ms = int(end_date.timestamp() * 1000)
+
+        total_fetched = 0
+        total_saved = 0
+        curr_start_ms = start_ms
+
+        while curr_start_ms <= end_ms:
+            fetch_limit = min(batch_size, 1000)
+            try:
+                batch = await self.client.fetch_klines(
+                    symbol=sym_clean,
+                    interval=timeframe,
+                    start_time=curr_start_ms,
+                    end_time=end_ms,
+                    limit=fetch_limit,
+                )
+            except BinanceRateLimitError as e:
+                logger.warning("backfill_rate_limited", retry_after=e.retry_after)
+                await asyncio.sleep(e.retry_after)
+                continue
+            except Exception as e:
+                logger.error("backfill_batch_error", error=str(e))
+                break
+
+            if not batch:
+                break
+
+            total_fetched += len(batch)
+
+            valid_candles: List[ValidatedCandle] = []
+            for item in batch:
+                try:
+                    c, issues = self.validator.validate_candle(item, require_closed=True)
+                    if c is not None:
+                        valid_candles.append(c)
+                except Exception:
+                    continue
+
+            if not valid_candles:
+                break
+
+            std_cols = ["timestamp", "open", "high", "low", "close", "volume", "quote_volume", "trades_count"]
+            batch_df = pd.DataFrame([
+                {k: getattr(c, k, None) for k in std_cols}
+                for c in valid_candles
+            ])
+            saved_count = await self.repository.save_candles(sym_clean, timeframe, batch_df)
+            total_saved += saved_count
+
+            # Next page starts after the last received candle
+            last_dt = valid_candles[-1].dt_utc
+            next_start_ms = int(last_dt.timestamp() * 1000) + 1
+            if next_start_ms <= curr_start_ms:
+                # No forward progress
+                break
+            curr_start_ms = next_start_ms
+
+            if curr_start_ms > end_ms:
+                break
+
+            await asyncio.sleep(self.delay_sec)
+
+        # Load stored range and validate sequence
+        final_df = await self.repository.load_candles(sym_clean, timeframe, start=start_date, end=end_date)
+        candles_objs = []
+        for _, row in final_df.iterrows():
+            d = row.to_dict()
+            d["symbol"] = sym_clean
+            d["timeframe"] = timeframe
+            c, _ = self.validator.validate_candle(d, require_closed=True)
+            if c:
+                candles_objs.append(c)
+
+        valid_seq, seq_issues = self.validator.validate_sequence(candles_objs, timeframe, allow_duplicates=False)
+        gaps = [i for i in seq_issues if i.field == "missing_candles_gap"]
+        dups = [i for i in seq_issues if i.field == "duplicate_timestamp"]
+
+        interval_mins = self.validator.TIMEFRAME_MINUTES.get(timeframe, 0)
+        expected_step = timedelta(minutes=interval_mins) if interval_mins else None
+        total_missing = 0
+        if expected_step:
+            for i in range(1, len(valid_seq)):
+                delta = valid_seq[i].dt_utc - valid_seq[i-1].dt_utc
+                if delta > expected_step:
+                    total_missing += int(delta / expected_step) - 1
+
+        fingerprint_data = ";".join(
+            f"{c.timestamp}:{c.open}:{c.high}:{c.low}:{c.close}:{c.volume}"
+            for c in valid_seq
+        )
+        fingerprint = hashlib.sha256(fingerprint_data.encode("utf-8")).hexdigest()
+
+        return BackfillDatasetSummary(
+            symbol=sym_clean,
+            timeframe=timeframe,
+            candles_fetched=total_fetched,
+            candles_saved=total_saved,
+            total_stored_candles=len(valid_seq),
+            earliest_timestamp=valid_seq[0].timestamp if valid_seq else "",
+            latest_timestamp=valid_seq[-1].timestamp if valid_seq else "",
+            elapsed_seconds=round(time.time() - t0, 2),
+            status="SUCCESS" if len(valid_seq) > 0 else "EMPTY",
+            message=f"Loaded {len(valid_seq)} candles for {sym_clean} {timeframe}.",
+            gap_events=len(gaps),
+            total_missing_candles=total_missing,
+            duplicate_count=len(dups),
+            sha256_fingerprint=fingerprint,
         )
