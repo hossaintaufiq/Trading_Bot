@@ -588,6 +588,17 @@ Milestone 4.6.1 established the complete historical news data engineering infras
 4. **Empirical Ingestion Sample & Cryptographic Manifest**: Successfully ingested a bounded sample of 66 articles (60 Binance Announcements, 6 GDELT GKG crypto records) with 100% success. Partitioned records were exported to Parquet (`storage/news/`) and registered in `storage/exports/milestone_4_6_1/news_dataset_manifest.json` with composite SHA-256 `58c4272ace3d148e85cd031d484a17bcb69eac4234e3f50bd2403d65d1db1084`.
 5. **Research Isolation Invariant**: In compliance with safety rules, news intelligence remains strictly quarantined in the data layer; direct connection to the Central Brain, Risk Manager, or paper execution engine is prohibited until positive expectancy is demonstrated.
 
+
+---
+
+### 8.9 Milestone 4.6.1.1: Independent News Data Integrity & Coverage Audit
+An independent forensic audit was conducted on the persisted news dataset and infrastructure:
+1. **Historical Coverage (Audit A):** The persisted dataset (66 records) represents an initial engineering sample, not a historical backfill. Across the 34-month canonical evaluation window (2024-01-01 to 2026-11-01), 31 months are completely missing. All 60 Binance articles originated from Catalog 48 ("New Cryptocurrency Listing"), containing 0 direct announcements for BTC or ETH.
+2. **Point-in-Time Integrity (Audit B):** GDELT 15-minute timestamps record crawler processing time, not publisher publication time. The 5-minute latency buffer ($t_{\text{avail}} = t_{\text{seen}} + 300\text{s}$) is an ingestion heuristic that eliminates look-ahead bias relative to crawl time, but does not prevent information decay from earlier wire releases. GDELT records must strictly remain `PARTIALLY_VERIFIED`.
+3. **Version Immutability & Deduplication (Audits C & D):** Append-only revision tracking was empirically verified. Updating articles creates new version records while preserving original publication timestamps. The 6-stage deduplication pipeline achieved 100% precision across an 8-pair real-world validation corpus (0 false merges, 0 missed duplicates), conditioned on asset overlap and a 24-hour chronological window.
+4. **Asset Relevance (Audit E):** GDELT matches for BNB were triggered by reports of a $6.3B Binance exchange hack ($4.7B customer outflows), representing an exchange-wide solvency contagion rather than a BNB token protocol event.
+5. **Formal Decision (`PASS WITH LIMITATIONS`):** The data engineering architecture passes all structural and cryptographic tests. However, the dataset is **NOT READY for controlled historical backtesting on dataset `v2.0.0`** due to the 31-month coverage gap. Ingestion of Binance Catalog 49 (News) and multi-year GDELT archives is a mandatory prerequisite before strategy experiments (Milestone 4.6.2).
+
 ## 9. Conclusion & Strategic Research Roadmap
 
 ### 8.1 Key Scientific Takeaways
@@ -638,6 +649,11 @@ Milestone 4.6.1 established the complete historical news data engineering infras
 - **Milestone 4.6.0 News Feasibility:** [`docs/research/MILESTONE_4_6_0_NEWS_DATA_FEASIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_0_NEWS_DATA_FEASIBILITY.md)
 - **Milestone 4.6.0.1 Source Validation & Proof:** [`docs/research/MILESTONE_4_6_0_1_NEWS_SOURCE_VALIDATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_0_1_NEWS_SOURCE_VALIDATION.md)
 - **Milestone 4.6.1 News Foundation Report:** [`docs/research/MILESTONE_4_6_1_IMPLEMENTATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_1_IMPLEMENTATION_REPORT.md)
+- **Milestone 4.6.1.1 Historical Coverage Audit:** [`docs/audits/MILESTONE_4_6_1_1_HISTORICAL_COVERAGE.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_6_1_1_HISTORICAL_COVERAGE.md)
+- **Milestone 4.6.1.1 Point-in-Time Integrity Audit:** [`docs/audits/MILESTONE_4_6_1_1_POINT_IN_TIME_INTEGRITY.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_6_1_1_POINT_IN_TIME_INTEGRITY.md)
+- **Milestone 4.6.1.1 Versioning & Deduplication Audit:** [`docs/audits/MILESTONE_4_6_1_1_VERSION_AND_DEDUP_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_6_1_1_VERSION_AND_DEDUP_AUDIT.md)
+- **Milestone 4.6.1.1 Asset Relevance Audit:** [`docs/audits/MILESTONE_4_6_1_1_ASSET_RELEVANCE.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_6_1_1_ASSET_RELEVANCE.md)
+- **Milestone 4.6.1.1 Results Synthesis:** [`docs/audits/MILESTONE_4_6_1_1_RESULTS.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_6_1_1_RESULTS.md)
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*
