@@ -52,8 +52,13 @@ from app.simulation.models import (
     BacktestConfig,
     BacktestResult,
     EquityPoint,
+    ExecutionPolicy,
+    OrderStatus,
+    ScheduledOrder,
     SimulatedTrade,
 )
+from app.simulation.scheduling import PointInTimeExecutionScheduler
+from app.simulation.news_boundary import NewsIntelligenceBoundary
 from app.simulation.reversal import MultiFactorReversalDetector
 
 
@@ -93,6 +98,11 @@ class HistoricalBacktestEngine:
             spread_bps=config.spread_bps,
             conservative_ambiguity=config.conservative_ambiguous_bars,
         )
+        self.scheduler = PointInTimeExecutionScheduler(
+            execution_policy=config.execution_policy,
+            max_execution_gap_bars=config.max_execution_gap_bars,
+        )
+        self.news_boundary = NewsIntelligenceBoundary()
 
     def _evaluate_candidate_filter(
         self,
@@ -146,12 +156,18 @@ class HistoricalBacktestEngine:
         self,
         candles_by_symbol: Optional[Dict[str, List[ValidatedCandle]]] = None,
         htf_candles_by_symbol: Optional[Dict[str, List[ValidatedCandle]]] = None,
+        news_events: Optional[List[Dict[str, Any]]] = None,
     ) -> BacktestResult:
         """
         Execute event-driven backtest.
         If candles_by_symbol is omitted, data is loaded from ParquetMarketDataRepository.
         """
         backtest_id = f"bkt_{uuid.uuid4().hex[:12]}"
+
+        if news_events and self.config.execution_policy == ExecutionPolicy.LEGACY_CLOSE_FILL:
+            raise ValueError(
+                "News-gated simulations require execution_policy='NEXT_ELIGIBLE_PRICE' to prevent look-ahead bias."
+            )
 
         # 1. Load or validate historical dataset
         candles_map = candles_by_symbol or await self._load_data_from_repo()
@@ -226,6 +242,30 @@ class HistoricalBacktestEngine:
                 )
                 daily_starting_equity = cash_equity + pos_value_day_start
                 daily_realized_pnl = Decimal("0")
+
+            # --- PHASE 0: Process scheduled orders at candle open (NEXT_ELIGIBLE_PRICE) ---
+            if self.config.execution_policy == ExecutionPolicy.NEXT_ELIGIBLE_PRICE:
+                for sym in self.config.symbols:
+                    curr_c = candle_lookup.get(sym, {}).get(ts)
+                    if curr_c is None:
+                        continue
+                    curr_tot_eq = cash_equity + sum(p.position_size * p.current_price for p in open_positions)
+                    filled_pairs, _ = self.scheduler.process_candle_open(
+                        curr_candle=curr_c,
+                        current_open_positions=open_positions,
+                        current_equity=curr_tot_eq,
+                        peak_equity=peak_equity,
+                        daily_starting_equity=daily_starting_equity,
+                        daily_realized_pnl=daily_realized_pnl,
+                        execution_simulator=self.execution_simulator,
+                        max_concurrent_positions=self.config.max_concurrent_positions,
+                        max_drawdown_pct=self.config.max_drawdown_pct,
+                        daily_loss_limit_pct=self.config.daily_loss_limit_pct,
+                    )
+                    for sched_ord, new_pos in filled_pairs:
+                        cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
+                        cash_equity -= cash_outflow
+                        open_positions.append(new_pos)
 
             # --- PHASE A: Update open positions against brackets & pending reversals ---
             positions_to_keep: List[ActivePosition] = []
@@ -380,9 +420,19 @@ class HistoricalBacktestEngine:
                 if len(sub_candles) < 30:
                     continue  # Warm-up requirement
 
-                # Check if position already open for this symbol
-                sym_already_open = any(p.symbol == sym for p in open_positions) or any(p.symbol == sym for p in newly_opened_positions)
-                if sym_already_open or (len(open_positions) + len(newly_opened_positions)) >= self.config.max_concurrent_positions:
+                # Check if position already open or scheduled for this symbol
+                sym_pending = any(o.symbol == sym for o in self.scheduler.pending_orders)
+                sym_already_open = (
+                    any(p.symbol == sym for p in open_positions)
+                    or any(p.symbol == sym for p in newly_opened_positions)
+                    or sym_pending
+                )
+                total_committed = (
+                    len(open_positions)
+                    + len(newly_opened_positions)
+                    + len(self.scheduler.pending_orders)
+                )
+                if sym_already_open or total_committed >= self.config.max_concurrent_positions:
                     continue
 
                 # Run specialist analytical agents
@@ -468,39 +518,73 @@ class HistoricalBacktestEngine:
                         peak_equity=peak_equity,
                         daily_starting_equity=daily_starting_equity,
                         daily_realized_pnl=daily_realized_pnl,
-                        open_positions=open_positions + newly_opened_positions,
+                        open_positions=open_positions + newly_opened_positions + list(self.scheduler.pending_orders),
                         timestamp=ts,
                     )
 
                     if risk_eval.approved and risk_eval.position_size:
                         pipeline_counts["risk_approved_signals"] += 1
-                        # Simulate paper entry
-                        new_pos = self.execution_simulator.simulate_entry(
-                            symbol=sym,
-                            timeframe=self.config.timeframe,
-                            direction=cand.direction,
-                            raw_price=Decimal(str(curr_candle.close)),
-                            position_size=risk_eval.position_size,
-                            stop_loss=Decimal(str(cand.suggested_stop_loss)),
-                            take_profit=Decimal(str(cand.suggested_take_profit)),
-                            signal_timestamp=cand.timestamp,
-                            entry_timestamp=ts,
-                            market_regime=sym_regime.regime,
-                            strategy_metadata={
-                                "signal_id": cand.signal_id,
-                                "strategy_id": cand.strategy_id,
-                                "raw_confidence": cand.raw_confidence,
-                                "rr_ratio": cand.risk_reward_ratio,
-                                "rationale": cand.rationale,
-                            },
-                            exit_policy=self.config.exit_policy,
-                            theoretical_take_profit=Decimal(str(cand.suggested_take_profit)),
-                        )
+                        if self.config.execution_policy == ExecutionPolicy.LEGACY_CLOSE_FILL:
+                            # Legacy path: immediate fill at curr_candle.close
+                            new_pos = self.execution_simulator.simulate_entry(
+                                symbol=sym,
+                                timeframe=self.config.timeframe,
+                                direction=cand.direction,
+                                raw_price=Decimal(str(curr_candle.close)),
+                                position_size=risk_eval.position_size,
+                                stop_loss=Decimal(str(cand.suggested_stop_loss)),
+                                take_profit=Decimal(str(cand.suggested_take_profit)),
+                                signal_timestamp=cand.timestamp,
+                                entry_timestamp=ts,
+                                market_regime=sym_regime.regime,
+                                strategy_metadata={
+                                    "signal_id": cand.signal_id,
+                                    "strategy_id": cand.strategy_id,
+                                    "raw_confidence": cand.raw_confidence,
+                                    "rr_ratio": cand.risk_reward_ratio,
+                                    "rationale": cand.rationale,
+                                },
+                                exit_policy=self.config.exit_policy,
+                                theoretical_take_profit=Decimal(str(cand.suggested_take_profit)),
+                                information_availability_cutoff=ts,
+                                candle_close_timestamp=ts,
+                                order_creation_timestamp=ts,
+                                risk_approval_timestamp=ts,
+                                risk_approval_token=risk_eval.risk_approval_token or f"tok_{uuid.uuid4().hex[:8]}",
+                                earliest_eligible_execution_timestamp=ts,
+                                execution_policy=self.config.execution_policy,
+                            )
 
-                        # Deduct actual cash outflow at entry (executed notional + entry fee)
-                        cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
-                        cash_equity -= cash_outflow
-                        newly_opened_positions.append(new_pos)
+                            # Deduct actual cash outflow at entry (executed notional + entry fee)
+                            cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
+                            cash_equity -= cash_outflow
+                            newly_opened_positions.append(new_pos)
+                        else:
+                            # NEXT_ELIGIBLE_PRICE: schedule order for execution at next eligible candle open
+                            self.scheduler.schedule_order(
+                                signal_id=cand.signal_id,
+                                symbol=sym,
+                                timeframe=self.config.timeframe,
+                                direction=cand.direction,
+                                signal_timestamp=cand.timestamp,
+                                candle_close_timestamp=ts,
+                                position_size=risk_eval.position_size,
+                                stop_loss=Decimal(str(cand.suggested_stop_loss)),
+                                take_profit=Decimal(str(cand.suggested_take_profit)) if cand.suggested_take_profit else None,
+                                risk_approval_token=risk_eval.risk_approval_token or f"tok_{uuid.uuid4().hex[:8]}",
+                                market_regime=sym_regime.regime,
+                                strategy_metadata={
+                                    "signal_id": cand.signal_id,
+                                    "strategy_id": cand.strategy_id,
+                                    "raw_confidence": cand.raw_confidence,
+                                    "rr_ratio": cand.risk_reward_ratio,
+                                    "rationale": cand.rationale,
+                                },
+                                exit_policy=self.config.exit_policy,
+                                theoretical_take_profit=Decimal(str(cand.suggested_take_profit)) if cand.suggested_take_profit else None,
+                                information_availability_cutoff=ts,
+                                scheduled_bar_index=step_idx,
+                            )
                     else:
                         pipeline_counts["risk_rejected_signals"] += 1
 
@@ -528,7 +612,14 @@ class HistoricalBacktestEngine:
                 )
             )
 
-        # 4. Post-Replay: Force-close remaining open positions at final candle
+        # 4. Post-Replay: Cancel remaining pending orders & force-close remaining open positions
+        for pending_ord in self.scheduler.pending_orders:
+            pending_ord.status = OrderStatus.CANCELLED
+            pending_ord.rejection_reason = "Simulation ended before next eligible execution point"
+            self.scheduler.order_history.append(pending_ord)
+        self.scheduler.pending_orders.clear()
+
+        # Force-close remaining open positions at final candle
         for pos in open_positions:
             last_candle = candle_lookup.get(pos.symbol, {}).get(all_timestamps[-1])
             if last_candle:
