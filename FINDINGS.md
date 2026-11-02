@@ -517,7 +517,7 @@ A primary failure mode in published quantitative NLP backtests is **revision bia
 #### The Simulation Invariant
 To prevent look-ahead bias, financial simulations must differentiate between four distinct temporal coordinates:
 
-$$egin{aligned}
+$$\begin{aligned}
 t_{\text{event}} & \le t_{\text{pub}} \le t_{\text{seen}} \le t_{\text{avail}} \le T_{\text{decision}} \\
 \text{where: } \quad & t_{\text{avail}} = t_{\text{pub}} + \Delta t_{\text{buffer}} \quad (\Delta t_{\text{buffer}} \ge 300 \text{ seconds / 5 minutes})
 \end{aligned}$$
@@ -571,6 +571,12 @@ The Quantitative Systems Group issued a formal recommendation of **`CONDITIONAL 
 
 ---
 
+### 8.7 Milestone 4.6.0.1: Empirical Source Validation & Feasibility Proof
+Prior to committing to Milestone 4.6.1 ingestion, empirical verification was executed directly on candidate endpoints:
+1. **Binance Public CMS Announcements:** Successfully resolved the list timestamp limitation. The article detail endpoint (`/bapi/composite/v1/public/cms/article/detail/query?articleCode={code}`) provides exact millisecond UTC `publishDate`, `lastUpdateTime`, `version`, and tag/pair mappings. Continuously paginated 100 pages back through November 2023 without authentication or blocking (`000000` status).
+2. **GDELT 2.0 Ingestion Proof & DOC API Rate Limiting:** The interactive DOC API (`api.gdeltproject.org`) proved feasibility by returning point-in-time indexed records for BTC/ETH/BNB (June 2026), but triggered aggressive IP rate limiting (`HTTP 429`) upon consecutive calls. Batch historical ETL must ingest raw 15-minute GKG master CSV archives (`data.gdeltproject.org/gdeltv2/`) or Google BigQuery to achieve reproducible, unthrottled point-in-time extraction.
+3. **Syndication Clustering & Control Groups:** Empirical audits of June 1, 2026 news confirmed multi-outlet syndication across 1–8 hours (e.g., MicroStrategy reporting). Event clustering (SimHash <= 3 over 24h, triggering only on earliest t_avail) is required to prevent echo-chamber over-trading. Furthermore, research design was refined to include frequency-matched and exposure-matched technical controls to isolate true news alpha from transaction fee reduction effects.
+
 ## 9. Conclusion & Strategic Research Roadmap
 
 ### 8.1 Key Scientific Takeaways
@@ -618,6 +624,7 @@ The Quantitative Systems Group issued a formal recommendation of **`CONDITIONAL 
 - **Milestone 4.5.1 Resource Reproducibility:** [`docs/audits/MILESTONE_4_5_1_RESOURCE_REPRODUCIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_RESOURCE_REPRODUCIBILITY.md)
 - **Milestone 4.5.1 Results Synthesis:** [`docs/audits/MILESTONE_4_5_1_RESULTS.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_5_1_RESULTS.md)
 - **Milestone 4.6.0 News Feasibility:** [`docs/research/MILESTONE_4_6_0_NEWS_DATA_FEASIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_0_NEWS_DATA_FEASIBILITY.md)
+- **Milestone 4.6.0.1 Source Validation & Proof:** [`docs/research/MILESTONE_4_6_0_1_NEWS_SOURCE_VALIDATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_0_1_NEWS_SOURCE_VALIDATION.md)
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*
