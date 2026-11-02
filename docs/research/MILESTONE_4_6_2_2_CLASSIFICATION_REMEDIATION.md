@@ -66,3 +66,4 @@ All six failure modes were codified into a dedicated test suite `backend/tests/u
 - `test_failure_mode_6_punctuation_acronym_normalization`: PASSED
 
 Execution time: **0.19 seconds** (100% deterministic, zero API calls, zero cost).
+

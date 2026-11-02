@@ -132,3 +132,4 @@ The quantitative research infrastructure for historical news intelligence is aut
 2. **Execution Timing Constraint:** All news-gated strategy signals must adhere strictly to the **Next-Available-Price Execution Rule** ($t_{\text{avail}} \le T_{\text{close}} \to \text{Fill at } T+1_{\text{open}}$). Same-candle fills remain strictly prohibited.
 3. **GDELT Usage Boundary:** GDELT records may only be used for macro regime filtering on $\ge 1\text{h}$ timeframes with an enforced $+300\text{s}$ latency buffer.
 4. **Preservation of Market Baseline:** The market dataset `v2.0.0` remains frozen. No strategy tuning or threshold optimization is permitted outside formal experimental controls.
+

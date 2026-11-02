@@ -62,3 +62,4 @@ The test suite in `backend/tests/unit/test_milestone_4_6_2_2_pit.py` verified 8 
 | **8. Multi-Version Isolation** | $v_1$ at 10:00, $v_2$ at 12:30. As-of 11:00 query | $v_2$ is invisible; strictly returns $v_1$ | **PASSED** |
 
 Execution time: **0.80 seconds**. All 8 tests passed with 100% precision.
+
