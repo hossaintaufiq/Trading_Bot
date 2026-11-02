@@ -163,3 +163,4 @@ Milestone 4.6.3 may proceed **only** under the following mandatory constraints:
 4. `market_relevance_breakdown.csv`: Comprehensive distribution of all 1,431 articles across relevance tiers and assets.
 5. `macro_provenance_audit.csv`: Complete audit of all 68 macro events with official agency URLs and release dates.
 6. `research_eligibility_matrix.csv`: Granular eligibility matrix for backtesting use cases across data sources.
+

@@ -104,3 +104,4 @@ Point-in-time execution logic is mathematically verified in unit tests, but **no
 1. Complete refactoring of `SimulationEngine.run_simulation()` to call `PointInTimeExecutionSynchronizer.resolve_execution_schedule()`.
 2. Execution strictly at `candle[T+1].open` with existing taker fees, slippage, and spread friction.
 3. Strict exclusion of GDELT from intraday signal paths.
+

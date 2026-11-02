@@ -82,3 +82,4 @@ While the headline accuracy of 94.00% is mathematically validated, the audit hig
 2. **Promotional False Positives (Precision 88.0%):** 3 operational exchange service announcements were assigned to `UNCLASSIFIED` because they used retail marketing terminology (*"Trade to share"*, *"Exclusive"*).
 
 **Audit Verdict:** `DeterministicNewsClassifier` (v1.1.0) is mathematically verified and suitable for controlled strategy research, provided that regulatory events are not treated as primary trade entry triggers.
+
