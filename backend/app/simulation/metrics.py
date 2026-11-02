@@ -232,10 +232,25 @@ def calculate_backtest_metrics(
     for reg in set(t.market_regime for t in trades):
         reg_trades = [t for t in trades if t.market_regime == reg]
         reg_wins = [t for t in reg_trades if t.net_pnl > Decimal("0")]
+        reg_gross_profit = sum((t.gross_pnl for t in reg_trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+        reg_gross_loss = abs(sum((t.gross_pnl for t in reg_trades if t.gross_pnl < Decimal("0")), Decimal("0.00")))
+        reg_net_pnl = sum((t.net_pnl for t in reg_trades), Decimal("0.00"))
+        reg_fees = sum((t.fees for t in reg_trades), Decimal("0.00"))
+        reg_slip = sum((t.slippage_cost for t in reg_trades), Decimal("0.00"))
+        reg_spread = sum((t.spread_cost for t in reg_trades), Decimal("0.00"))
+        reg_duration = [t.holding_duration_seconds for t in reg_trades if t.holding_duration_seconds > 0]
         perf_by_reg[reg] = {
             "total_trades": len(reg_trades),
             "win_rate": round(len(reg_wins) / len(reg_trades), 4) if reg_trades else 0.0,
-            "net_pnl": float(sum((t.net_pnl for t in reg_trades), Decimal("0.00"))),
+            "gross_profit": float(reg_gross_profit),
+            "gross_loss": float(reg_gross_loss),
+            "net_pnl": float(reg_net_pnl),
+            "expectancy_per_trade": float(reg_net_pnl / Decimal(str(len(reg_trades)))) if reg_trades else 0.0,
+            "profit_factor": round(float(reg_gross_profit / reg_gross_loss), 2) if reg_gross_loss > Decimal("0") else (999.0 if reg_gross_profit > Decimal("0") else 0.0),
+            "total_fees": float(reg_fees),
+            "total_slippage": float(reg_slip),
+            "total_spread": float(reg_spread),
+            "avg_holding_duration_seconds": round(float(np.mean(reg_duration)), 1) if reg_duration else 0.0,
         }
 
     perf_by_exit_reason: Dict[str, Dict[str, Any]] = {}

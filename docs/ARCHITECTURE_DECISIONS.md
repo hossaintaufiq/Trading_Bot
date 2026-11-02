@@ -30,6 +30,8 @@
 - [ADR-017: Balanced Protection Exit Engine and Multi-Factor Early Reversal Protocol](#adr-017-balanced-protection-exit-engine-and-multi-factor-early-reversal-protocol)
 - [ADR-018: Exit Policy Benchmark Protocol and Chronological Out-of-Sample Degradation Framework](#adr-018-exit-policy-benchmark-protocol-and-chronological-out-of-sample-degradation-framework)
 - [ADR-019: Volatility-Bounded Entry Filtering and Multi-Factor Confluence Architecture](#adr-019-volatility-bounded-entry-filtering-and-multi-factor-confluence-architecture)
+- [ADR-020: Dataset Versioning, Provenance Tracking, and Timeframe-Independent Chronological Research Framework](#adr-020-dataset-versioning-provenance-tracking-and-timeframe-independent-chronological-research-framework)
+- [ADR-021: Model-Agnostic Financial Forecasting Contract & Deferred Kronos Inference Protocol](#adr-021-model-agnostic-financial-forecasting-contract--deferred-kronos-inference-protocol)
 
 ---
 
@@ -344,5 +346,53 @@
   - Overfitting moving average periods or RSI levels: Curve-fitting individual indicators fails out-of-sample and does not address the fundamental friction-to-ATR ratio.
   - Relying exclusively on higher-timeframe alignment without volatility bounds: HTF alignment was shown by ablation to be insufficient on its own if local volatility is compressed.
 - **Consequences**: Signal Validator and Strategy Analyst agents can now employ causal, zero-lookahead entry filters before routing candidate orders to the Risk Manager.
+
+---
+
+### ADR-020: Dataset Versioning, Provenance Tracking, and Timeframe-Independent Chronological Research Framework
+
+- **Status**: Accepted
+- **Date**: 2026-11-02
+- **Context**: Milestone 4.3 revealed a critical flaw in pooled chronological evaluations: unequal historical coverage (15m covered ~52 days, 1h covered ~208 days, 4h covered ~500 days) caused the out-of-sample period to be dominated exclusively by lower-timeframe trades, destroying timeframe balance. Furthermore, reproducible research requires immutable dataset versioning, cryptographic provenance fingerprints, and explicit partition boundary enforcement without look-ahead indicator leakage.
+- **Decision**:
+  1. Establish an immutable dataset versioning hierarchy: Dataset `v1.0.0` (frozen reference baseline of 87 Parquet files, SHA256 `11c41f00...`) and Dataset `v2.0.0` (expanded 34-month contiguous history from 2024-01-01 to 2026-11-01 across BTCUSDT, ETHUSDT, BNBUSDT on 15m, 1h, 4h, and 1d; 420 Parquet files).
+  2. Implement SQLite metadata tracking via table `historical_datasets` recording dataset ID, date ranges, candle counts, missing interval counts, validation status, and SHA256 fingerprints.
+  3. Enforce the canonical 8-column Parquet schema: `('timestamp', 'open', 'high', 'low', 'close', 'volume', 'quote_volume', 'trades_count')`.
+  4. Mandate timeframe-independent evaluation: each symbol and timeframe must be evaluated independently before considering pooled results.
+  5. Enforce chronological partitions (Train, Validation, OOS) with strict boundary enforcement: orders cannot cross partition boundaries, and indicators are primed using pre-partition closed warmup bars without look-ahead leakage.
+  6. Support expanding walk-forward evaluation across standardized chronological folds.
+- **Rationale**:
+  - Eliminates sample selection distortion caused by asymmetric timeframe lengths.
+  - Guarantees 100% bit-for-bit reproducible data provenance across all research milestones.
+  - Adding 1d candles establishes an authoritative higher timeframe for 4h alignment and enables multi-year macro regime analysis.
+- **Alternatives Considered**:
+  - Overwriting historical files in-place without versioning: Violates auditability and breaks past milestone reproducibility.
+  - Random k-fold cross validation: Strictly forbidden by Rule `S-05` due to look-ahead bias and serial correlation.
+- **Consequences**: Backtest runners, data downloaders, and audit manifests must track explicit dataset IDs and partition boundaries.
+
+---
+
+### ADR-021: Model-Agnostic Financial Forecasting Contract & Deferred Kronos Inference Protocol
+
+- **Status**: Accepted
+- **Date**: 2026-11-02
+- **Context**: Future milestones intend to evaluate pre-trained foundation models (such as Kronos, Chronos, TimesFM) for multi-step financial time-series forecasting. Integrating deep learning weights directly into NEPTUNE's core trading pipeline at this stage would violate Rule `E-08` (minimal dependencies), inflate installation footprints, and risk architectural coupling to proprietary model interfaces.
+- **Decision**:
+  1. Define a strict model-independent forecasting contract in `backend/app/analytics/forecasting.py` using typed Pydantic models: `ForecastInput`, `ForecastOutput`, `ForecastCandle`, and `IForecaster`.
+  2. Enforce zero look-ahead bias: `ForecastInput` requires past closed candles, sequence length, forecast horizon, dataset ID, and generates an input cryptographic fingerprint.
+  3. Enforce research isolation: Forecast outputs can only serve as research signals or filter inputs; they are strictly prohibited from directly authorizing paper orders or bypassing the Central Brain and Risk Manager (Rules `S-01`, `S-04`).
+  4. Defer deep learning model weight downloads and GPU inference runtimes until the forecasting evaluation harness is fully benchmarked. Provide `MockAgnosticForecaster` for testing contracts and pipeline integration.
+  5. Design future comparative research to measure the marginal economic value of foundation models:
+     - Configuration A: Deterministic NEPTUNE baseline.
+     - Configuration B: Forecaster alone.
+     - Configuration C: Hybrid (Deterministic + Forecaster).
+- **Rationale**:
+  - Decouples NEPTUNE from any specific deep learning architecture or PyTorch/TensorFlow framework.
+  - Ensures clean pair-wise ablation studies to isolate whether neural forecasting provides genuine economic alpha after execution friction.
+- **Alternatives Considered**:
+  - Bundling Kronos weights and PyTorch directly in v1: Incurs multi-gigabyte dependency overhead and violates modular monolith stability.
+  - Allowing forecasters to place direct orders: Violates Central Brain architecture (Rule `A-06`) and Risk Manager authorization (Rule `S-04`).
+- **Consequences**: Future ML components will implement the `IForecaster` protocol, preserving zero-lookahead guarantees and input dataset provenance.
+
 
 
