@@ -98,3 +98,4 @@ We executed an independent re-run of **Fold 4 Test** on BTCUSDT 4h:
   - Trades Fingerprint: `9b67e54a3f26180141379e325ca0bd6b11cc9deeb0a1f61b288590f31ee5b2b9` (Match: `True`)
 
 The walk-forward engine is **100% deterministic and verified**.
+

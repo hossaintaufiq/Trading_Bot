@@ -115,3 +115,4 @@ Reconciling `Baseline BALANCED` strictly across comparable series (excluding 15m
 The reported difference between partition P&Ls and `FULL` P&L is **fully reconciled and verified**. 
 - It is not an accounting defect.
 - It reflects the intended safety operation of NEPTUNE's Risk Manager: **the circuit breaker successfully protected paper capital by halting trading when the strategy experienced severe drawdown**.
+

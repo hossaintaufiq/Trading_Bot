@@ -107,3 +107,4 @@ To guarantee immutability:
 2. `storage/historical/` serves as the active working copy.
 3. An SHA256 check across all 420 files between `storage/datasets/v2.0.0/` and `storage/historical/` confirmed **0 mismatches**.
 4. Both repositories are bit-for-bit identical.
+
