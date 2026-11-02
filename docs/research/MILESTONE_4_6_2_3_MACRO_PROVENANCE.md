@@ -67,3 +67,4 @@ In 1 record (`macro_20240802_bls_nfp`), `first_observed_at` and `collected_at` w
 ## 4. Conclusion & Audit Sign-Off
 
 The 66 verified historical macroeconomic events provide ground-truthed, agency-backed event timestamps across all 35 calendar months. The 2 future scheduled events have been categorized and isolated. The macroeconomic calendar is **audited, reconciled, and authorized for research use**.
+

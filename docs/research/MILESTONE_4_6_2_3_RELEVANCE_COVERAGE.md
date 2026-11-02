@@ -66,3 +66,4 @@ The multi-stage clusterer successfully collapses identical exchange updates and 
 
 1. **Defensive Filtering Suitability:** The dataset contains ample high-impact events (margin tier updates, tick size changes, ETF flows, and macroeconomic prints) to test whether avoiding or hedging around these periods improves net risk-adjusted returns.
 2. **Directional Alpha Warning:** There is **no evidence** that headline sentiment predicts future directional returns. News intelligence must be tested as a defensive filter or volatility regime marker, not as an unconstrained directional signal.
+
