@@ -613,6 +613,26 @@ Milestone 4.6.2 resolved the historical coverage gap and relevance misalignment 
 5. **Storage Parity & Cryptographic Manifest:** Reconciled 1:1 between relational SQLite (`neptune.db`) and snappy-compressed Parquet partitions in `storage/news/` partitioned by source and event year. Frozen market dataset `v2.0.0` (420 files) remained completely untouched and bit-for-bit identical (`b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`).
 6. **Milestone Decision (`PASS WITH LIMITATIONS`):** The historical news dataset is sufficiently representative and temporally defensible for controlled historical news research in Milestone 4.6.3. Strict point-in-time backtests are limited to the 439 `POINT_IN_TIME_VERIFIED` records (Binance + Macro Calendar); GDELT records remain restricted to exploratory and regime-level research.
 
+---
+
+### 8.11 Milestone 4.6.2.1: Independent News Dataset Reconciliation, Historical Coverage & Classification Audit
+Milestone 4.6.2.1 performed an independent forensic, statistical, and engineering audit of the Milestone 4.6.2 historical news foundation:
+1. **Definitive Record Count Reconciliation:** Reconciled SQLite database tables and Parquet partition files with zero delta:
+   - Total Unique Entities: Exactly **505 records** (413 Binance announcements, 66 GDELT articles, 26 canonical macro events).
+   - Event Clusters: 474 semantic clusters across 479 articles (5 multi-article duplicate pairs, 469 singletons).
+   - "Macro: 22" Reporting Ambiguity Resolved: The monthly coverage table in Milestone 4.6.2 summed to 479 articles; the column labeled "Macro" tracked article-level relevance (`relevance_classification == 'MACRO'`), completely distinct from the 26 canonical records in `news_macro_events`.
+2. **Exhaustive 35-Month Temporal Coverage Matrix:** Evaluated every calendar month from 2024-01 to 2026-11:
+   - Populated Months: 18 of 35 months (51.4%) across all sources; 14 of 35 months (40.0%) for news articles.
+   - 2025 Coverage Void Root Cause: Confirmed as `SOURCE_NOT_QUERIED` (intentional bounded sampling design). In `execute_staged_ingest.py`, pagination skipped pages 11–47 of Binance Catalog 49 to prevent HTTP 429 rate limits; 2025 GDELT archives and 2025 Macro Calendar dates were not requested.
+3. **Point-in-Time Temporal Audit (7 Coordinates):**
+   - 439 records (86.9%) are `POINT_IN_TIME_VERIFIED` with millisecond/second publisher timestamps and are authorized for candle-close backtest synchronization ($t_{\text{event}} \le t_{\text{candle\_close}}$).
+   - 66 GDELT records (13.1%) are `PARTIALLY_VERIFIED` (`published_at` is `NULL`); strictly excluded from intraday candle backtests.
+4. **Stratified 105-Record Classification Audit:**
+   - Evaluated across a stratified sample of $N=105$ records: Event Category Accuracy was **65.71%**, Relevance Accuracy was **83.81%**, and Affected Assets Accuracy was **80.95%**.
+   - Identified 6 concrete failure modes: `TAXONOMY_BOUNDARY_OVERLAP` (8), `BOILERPLATE_DISCLAIMER_FALSE_POSITIVE` (6), `SECURITY_REGEX_FALSE_POSITIVE` (4), `PROMOTIONAL_ASSET_FALSE_POSITIVE` (3), `CATEGORY_PRECEDENCE_MASKING` (2), and `PUNCTUATION_ACRONYM_MISS` (1).
+5. **Deduplication Precision (100%):** Verified all 5 duplicate clusters as genuine syndications within 24 hours. Zero false merges.
+6. **Audit Verdict (`PASS WITH LIMITATIONS`):** Authorized for discrete Event Studies and Macroeconomic Risk Overlays. Continuous 35-month intraday backtests remain prohibited until pages 11–47 are backfilled in Milestone 4.6.3.
+
 ## 9. Conclusion & Strategic Research Roadmap
 
 ### 8.1 Key Scientific Takeaways
@@ -675,6 +695,13 @@ Milestone 4.6.2 resolved the historical coverage gap and relevance misalignment 
 - **Milestone 4.6.2 Point-in-Time Policy:** [`docs/research/MILESTONE_4_6_2_POINT_IN_TIME_POLICY.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_POINT_IN_TIME_POLICY.md)
 - **Milestone 4.6.2 Data Quality Report:** [`docs/research/MILESTONE_4_6_2_DATA_QUALITY_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_DATA_QUALITY_REPORT.md)
 - **Milestone 4.6.2 Implementation Report:** [`docs/research/MILESTONE_4_6_2_IMPLEMENTATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_IMPLEMENTATION_REPORT.md)
+- **Milestone 4.6.2.1 Coverage Audit:** [`docs/research/MILESTONE_4_6_2_1_COVERAGE_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_COVERAGE_AUDIT.md)
+- **Milestone 4.6.2.1 Count Reconciliation:** [`docs/research/MILESTONE_4_6_2_1_COUNT_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_COUNT_RECONCILIATION.md)
+- **Milestone 4.6.2.1 Classification Audit:** [`docs/research/MILESTONE_4_6_2_1_CLASSIFICATION_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_CLASSIFICATION_AUDIT.md)
+- **Milestone 4.6.2.1 Point-in-Time Audit:** [`docs/research/MILESTONE_4_6_2_1_POINT_IN_TIME_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_POINT_IN_TIME_AUDIT.md)
+- **Milestone 4.6.2.1 Deduplication Audit:** [`docs/research/MILESTONE_4_6_2_1_DEDUPLICATION_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_DEDUPLICATION_AUDIT.md)
+- **Milestone 4.6.2.1 Research Readiness:** [`docs/research/MILESTONE_4_6_2_1_RESEARCH_READINESS.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_RESEARCH_READINESS.md)
+- **Milestone 4.6.2.1 Final Audit Report:** [`docs/research/MILESTONE_4_6_2_1_FINAL_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_1_FINAL_REPORT.md)
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*
