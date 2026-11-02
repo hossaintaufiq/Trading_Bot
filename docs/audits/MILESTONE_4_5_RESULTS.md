@@ -140,3 +140,4 @@ Accuracy was relatively uniform across major assets, reflecting broad market co-
 
 ### Q10: What is the architectural recommendation for Milestone 5.0?
 **Answer**: Kronos should **not** be deployed as a primary signal generator or autonomous paper execution model. Instead, it should be permanently integrated into the Central Brain as an **asynchronous probabilistic confirmation gate and dynamic position sizing input**, using its short-horizon directional predictions to suppress low-conviction signals and reduce portfolio churn.
+
