@@ -65,3 +65,4 @@ All 35 calendar months are now populated with official exchange events:
 1. **Storage Parity:** All 1,431 articles and 1,431 version records exist identically in SQLite `neptune.db` and partitioned Parquet files (`storage/news/binance_announcements/YYYY/articles.parquet`).
 2. **Immutability:** Every version record is cryptographically pinned by its `raw_payload_sha256`.
 3. **Point-in-Time Status:** All 1,431 Binance records are marked `POINT_IN_TIME_VERIFIED` with verified millisecond UTC publication timestamps.
+

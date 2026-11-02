@@ -218,3 +218,4 @@ def test_historical_revision_isolation():
     assert vis_1300 is not None
     assert vis_1300["version_number"] == 2
     assert "cancels maintenance" in vis_1300["headline"]
+

@@ -56,3 +56,4 @@ Every single month in the 35-month window contains at least 1 verified macroecon
 - **Basket Relevance (`MACRO`):** FOMC, CPI, and NFP prints systematically affect macro liquidity and risk-free discount rates. They are assigned `relevance_classification = "MACRO"` and attributed to all target assets: `["BTC", "ETH", "BNB"]`.
 - **Look-Ahead Prevention:** The exact scheduled release timestamp (`scheduled_at`) is identical to `actual_release_at` for scheduled releases. Any post-release revision is timestamped at `revision_observed_at`, preventing historical back-fitting.
 - **Export Verification:** Parquet export to `storage/news/macro_calendar/macro_events.parquet` and machine-readable ledger `storage/exports/milestone_4_6_2_2/macro_calendar_coverage.csv` match SQLite records with 0 delta.
+

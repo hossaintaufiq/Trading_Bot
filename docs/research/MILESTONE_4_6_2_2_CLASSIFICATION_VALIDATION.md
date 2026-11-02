@@ -69,3 +69,4 @@ Both primary metrics (Category Accuracy and Relevance Accuracy) exceeded their t
 1. **Elimination of Catastrophic Misclassifications:** The legal disclaimer stripping completely eliminated the false `REGULATORY` misclassifications that plagued Milestone 4.6.2.1.
 2. **Altcoin Pair Isolation:** Altcoin listings and delistings against BTC/ETH quote currencies are now strictly isolated to `OTHER_ASSET` with `affected_assets = []`, preventing false volatility signal injection into BTCUSDT and ETHUSDT trading models.
 3. **Machine-Readable Ledger:** The complete record-by-record ledger is exported to `storage/exports/milestone_4_6_2_2/classification_validation.csv` and confusion matrices to `storage/exports/milestone_4_6_2_2/classification_confusion_matrices.csv`.
+
