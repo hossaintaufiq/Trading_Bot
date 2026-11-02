@@ -1,25 +1,21 @@
 """
 NEPTUNE News Data Quality Reporter (`quality_reporter.py`)
 
-Audits stored historical news datasets across 13 empirical dimensions:
-1. Total records
-2. Unique articles
-3. Unique URLs
-4. Unique canonical URLs
-5. Unique event clusters
-6. Duplicate rates
-7. Missing timestamps
-8. Timestamp precision distribution
-9. Revision frequency
-10. Asset relevance coverage
-11. Source distribution
-12. Failed downloads
-13. Verification status breakdown
-Governed by: Rule S-06, Rule S-07, ADR-023.
+Audits stored historical news datasets across empirical dimensions:
+1. Total articles, versions, clusters, and macro events
+2. Source distribution
+3. Event taxonomy category distribution (15 categories)
+4. Asset relevance distribution (6 tiers)
+5. Monthly asset coverage for BTC, ETH, BNB, EXCHANGE_WIDE, MARKET_WIDE, MACRO
+6. Timestamp precision distribution
+7. Point-in-time verification status breakdown
+8. Deduplication and clustering metrics
+Governed by: Rule S-06, Rule S-07, ADR-023, ADR-024.
 """
 import json
 import sqlite3
 from typing import Any, Dict, List, Optional
+import pandas as pd
 
 
 class NewsQualityReporter:
@@ -63,6 +59,14 @@ class NewsQualityReporter:
                 "SELECT COUNT(*) FROM news_event_clusters WHERE article_count > 1"
             ).fetchone()[0]
 
+            # Macro Event Counts
+            total_macro_events = 0
+            table_check = cur.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='news_macro_events'"
+            ).fetchone()
+            if table_check:
+                total_macro_events = cur.execute("SELECT COUNT(*) FROM news_macro_events").fetchone()[0]
+
             # Ingestion Runs
             total_runs = cur.execute("SELECT COUNT(*) FROM news_ingestion_runs").fetchone()[0]
             failed_records_sum = cur.execute(
@@ -85,6 +89,16 @@ class NewsQualityReporter:
                     "SELECT source, COUNT(*) FROM news_articles GROUP BY source"
                 ).fetchall()
             )
+            category_counts = dict(
+                cur.execute(
+                    "SELECT COALESCE(event_category, 'UNCLASSIFIED'), COUNT(*) FROM news_articles GROUP BY event_category"
+                ).fetchall()
+            )
+            relevance_counts = dict(
+                cur.execute(
+                    "SELECT COALESCE(relevance_classification, 'UNCLASSIFIED'), COUNT(*) FROM news_articles GROUP BY relevance_classification"
+                ).fetchall()
+            )
 
             # Timestamps Completeness
             missing_published_at = cur.execute(
@@ -94,44 +108,64 @@ class NewsQualityReporter:
                 "SELECT COUNT(*) FROM news_article_versions WHERE available_at IS NULL"
             ).fetchone()[0]
 
-            # Asset Relevance Breakdown
-            raw_entities = cur.execute("SELECT entities_json FROM news_articles").fetchall()
-            asset_coverage = {"BTC": 0, "ETH": 0, "BNB": 0, "OTHER": 0}
-            for row in raw_entities:
-                try:
-                    ents = json.loads(row[0])
-                    for sym in ["BTC", "ETH", "BNB"]:
-                        if sym in ents:
-                            asset_coverage[sym] += 1
-                    if not any(s in ents for s in ["BTC", "ETH", "BNB"]):
-                        asset_coverage["OTHER"] += 1
-                except Exception:
-                    pass
+            # Monthly Asset & Relevance Coverage
+            # Join articles with their earliest version to get effective date
+            df_dates = pd.read_sql_query(
+                """
+                SELECT a.article_id, a.event_category, a.relevance_classification, a.affected_assets_json,
+                       COALESCE(v.published_at, v.provider_seen_at, v.created_at) as effective_date
+                FROM news_articles a
+                LEFT JOIN news_article_versions v ON a.article_id = v.article_id AND v.version_number = 1
+                """,
+                conn,
+            )
 
-            # Duplicate Rate
-            duplicate_rate_pct = 0.0
-            if total_articles > 0:
-                duplicate_rate_pct = round(
-                    ((total_articles - total_clusters) / total_articles) * 100.0, 2
-                )
+            monthly_coverage: Dict[str, Dict[str, int]] = {}
+            if not df_dates.empty:
+                df_dates["month"] = pd.to_datetime(df_dates["effective_date"], errors="coerce", utc=True).dt.strftime("%Y-%m")
+                df_dates["month"] = df_dates["month"].fillna("UNKNOWN")
+
+                for _, row in df_dates.iterrows():
+                    m = row["month"]
+                    if m not in monthly_coverage:
+                        monthly_coverage[m] = {
+                            "BTC": 0, "ETH": 0, "BNB": 0,
+                            "EXCHANGE_WIDE": 0, "MARKET_WIDE": 0, "MACRO": 0, "OTHER": 0, "TOTAL": 0,
+                        }
+                    monthly_coverage[m]["TOTAL"] += 1
+                    rel = row["relevance_classification"]
+                    if rel in monthly_coverage[m]:
+                        monthly_coverage[m][rel] += 1
+                    else:
+                        monthly_coverage[m]["OTHER"] += 1
+
+                    try:
+                        assets = json.loads(row["affected_assets_json"] or "[]")
+                    except Exception:
+                        assets = []
+                    for ast in ["BTC", "ETH", "BNB"]:
+                        if ast in assets:
+                            monthly_coverage[m][ast] += 1
 
             return {
                 "total_articles": total_articles,
-                "total_versions": total_versions,
-                "unique_raw_urls": unique_urls,
+                "unique_urls": unique_urls,
                 "unique_canonical_urls": unique_canonical,
-                "total_event_clusters": total_clusters,
+                "total_versions": total_versions,
+                "multi_version_articles": multi_version_articles,
+                "max_versions_for_article": max_versions_for_article,
+                "total_clusters": total_clusters,
                 "clustered_articles": clustered_articles,
                 "multi_article_clusters": multi_article_clusters,
-                "multi_version_articles": multi_version_articles,
-                "max_versions_observed": max_versions_for_article,
-                "duplicate_rate_percent": duplicate_rate_pct,
-                "missing_published_at_count": missing_published_at,
-                "missing_available_at_count": missing_available_at,
+                "total_macro_events": total_macro_events,
+                "total_ingestion_runs": total_runs,
+                "failed_records_sum": failed_records_sum,
+                "missing_published_at": missing_published_at,
+                "missing_available_at": missing_available_at,
                 "precision_distribution": precision_counts,
                 "verification_distribution": verification_counts,
                 "source_distribution": source_counts,
-                "asset_coverage": asset_coverage,
-                "total_ingestion_runs": total_runs,
-                "failed_records_count": failed_records_sum,
+                "category_distribution": category_counts,
+                "relevance_distribution": relevance_counts,
+                "monthly_coverage": monthly_coverage,
             }

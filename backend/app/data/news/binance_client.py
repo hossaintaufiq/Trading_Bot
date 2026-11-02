@@ -58,6 +58,8 @@ class BinanceNewsClient:
 
                 body_bytes = await loop.run_in_executor(None, _do_fetch)
                 data = json.loads(body_bytes.decode("utf-8"))
+                # Polite pacing delay
+                await asyncio.sleep(0.3)
                 return data
             except Exception as e:
                 last_exc = e
@@ -65,7 +67,8 @@ class BinanceNewsClient:
                     f"Binance CMS request failed (attempt {attempt + 1}/{self.max_retries}) for {url}: {e}"
                 )
                 if attempt < self.max_retries - 1:
-                    await asyncio.sleep(delay)
+                    backoff = 10.0 if "429" in str(e) else delay
+                    await asyncio.sleep(backoff)
                     delay *= 2.0
 
         raise RuntimeError(f"HTTP GET failed after {self.max_retries} retries: {last_exc}")

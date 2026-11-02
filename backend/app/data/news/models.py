@@ -2,8 +2,8 @@
 NEPTUNE News Domain Models (`models.py`)
 
 Defines Pydantic models, enums, and data contracts for immutable news articles,
-version revisions, event clusters, and ingestion runs.
-Governed by: Rule S-05, Rule S-08, ADR-023.
+version revisions, event clusters, macro calendar records, and ingestion runs.
+Governed by: Rule S-05, Rule S-08, ADR-023, ADR-024.
 """
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -30,6 +30,7 @@ class NewsSourceType(str, Enum):
     """Approved candidate news sources."""
     BINANCE_ANNOUNCEMENTS = "binance_announcements"
     GDELT_GKG = "gdelt_gkg"
+    MACRO_CALENDAR = "macro_calendar"
 
 
 class ReviewStatus(str, Enum):
@@ -39,8 +40,37 @@ class ReviewStatus(str, Enum):
     FLAGGED = "FLAGGED"
 
 
+class EventCategory(str, Enum):
+    """15-Category Event Taxonomy per Milestone 4.6.2 Section 4."""
+    SECURITY_INCIDENT = "SECURITY_INCIDENT"
+    REGULATORY = "REGULATORY"
+    MONETARY_POLICY = "MONETARY_POLICY"
+    MACROECONOMIC = "MACROECONOMIC"
+    ETF_INSTITUTIONAL_FLOW = "ETF_INSTITUTIONAL_FLOW"
+    EXCHANGE_SOLVENCY = "EXCHANGE_SOLVENCY"
+    EXCHANGE_OPERATIONAL = "EXCHANGE_OPERATIONAL"
+    PROTOCOL_UPGRADE = "PROTOCOL_UPGRADE"
+    NETWORK_OUTAGE = "NETWORK_OUTAGE"
+    ASSET_LISTING = "ASSET_LISTING"
+    ASSET_DELISTING = "ASSET_DELISTING"
+    MARKET_STRUCTURE = "MARKET_STRUCTURE"
+    LARGE_CAPITAL_FLOW = "LARGE_CAPITAL_FLOW"
+    OTHER = "OTHER"
+    UNCLASSIFIED = "UNCLASSIFIED"
+
+
+class RelevanceClassification(str, Enum):
+    """6-Tier Asset Relevance Classification per Milestone 4.6.2 Section 4."""
+    DIRECT_ASSET = "DIRECT_ASSET"
+    EXCHANGE_WIDE = "EXCHANGE_WIDE"
+    MARKET_WIDE = "MARKET_WIDE"
+    MACRO = "MACRO"
+    OTHER_ASSET = "OTHER_ASSET"
+    UNCLASSIFIED = "UNCLASSIFIED"
+
+
 class NewsArticle(BaseModel):
-    """Immutable identity of a news article."""
+    """Immutable identity of a news article with event & relevance classification."""
     article_id: str
     source: NewsSourceType
     source_record_id: Optional[str] = None
@@ -55,15 +85,26 @@ class NewsArticle(BaseModel):
     raw_payload_sha256: str
     created_at: str
 
+    # Classification fields (Milestone 4.6.2)
+    event_category: EventCategory = EventCategory.UNCLASSIFIED
+    relevance_classification: RelevanceClassification = RelevanceClassification.UNCLASSIFIED
+    affected_assets: List[str] = Field(default_factory=list)
+    classification_evidence: Dict[str, Any] = Field(default_factory=dict)
+    classifier_version: Optional[str] = None
+    confidence_score: float = 1.0
+    classified_at: Optional[str] = None
+
     def to_dict(self) -> Dict[str, Any]:
         d = self.model_dump()
         d["source"] = self.source.value
         d["source_verification_status"] = self.source_verification_status.value
+        d["event_category"] = self.event_category.value
+        d["relevance_classification"] = self.relevance_classification.value
         return d
 
 
 class NewsArticleVersion(BaseModel):
-    """Immutable version record of a news article."""
+    """Immutable version record of a news article with separate temporal coordinates."""
     version_id: str
     article_id: str
     version_number: int = 1
@@ -79,6 +120,8 @@ class NewsArticleVersion(BaseModel):
     first_seen_at: str
     collected_at: str
     available_at: Optional[str] = None
+    archive_available_at: Optional[str] = None
+    research_available_at: Optional[str] = None
     timestamp_precision: TimestampPrecision
     created_at: str
 
@@ -104,6 +147,33 @@ class NewsEventCluster(BaseModel):
     def to_dict(self) -> Dict[str, Any]:
         d = self.model_dump()
         d["review_status"] = self.review_status.value
+        return d
+
+
+class MacroEventRecord(BaseModel):
+    """Source C: Authoritative historical macroeconomic or protocol calendar record."""
+    macro_event_id: str
+    event_name: str
+    event_category: EventCategory
+    scheduled_at: str
+    actual_release_at: str
+    source: str
+    source_url: str
+    source_record_id: Optional[str] = None
+    affected_assets: List[str] = Field(default_factory=list)
+    relevance_classification: RelevanceClassification
+    source_verification_status: SourceVerificationStatus = SourceVerificationStatus.POINT_IN_TIME_VERIFIED
+    timestamp_precision: TimestampPrecision = TimestampPrecision.SECOND
+    description: Optional[str] = None
+    raw_payload_sha256: str
+    created_at: str
+
+    def to_dict(self) -> Dict[str, Any]:
+        d = self.model_dump()
+        d["event_category"] = self.event_category.value
+        d["relevance_classification"] = self.relevance_classification.value
+        d["source_verification_status"] = self.source_verification_status.value
+        d["timestamp_precision"] = self.timestamp_precision.value
         return d
 
 

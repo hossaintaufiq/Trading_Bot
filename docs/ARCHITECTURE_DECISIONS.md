@@ -451,3 +451,31 @@
 - **Consequences**:
   - News datasets can be independently verified, exported, and audited via reproducible cryptographic manifests.
 
+
+---
+
+### ADR-024: 15-Category Event Taxonomy, Asset Relevance Isolation & Macroeconomic Calendar Registry
+
+- **Status**: Accepted
+- **Date**: 2026-11-03
+- **Context**: Milestone 4.6.2 expanded NEPTUNE's historical news coverage across the 2024–2026 research window. Auditing revealed that naive keyword matching conflated general Binance exchange operations (Proof of Reserves audits, system maintenance, executive settlements) with direct BNB tokenomics, creating artificial signal contamination. Furthermore, macroeconomic events (FOMC rate decisions, CPI prints, NFP releases) lacked ground-truthed, point-in-time verified event calendars.
+- **Decision**:
+  1. **15-Category Event Taxonomy**:
+     - Implement transparent, deterministic categorization: `SECURITY_INCIDENT`, `REGULATORY`, `MONETARY_POLICY`, `MACROECONOMIC`, `ETF_INSTITUTIONAL_FLOW`, `EXCHANGE_SOLVENCY`, `EXCHANGE_OPERATIONAL`, `PROTOCOL_UPGRADE`, `NETWORK_OUTAGE`, `ASSET_LISTING`, `ASSET_DELISTING`, `MARKET_STRUCTURE`, `LARGE_CAPITAL_FLOW`, `OTHER`, `UNCLASSIFIED`.
+  2. **6-Tier Asset Relevance Classification**:
+     - Categorize how events map to the research universe (`BTC`, `ETH`, `BNB`): `DIRECT_ASSET`, `EXCHANGE_WIDE`, `MARKET_WIDE`, `MACRO`, `OTHER_ASSET`, `UNCLASSIFIED`.
+  3. **Critical BNB / Exchange Disambiguation**:
+     - Binance exchange operations, maintenance notices, Proof of Reserves, and general exchange settlements must be classified as `EXCHANGE_WIDE`, **never** `DIRECT_ASSET` for BNB unless the BNB token supply, auto-burn, or BNB Chain consensus is explicitly targeted.
+  4. **Source C: Historical Macroeconomic & Protocol Calendar Registry**:
+     - Create `news_macro_events` table storing canonical, scheduled vs actual release timestamps for FOMC interest rate decisions, BLS CPI releases, BLS NFP releases, and crypto structural milestones (Bitcoin Halvings, SEC ETF approvals).
+     - All Source C events are verified against official agency domains (`federalreserve.gov`, `bls.gov`, `sec.gov`) and consensus blocks, designated as `POINT_IN_TIME_VERIFIED`.
+  5. **Point-in-Time Research Boundary Enforcement**:
+     - Records classified as `PARTIALLY_VERIFIED` (such as GDELT 15-minute GKG batches) are strictly excluded from high-frequency (1m, 5m, 15m) candle-level backtesting. Only `POINT_IN_TIME_VERIFIED` records with certified millisecond/second timestamps are eligible for candle-close synchronization.
+  6. **Year-Partitioned Analytical Parquet Storage**:
+     - Export articles and versions partitioned by source and event year (`storage/news/{source}/{YYYY}/`), verified against cryptographic manifests and composite SHA-256 fingerprints.
+- **Rationale**:
+  - Prevents false attribution of exchange-level operational announcements to asset-level fundamental alpha.
+  - Establishes second-level ground truth for global macroeconomic volatility triggers.
+  - Preserves strict look-ahead bias prevention (Rule S-05).
+- **Consequences**:
+  - Controlled research experiments in Milestone 4.6.3 can isolate direct asset news from exchange-wide noise and macroeconomic shocks.

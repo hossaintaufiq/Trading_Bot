@@ -599,6 +599,20 @@ An independent forensic audit was conducted on the persisted news dataset and in
 4. **Asset Relevance (Audit E):** GDELT matches for BNB were triggered by reports of a $6.3B Binance exchange hack ($4.7B customer outflows), representing an exchange-wide solvency contagion rather than a BNB token protocol event.
 5. **Formal Decision (`PASS WITH LIMITATIONS`):** The data engineering architecture passes all structural and cryptographic tests. However, the dataset is **NOT READY for controlled historical backtesting on dataset `v2.0.0`** due to the 31-month coverage gap. Ingestion of Binance Catalog 49 (News) and multi-year GDELT archives is a mandatory prerequisite before strategy experiments (Milestone 4.6.2).
 
+---
+
+### 8.10 Milestone 4.6.2: Historical News Backfill, Event Classification & Point-in-Time Dataset Construction
+Milestone 4.6.2 resolved the historical coverage gap and relevance misalignment identified in the Milestone 4.6.1.1 audit:
+1. **Multi-Source Historical Expansion:** Total records expanded from 66 to **505 authoritative records** (479 news articles + 26 macro events) grouped into **474 event clusters** across 2024–2026.
+   - *Source A (Binance CMS Catalogs 49 & 161):* 413 operational, security, Proof of Reserves, and delisting notices spanning continuous operations from May 2024 to November 2026.
+   - *Source B (GDELT 2.0 Historical GKG Archives):* 66 crypto-filtered articles extracted from unthrottled 15-minute master archives covering anchor dates (Bitcoin ETF approval Jan 2024, Halving Apr 2024, Ethereum ETF May 2024, Yen carry crash Aug 2024, FOMC 50bps cut Sep 2024, US Election Nov 2024).
+   - *Source C (Historical Macroeconomic Calendar Registry):* 26 canonical events ground-truthed from Federal Reserve, BLS, and SEC official releases with exact second-level timestamps.
+2. **Transparent 15-Category Event Taxonomy:** Codified deterministic, regex-grounded categorization across 15 classes (`SECURITY_INCIDENT`, `REGULATORY`, `MONETARY_POLICY`, `MACROECONOMIC`, `ETF_INSTITUTIONAL_FLOW`, `EXCHANGE_SOLVENCY`, `EXCHANGE_OPERATIONAL`, `PROTOCOL_UPGRADE`, `NETWORK_OUTAGE`, `ASSET_LISTING`, `ASSET_DELISTING`, `MARKET_STRUCTURE`, `LARGE_CAPITAL_FLOW`, `OTHER`, `UNCLASSIFIED`).
+3. **6-Tier Asset Relevance & BNB Disambiguation:** Completely resolved the BNB exchange-hack conflation trap. General Binance exchange updates, security notices, and Proof of Reserves audits are categorized as `EXCHANGE_WIDE`, **never** `DIRECT_ASSET` for BNB unless the BNB token supply, auto-burn, or BNB Chain consensus is explicitly targeted.
+4. **Deduplication Benchmark Evaluation (105 Pairs):** Validated the 6-stage deduplication engine over a comprehensive 105-pair labeled real-world corpus, achieving **100.0% Precision ($FP = 0$)**, **93.85% Recall ($FN = 4$)**, and an **F1 score of 96.83%**. Temporal window constraints ($24	ext{ hours}$) and entity overlap prevented all false merges.
+5. **Storage Parity & Cryptographic Manifest:** Reconciled 1:1 between relational SQLite (`neptune.db`) and snappy-compressed Parquet partitions in `storage/news/` partitioned by source and event year. Frozen market dataset `v2.0.0` (420 files) remained completely untouched and bit-for-bit identical (`b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`).
+6. **Milestone Decision (`PASS WITH LIMITATIONS`):** The historical news dataset is sufficiently representative and temporally defensible for controlled historical news research in Milestone 4.6.3. Strict point-in-time backtests are limited to the 439 `POINT_IN_TIME_VERIFIED` records (Binance + Macro Calendar); GDELT records remain restricted to exploratory and regime-level research.
+
 ## 9. Conclusion & Strategic Research Roadmap
 
 ### 8.1 Key Scientific Takeaways
@@ -625,6 +639,7 @@ An independent forensic audit was conducted on the persisted news dataset and in
 - **[ADR-021: Model-Agnostic Financial Forecasting Contract](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-021-model-agnostic-financial-forecasting-contract--deferred-kronos-inference-protocol)**
 - **[ADR-022: Kronos Foundation Model Experimental Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-022-kronos-foundation-model-experimental-integration--gated-confirmation-protocol)**
 - **[ADR-023: Immutable News Storage, Multi-Stage Deduplication & Point-in-Time Temporal Gate](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-023-immutable-news-storage-multi-stage-deduplication--point-in-time-temporal-gate)**
+- **[ADR-024: 15-Category Event Taxonomy, Asset Relevance Isolation & Macroeconomic Calendar Registry](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-024-15-category-event-taxonomy-asset-relevance-isolation--macroeconomic-calendar-registry)**
 
 ### Research & Audit Documents
 - **Milestone 4.1.1 Audit:** [`docs/audits/MILESTONE_4_1_1_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_1_1_AUDIT.md)
@@ -654,6 +669,12 @@ An independent forensic audit was conducted on the persisted news dataset and in
 - **Milestone 4.6.1.1 Versioning & Deduplication Audit:** [`docs/audits/MILESTONE_4_6_1_1_VERSION_AND_DEDUP_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_6_1_1_VERSION_AND_DEDUP_AUDIT.md)
 - **Milestone 4.6.1.1 Asset Relevance Audit:** [`docs/audits/MILESTONE_4_6_1_1_ASSET_RELEVANCE.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_6_1_1_ASSET_RELEVANCE.md)
 - **Milestone 4.6.1.1 Results Synthesis:** [`docs/audits/MILESTONE_4_6_1_1_RESULTS.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_6_1_1_RESULTS.md)
+- **Milestone 4.6.2 Source Coverage:** [`docs/research/MILESTONE_4_6_2_SOURCE_COVERAGE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_SOURCE_COVERAGE.md)
+- **Milestone 4.6.2 Historical Dataset:** [`docs/research/MILESTONE_4_6_2_HISTORICAL_DATASET.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_HISTORICAL_DATASET.md)
+- **Milestone 4.6.2 Event Taxonomy:** [`docs/research/MILESTONE_4_6_2_EVENT_TAXONOMY.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_EVENT_TAXONOMY.md)
+- **Milestone 4.6.2 Point-in-Time Policy:** [`docs/research/MILESTONE_4_6_2_POINT_IN_TIME_POLICY.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_POINT_IN_TIME_POLICY.md)
+- **Milestone 4.6.2 Data Quality Report:** [`docs/research/MILESTONE_4_6_2_DATA_QUALITY_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_DATA_QUALITY_REPORT.md)
+- **Milestone 4.6.2 Implementation Report:** [`docs/research/MILESTONE_4_6_2_IMPLEMENTATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_IMPLEMENTATION_REPORT.md)
 
 ---
 *End of Research Paper — Project NEPTUNE Quantitative Systems Group*
