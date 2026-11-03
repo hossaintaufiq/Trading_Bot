@@ -752,6 +752,28 @@ Milestone 4.6.2.5 conducted an independent, adversarial forensic audit of the po
 
 ---
 
+### 8.16 Milestone 4.6.2.5.1: Final Risk Authorization & Execution Readiness Verification
+Milestone 4.6.2.5.1 resolved the remaining operational and cryptographic readiness requirements for paper trading and news-gated historical simulation:
+1. **HMAC Key Lifecycle & Isolation (ADR-028):**
+   - Audited key generation, memory-only storage (`self.auth_secret`), restart isolation, and thread-safe key rotation via `RiskManager.rotate_key`.
+   - Proved zero credential exposure in code, logs, and serialized tokens (`rat_v1_{digest[:24]}`).
+   - Proved cryptographic isolation across simulation runs: `run_id` parameter binding prevents cross-run token reuse.
+2. **Atomic Token Idempotency State Machine:**
+   - Implemented state transitions: `ISSUED` -> `RESERVED` -> `CONSUMED` / `EXPIRED` / `CANCELLED`.
+   - Executed and passed all 10 adversarial replay scenarios: valid single-use, duplicate token submission, duplicate order ID, order ID mismatch, cross-run replay, post-rotation invalidation, gap timeout expiry, 10-thread concurrent consumption race conditions, mid-flight interruption rollback and retry, and duplicate ledger insertion.
+3. **Execution-Gap Semantics & Timeframe Calibration:**
+   - Formally defined maximum allowed delay: $T_{\text{max}} = \Delta_{\text{tf}} \times (\text{max\_gap\_bars} + 1)$.
+   - Calibrated intraday execution: mandated `max_execution_gap_bars = 1` for 15m (30 min max delay) to prevent signal decay from stale momentum breakouts, while permitting `max_execution_gap_bars = 3` for swing/macro regimes (1h, 4h, 1d).
+4. **Simulation Engine Integration & Full Test Suite:**
+   - Proved that all `NEXT_ELIGIBLE_PRICE` orders pass through scheduler, carry valid risk authorization tokens, consume tokens atomically upon fill, and maintain unique trade ledger entries.
+   - Re-verified news-gated simulation mandate: `LEGACY_CLOSE_FILL` is strictly rejected for news runs.
+   - Expanded test suite to **246 backend tests passed in 8.24s**, 4 frontend tests passed, 0 TypeScript errors, clean Next.js production build.
+5. **Frozen Dataset Preservation:**
+   - Market dataset `v2.0.0` (420 Parquet files, tree SHA-256 `b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`) and news dataset `v2.0.0-news-historical` (1,499 records) confirmed 100% bit-for-bit identical.
+6. **Authoritative Decision:** **PASS**. The platform has achieved complete execution readiness and cryptographic risk enforcement.
+
+---
+
 ## 10. Architecture Decision Records & Audit Index
 
 ### Architectural Records
@@ -768,6 +790,7 @@ Milestone 4.6.2.5 conducted an independent, adversarial forensic audit of the po
 - **[ADR-025: Two-Stage Deterministic Classification Remediation, 100% Historical Coverage & Next-Available-Price Execution Synchronization](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-025-two-stage-deterministic-classification-remediation-100-historical-coverage--next-available-price-execution-synchronization)**
 - **[ADR-026: Deterministic Point-in-Time Execution Scheduling, Next-Eligible-Price Policy & Simulation Engine Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-026-deterministic-point-in-time-execution-scheduling-next-eligible-price-policy--simulation-engine-integration)**
 - **[ADR-027: Cryptographic HMAC-SHA256 Risk Authorization Token Binding and Macro Boundary Schema Normalization](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-027-cryptographic-hmac-sha256-risk-authorization-token-binding-and-macro-boundary-schema-normalization)**
+- **[ADR-028: Cryptographic Risk Authorization Lifecycle, Atomic Token Idempotency, and Timeframe-Calibrated Execution Gap Policy](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-028-cryptographic-risk-authorization-lifecycle-atomic-token-idempotency-and-timeframe-calibrated-execution-gap-policy)**
 
 
 ### Research & Audit Documents
@@ -832,6 +855,10 @@ Milestone 4.6.2.5 conducted an independent, adversarial forensic audit of the po
 - **Milestone 4.6.2.5 News PIT Audit:** [`docs/research/MILESTONE_4_6_2_5_NEWS_PIT_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_NEWS_PIT_AUDIT.md)
 - **Milestone 4.6.2.5 Risk Authorization Audit:** [`docs/research/MILESTONE_4_6_2_5_RISK_AUTHORIZATION_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_RISK_AUTHORIZATION_AUDIT.md)
 - **Milestone 4.6.2.5 Validation Report:** [`docs/research/MILESTONE_4_6_2_5_VALIDATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_VALIDATION_REPORT.md)
+- **Milestone 4.6.2.5.1 HMAC Lifecycle Audit:** [`docs/research/MILESTONE_4_6_2_5_1_HMAC_LIFECYCLE_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_1_HMAC_LIFECYCLE_AUDIT.md)
+- **Milestone 4.6.2.5.1 Idempotency Audit:** [`docs/research/MILESTONE_4_6_2_5_1_IDEMPOTENCY_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_1_IDEMPOTENCY_AUDIT.md)
+- **Milestone 4.6.2.5.1 Execution Gap Policy:** [`docs/research/MILESTONE_4_6_2_5_1_EXECUTION_GAP_POLICY.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_1_EXECUTION_GAP_POLICY.md)
+- **Milestone 4.6.2.5.1 Final Validation Report:** [`docs/research/MILESTONE_4_6_2_5_1_FINAL_VALIDATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_1_FINAL_VALIDATION_REPORT.md)
 
 
 ---

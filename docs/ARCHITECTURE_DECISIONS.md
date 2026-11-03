@@ -570,3 +570,34 @@
 - **Consequences**:
   - The Risk Manager's sole authorization authority (Rule S-04) is enforced cryptographically; orders cannot be tampered with or fabricated between approval and execution.
   - All 68 macro calendar records are accurately parsed, with 62 historical records point-in-time eligible, 2 forward records quarantined, 1 unprovenanced record excluded, and 3 asset-irrelevant records filtered for BTCUSDT.
+
+
+---
+
+## ADR-028: Cryptographic Risk Authorization Lifecycle, Atomic Token Idempotency, and Timeframe-Calibrated Execution Gap Policy
+
+- **Status**: Accepted
+- **Date**: 2026-11-03
+- **Context**: Milestone 4.6.2.5.1 investigated the final operational requirements for risk authorization and execution readiness. While Milestone 4.6.2.5 added HMAC signatures to risk tokens, signature verification alone is stateless and does not prevent replay attacks (submitting identical valid tokens multiple times). Furthermore, execution-gap semantics and key rotation mechanics required formal codification.
+- **Decision**:
+  1. **Atomic Token Idempotency State Machine**:
+     - Implemented stateful token lifecycle tracking inside `RiskManager`: `ISSUED` -> `RESERVED` -> `CONSUMED` (or `EXPIRED` / `CANCELLED`).
+     - Thread-safe transitions enforced via `threading.Lock`.
+     - `reserve_token` binds tokens to specific `order_id`s, preventing token reuse across different orders or duplicate scheduling.
+     - `consume_token` atomically retires tokens upon execution; re-consumption attempts fail with `TOKEN_ALREADY_CONSUMED`.
+     - `rollback_token` provides transient failure recovery during execution simulation interruptions.
+  2. **Multi-Tier Execution Deduplication**:
+     - `PointInTimeExecutionScheduler.schedule_order` enforces uniqueness across `scheduled_order_ids` and `scheduled_tokens`, immediately rejecting duplicate submissions.
+     - `HistoricalBacktestEngine` enforces unique `trade_id` registration across all completed and force-closed ledger entries.
+  3. **HMAC Key Lifecycle & Rotation**:
+     - Keys are stored strictly in-memory (`self.auth_secret`); no persistence to database, disk, or logs (Rule S-02).
+     - `RiskManager.rotate_key` invalidates all previously issued tokens immediately.
+     - Cryptographic payload binding of `run_id` ensures bit-level token isolation between backtest runs even when sharing configuration keys.
+  4. **Timeframe-Calibrated Execution Gap Policy**:
+     - Bounded maximum allowable execution delay as $T_{\\text{max\\_allowed}} = \\Delta_{\\text{timeframe}} \\times (\\text{max\\_execution\\_gap\\_bars} + 1)$.
+     - Calibrated policy: `max_execution_gap_bars = 1` for 15m intraday execution (30 min max delay to prevent momentum signal decay); `3` for 1h (4h delay), 4h (16h delay), and 1d (4d delay) swing/macro regimes.
+     - Orders exceeding the gap threshold cleanly expire and transition their associated risk tokens to `EXPIRED`.
+- **Consequences**:
+  - Replay attacks, token double-spending, and duplicate ledger entries are architecturally impossible.
+  - Risk Manager is the sole, stateful, and cryptographically verified order authority (Rule S-04).
+  - The historical simulation engine is fully verified and hardened for upcoming news strategy experiments.

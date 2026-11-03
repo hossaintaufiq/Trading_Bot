@@ -63,6 +63,8 @@ class PointInTimeExecutionScheduler:
         self.risk_manager = risk_manager
         self.pending_orders: List[ScheduledOrder] = []
         self.order_history: List[ScheduledOrder] = []
+        self.scheduled_order_ids: Set[str] = set()
+        self.scheduled_tokens: Set[str] = set()
 
     def schedule_order(
         self,
@@ -83,6 +85,7 @@ class PointInTimeExecutionScheduler:
         information_availability_cutoff: Optional[str] = None,
         earliest_eligible_execution_timestamp: Optional[str] = None,
         scheduled_bar_index: int = 0,
+        order_id: Optional[str] = None,
     ) -> ScheduledOrder:
         """
         Create and queue a ScheduledOrder awaiting next-eligible-price fill.
@@ -107,8 +110,29 @@ class PointInTimeExecutionScheduler:
         else:
             earliest_eligible_execution_timestamp = candle_close_timestamp
 
+        assigned_order_id = order_id or f"ord_{uuid.uuid4().hex[:12]}"
+        if assigned_order_id in self.scheduled_order_ids:
+            raise ValueError(f"Duplicate order ID detected: {assigned_order_id}")
+
+        if risk_approval_token in self.scheduled_tokens:
+            raise ValueError(f"Duplicate risk token submission: {risk_approval_token} is already scheduled")
+
+        if self.risk_manager is not None and hasattr(self.risk_manager, "reserve_token"):
+            run_ref = str(strategy_metadata.get("run_id", "default_run"))
+            rec = getattr(self.risk_manager, "token_registry", {}).get(risk_approval_token)
+            if rec is not None:
+                if rec.state == "CONSUMED":
+                    raise ValueError("Risk token reservation failed: TOKEN_ALREADY_CONSUMED")
+                if rec.state == "RESERVED" and rec.order_id != assigned_order_id:
+                    raise ValueError("Risk token reservation failed: TOKEN_ALREADY_RESERVED_BY_ANOTHER_ORDER")
+                if rec.run_id == run_ref:
+                    self.risk_manager.reserve_token(risk_approval_token, assigned_order_id, run_ref)
+
+        self.scheduled_order_ids.add(assigned_order_id)
+        self.scheduled_tokens.add(risk_approval_token)
+
         order = ScheduledOrder(
-            order_id=f"ord_{uuid.uuid4().hex[:12]}",
+            order_id=assigned_order_id,
             signal_id=signal_id,
             symbol=symbol,
             timeframe=timeframe,
@@ -218,6 +242,8 @@ class PointInTimeExecutionScheduler:
                         f"Data gap exceeded max_execution_gap_bars ({self.max_execution_gap_bars}): "
                         f"elapsed {time_elapsed} > {max_allowed_time}"
                     )
+                    if self.risk_manager is not None and hasattr(self.risk_manager, "expire_token"):
+                        self.risk_manager.expire_token(order.risk_approval_token, order.order_id)
                     terminal_orders.append(order)
                     self.order_history.append(order)
                     continue
@@ -296,9 +322,25 @@ class PointInTimeExecutionScheduler:
                 if not is_valid_tok:
                     order.status = OrderStatus.REJECTED
                     order.rejection_reason = f"Risk token verification failed: {tok_err}"
+                    if hasattr(self.risk_manager, "release_token"):
+                        self.risk_manager.release_token(order.risk_approval_token, order.order_id)
                     terminal_orders.append(order)
                     self.order_history.append(order)
                     continue
+
+                if hasattr(self.risk_manager, "consume_token"):
+                    is_consumed, con_err = self.risk_manager.consume_token(
+                        token=order.risk_approval_token,
+                        order_id=order.order_id,
+                        run_id=run_ref,
+                        fill_timestamp=curr_candle.timestamp,
+                    )
+                    if not is_consumed:
+                        order.status = OrderStatus.REJECTED
+                        order.rejection_reason = f"Risk token consumption failed: {con_err}"
+                        terminal_orders.append(order)
+                        self.order_history.append(order)
+                        continue
 
             # All checks passed: execute at curr_candle.open
             PointInTimeExecutionSynchronizer.assert_no_lookahead(
