@@ -101,6 +101,7 @@ class HistoricalBacktestEngine:
         self.scheduler = PointInTimeExecutionScheduler(
             execution_policy=config.execution_policy,
             max_execution_gap_bars=config.max_execution_gap_bars,
+            risk_manager=self.risk_manager,
         )
         self.news_boundary = NewsIntelligenceBoundary()
 
@@ -520,10 +521,20 @@ class HistoricalBacktestEngine:
                         daily_realized_pnl=daily_realized_pnl,
                         open_positions=open_positions + newly_opened_positions + list(self.scheduler.pending_orders),
                         timestamp=ts,
+                        run_id=backtest_id,
                     )
 
-                    if risk_eval.approved and risk_eval.position_size:
+                    if risk_eval.approved and risk_eval.position_size and risk_eval.risk_approval_token:
                         pipeline_counts["risk_approved_signals"] += 1
+                        strat_meta = {
+                            "signal_id": cand.signal_id,
+                            "strategy_id": cand.strategy_id,
+                            "raw_confidence": cand.raw_confidence,
+                            "rr_ratio": cand.risk_reward_ratio,
+                            "rationale": cand.rationale,
+                            "entry_price": str(cand.entry_price),
+                            "run_id": backtest_id,
+                        }
                         if self.config.execution_policy == ExecutionPolicy.LEGACY_CLOSE_FILL:
                             # Legacy path: immediate fill at curr_candle.close
                             new_pos = self.execution_simulator.simulate_entry(
@@ -537,20 +548,14 @@ class HistoricalBacktestEngine:
                                 signal_timestamp=cand.timestamp,
                                 entry_timestamp=ts,
                                 market_regime=sym_regime.regime,
-                                strategy_metadata={
-                                    "signal_id": cand.signal_id,
-                                    "strategy_id": cand.strategy_id,
-                                    "raw_confidence": cand.raw_confidence,
-                                    "rr_ratio": cand.risk_reward_ratio,
-                                    "rationale": cand.rationale,
-                                },
+                                strategy_metadata=strat_meta,
                                 exit_policy=self.config.exit_policy,
                                 theoretical_take_profit=Decimal(str(cand.suggested_take_profit)),
                                 information_availability_cutoff=ts,
                                 candle_close_timestamp=ts,
                                 order_creation_timestamp=ts,
                                 risk_approval_timestamp=ts,
-                                risk_approval_token=risk_eval.risk_approval_token or f"tok_{uuid.uuid4().hex[:8]}",
+                                risk_approval_token=risk_eval.risk_approval_token,
                                 earliest_eligible_execution_timestamp=ts,
                                 execution_policy=self.config.execution_policy,
                             )
@@ -571,15 +576,9 @@ class HistoricalBacktestEngine:
                                 position_size=risk_eval.position_size,
                                 stop_loss=Decimal(str(cand.suggested_stop_loss)),
                                 take_profit=Decimal(str(cand.suggested_take_profit)) if cand.suggested_take_profit else None,
-                                risk_approval_token=risk_eval.risk_approval_token or f"tok_{uuid.uuid4().hex[:8]}",
+                                risk_approval_token=risk_eval.risk_approval_token,
                                 market_regime=sym_regime.regime,
-                                strategy_metadata={
-                                    "signal_id": cand.signal_id,
-                                    "strategy_id": cand.strategy_id,
-                                    "raw_confidence": cand.raw_confidence,
-                                    "rr_ratio": cand.risk_reward_ratio,
-                                    "rationale": cand.rationale,
-                                },
+                                strategy_metadata=strat_meta,
                                 exit_policy=self.config.exit_policy,
                                 theoretical_take_profit=Decimal(str(cand.suggested_take_profit)) if cand.suggested_take_profit else None,
                                 information_availability_cutoff=ts,

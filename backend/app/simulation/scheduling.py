@@ -11,6 +11,7 @@ Enforces the non-negotiable temporal invariants:
 4. Risk Manager remains the sole authorization authority (retains tokens and provenance).
 5. Missing candles and data gaps beyond max_execution_gap_bars trigger deterministic order expiry.
 6. Market opening gaps breaching stop-loss thresholds invalidate entries safely.
+7. Cryptographic HMAC risk authorization token verification prior to execution fill.
 """
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -55,9 +56,11 @@ class PointInTimeExecutionScheduler:
         self,
         execution_policy: str = ExecutionPolicy.NEXT_ELIGIBLE_PRICE,
         max_execution_gap_bars: int = 3,
+        risk_manager: Optional[Any] = None,
     ):
         self.execution_policy = execution_policy
         self.max_execution_gap_bars = max_execution_gap_bars
+        self.risk_manager = risk_manager
         self.pending_orders: List[ScheduledOrder] = []
         self.order_history: List[ScheduledOrder] = []
 
@@ -84,6 +87,9 @@ class PointInTimeExecutionScheduler:
         """
         Create and queue a ScheduledOrder awaiting next-eligible-price fill.
         """
+        if not risk_approval_token or not str(risk_approval_token).strip():
+            raise ValueError("Risk authorization token is required to schedule an order.")
+
         cutoff = information_availability_cutoff or candle_close_timestamp
 
         # Invariant: earliest execution timestamp must be at or after decision candle close
@@ -264,6 +270,35 @@ class PointInTimeExecutionScheduler:
                 terminal_orders.append(order)
                 self.order_history.append(order)
                 continue
+
+            # Cryptographic Risk Manager Token Verification
+            if not order.risk_approval_token:
+                order.status = OrderStatus.REJECTED
+                order.rejection_reason = "Missing risk authorization token"
+                terminal_orders.append(order)
+                self.order_history.append(order)
+                continue
+
+            if self.risk_manager is not None:
+                entry_ref = Decimal(str(order.strategy_metadata.get("entry_price", c_open)))
+                run_ref = str(order.strategy_metadata.get("run_id", "default_run"))
+                is_valid_tok, tok_err = self.risk_manager.verify_risk_token(
+                    token=order.risk_approval_token,
+                    signal_id=order.signal_id,
+                    symbol=order.symbol,
+                    direction=order.direction,
+                    position_size=order.position_size,
+                    entry_price=entry_ref,
+                    stop_loss=order.stop_loss,
+                    timestamp=order.risk_approval_timestamp,
+                    run_id=run_ref,
+                )
+                if not is_valid_tok:
+                    order.status = OrderStatus.REJECTED
+                    order.rejection_reason = f"Risk token verification failed: {tok_err}"
+                    terminal_orders.append(order)
+                    self.order_history.append(order)
+                    continue
 
             # All checks passed: execute at curr_candle.open
             PointInTimeExecutionSynchronizer.assert_no_lookahead(

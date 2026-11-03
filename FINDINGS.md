@@ -732,6 +732,26 @@ Milestone 4.6.2.4 implemented and verified an event-time-aware execution schedul
 
 ---
 
+### 8.15 Milestone 4.6.2.5: Independent Point-in-Time Execution, Risk Authorization & News Boundary Audit
+Milestone 4.6.2.5 conducted an independent, adversarial forensic audit of the point-in-time execution scheduling engine, transaction cost accounting, news intelligence boundary, and risk authorization token lifecycle implemented in Milestone 4.6.2.4:
+1. **Cryptographic HMAC-SHA256 Risk Authorization (ADR-027):**
+   - Discovered that Milestone 4.6.2.4 issued pseudo-random UUID tokens (`rat_{uuid}`) without cryptographic binding to order parameters, that the scheduler did not verify tokens prior to execution, and that `engine.py` contained an unauthenticated fallback (`or f"tok_{uuid}"`).
+   - Remediated by implementing HMAC-SHA256 signatures (`rat_v1_{digest}`) binding 8 execution coordinates (`run_id`, `signal_id`, `symbol`, `direction`, `position_size`, `entry_price`, `stop_loss`, `timestamp`). Integrated constant-time pre-fill verification in `PointInTimeExecutionScheduler` and eliminated the fallback.
+2. **Macro Calendar Schema Normalization & Provenance Gating:**
+   - Discovered schema key mismatches between `news_macro_events` (`macro_event_id`, `actual_release_at`, `affected_assets_json`) and `NewsIntelligenceBoundary` keys (`event_id`, `available_at`, `affected_assets`), causing all raw macro records to be excluded as missing timestamps.
+   - Remediated with multi-key fallback normalization. Verified all 68 macro records under `BTCUSDT` decision cutoff: 62 eligible, 2 forward scheduled releases quarantined (`macro_20261104_fomc_decision`, `macro_20261112_bls_cpi`), 1 unprovenanced record excluded (`macro_20240802_bls_nfp`), and 3 asset-irrelevant records filtered.
+3. **Execution Cost Model & Cash Conservation Verification:**
+   - Mathematically reconciled transaction cost accounting. Clarified that the "0.30% round trip" figure represents fees (0.20%) and slippage (0.10%), with 2.0 bps bid-ask spread adding 0.02% (total friction: 32 bps / 0.32%).
+   - Formally proved exact cash conservation ($\Delta \text{cash} == \text{net\_pnl}$) within cent-display quantization. Verified conservative taker fee mandate on all fills and ambiguous-bar stop loss resolution.
+4. **Adversarial Verification Suite (18 Scenarios):**
+   - Engineered dedicated adversarial test suite (`backend/tests/unit/test_milestone_4_6_2_5_adversarial.py`) covering all 18 edge cases: look-ahead rejection, delayed arrival, revision leakage, future macro quarantine, missing provenance, GDELT intraday exclusion, clustering distinct events vs syndicated duplicates, cost arithmetic, double-count prevention, token tampering, token replay, wrong-run token, circuit breaker trips, missing next candle, data gap expiry, duplicate execution prevention, and deterministic replay.
+   - All 18 adversarial tests passed. System test suite expanded to **224 backend tests passed in 7.56s**, 4 frontend tests passed, 0 TypeScript errors, clean Next.js production build.
+5. **Frozen Dataset Preservation:**
+   - Frozen market dataset `v2.0.0` (420 files, tree SHA-256 `b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`) and news dataset `v2.0.0-news-historical` (1,499 records) confirmed 100% bit-for-bit identical.
+6. **Authoritative Decision:** **PASS**. The simulation engine, execution scheduler, risk authorization contract, and news boundary are forensically certified point-in-time compliant.
+
+---
+
 ## 10. Architecture Decision Records & Audit Index
 
 ### Architectural Records
@@ -747,6 +767,7 @@ Milestone 4.6.2.4 implemented and verified an event-time-aware execution schedul
 - **[ADR-024: 15-Category Event Taxonomy, Asset Relevance Isolation & Macroeconomic Calendar Registry](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-024-15-category-event-taxonomy-asset-relevance-isolation--macroeconomic-calendar-registry)**
 - **[ADR-025: Two-Stage Deterministic Classification Remediation, 100% Historical Coverage & Next-Available-Price Execution Synchronization](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-025-two-stage-deterministic-classification-remediation-100-historical-coverage--next-available-price-execution-synchronization)**
 - **[ADR-026: Deterministic Point-in-Time Execution Scheduling, Next-Eligible-Price Policy & Simulation Engine Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-026-deterministic-point-in-time-execution-scheduling-next-eligible-price-policy--simulation-engine-integration)**
+- **[ADR-027: Cryptographic HMAC-SHA256 Risk Authorization Token Binding and Macro Boundary Schema Normalization](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-027-cryptographic-hmac-sha256-risk-authorization-token-binding-and-macro-boundary-schema-normalization)**
 
 
 ### Research & Audit Documents
@@ -806,6 +827,11 @@ Milestone 4.6.2.4 implemented and verified an event-time-aware execution schedul
 - **Milestone 4.6.2.4 Execution Contract:** [`docs/research/MILESTONE_4_6_2_4_EXECUTION_CONTRACT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_4_EXECUTION_CONTRACT.md)
 - **Milestone 4.6.2.4 Engine Integration:** [`docs/research/MILESTONE_4_6_2_4_ENGINE_INTEGRATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_4_ENGINE_INTEGRATION.md)
 - **Milestone 4.6.2.4 Validation Report:** [`docs/research/MILESTONE_4_6_2_4_VALIDATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_4_VALIDATION_REPORT.md)
+- **Milestone 4.6.2.5 Independent Audit:** [`docs/research/MILESTONE_4_6_2_5_INDEPENDENT_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_INDEPENDENT_AUDIT.md)
+- **Milestone 4.6.2.5 Cost Reconciliation:** [`docs/research/MILESTONE_4_6_2_5_EXECUTION_COST_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_EXECUTION_COST_RECONCILIATION.md)
+- **Milestone 4.6.2.5 News PIT Audit:** [`docs/research/MILESTONE_4_6_2_5_NEWS_PIT_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_NEWS_PIT_AUDIT.md)
+- **Milestone 4.6.2.5 Risk Authorization Audit:** [`docs/research/MILESTONE_4_6_2_5_RISK_AUTHORIZATION_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_RISK_AUTHORIZATION_AUDIT.md)
+- **Milestone 4.6.2.5 Validation Report:** [`docs/research/MILESTONE_4_6_2_5_VALIDATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_2_5_VALIDATION_REPORT.md)
 
 
 ---

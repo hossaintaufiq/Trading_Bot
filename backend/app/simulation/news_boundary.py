@@ -11,6 +11,7 @@ Safety & Invariant Rules:
 4. Article revisions available after the decision cutoff are strictly invisible.
 5. Multi-article clusters are deduplicated to earliest available timestamp.
 """
+import json
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -34,6 +35,8 @@ class NewsIntelligenceBoundary:
 
     # Known future scheduled calendar entries quarantined from historical backtesting
     QUARANTINED_FORWARD_EVENTS = {
+        "macro_20261104_fomc_decision",
+        "macro_20261112_bls_cpi",
         "macro_20261105_fomc_rate",
         "macro_20261113_bls_cpi",
     }
@@ -69,8 +72,17 @@ class NewsIntelligenceBoundary:
 
         for raw_event in events:
             event = dict(raw_event)
-            event_id = event.get("event_id") or event.get("article_code") or event.get("cluster_id") or "unknown"
+            event_id = (
+                event.get("event_id")
+                or event.get("macro_event_id")
+                or event.get("article_code")
+                or event.get("cluster_id")
+                or event.get("source_record_id")
+                or "unknown"
+            )
             source = event.get("source", "")
+            category = event.get("event_category", "")
+            relevance = event.get("relevance_classification", "UNCLASSIFIED")
             status_str = event.get("source_verification_status") or event.get("verification_status")
             status = SourceVerificationStatus(status_str) if status_str else SourceVerificationStatus.HISTORICAL_TIMESTAMP_UNVERIFIED
 
@@ -80,7 +92,11 @@ class NewsIntelligenceBoundary:
                 excluded.append(event)
                 continue
 
-            actual_release = event.get("actual_release_time")
+            actual_release = (
+                event.get("actual_release_time")
+                or event.get("actual_release_at")
+                or event.get("scheduled_at")
+            )
             if actual_release and self._dt_cutoff:
                 dt_rel = parse_iso_utc(actual_release)
                 if dt_rel and dt_rel > self._dt_cutoff:
@@ -89,7 +105,12 @@ class NewsIntelligenceBoundary:
                     continue
 
             # 2. Macro provenance completeness check
-            if source == "macro_calendar":
+            is_macro = (
+                source in ("macro_calendar", "bls", "sec_gov", "bitcoin_core", "ethereum_foundation", "federal_reserve")
+                or category == "MACROECONOMIC"
+                or relevance == "MACRO"
+            )
+            if is_macro:
                 first_obs = event.get("first_observed_at")
                 coll_at = event.get("collected_at")
                 if not first_obs and not coll_at:
@@ -112,7 +133,12 @@ class NewsIntelligenceBoundary:
                 continue
 
             # 5. Point-in-time availability cutoff check
-            available_at_iso = event.get("available_at") or event.get("published_at")
+            available_at_iso = (
+                event.get("available_at")
+                or event.get("actual_release_at")
+                or event.get("actual_release_time")
+                or event.get("published_at")
+            )
             if not available_at_iso:
                 event["exclusion_reason"] = "MISSING_AVAILABLE_AT_TIMESTAMP"
                 excluded.append(event)
@@ -140,8 +166,15 @@ class NewsIntelligenceBoundary:
                 event["version_number"] = visible_ver.get("version_number", 1)
 
             # 7. Asset relevance matching
-            relevance = event.get("relevance_classification", "UNCLASSIFIED")
-            assets = event.get("affected_assets", [])
+            assets = event.get("affected_assets")
+            if assets is None and "affected_assets_json" in event:
+                try:
+                    assets = json.loads(event["affected_assets_json"]) if event["affected_assets_json"] else []
+                except Exception:
+                    assets = []
+            elif assets is None:
+                assets = []
+
             clean_sym = symbol.upper().replace("USDT", "")
 
             # Target asset relevant if:
