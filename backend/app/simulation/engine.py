@@ -222,6 +222,7 @@ class HistoricalBacktestEngine:
 
         open_positions: List[ActivePosition] = []
         completed_trades: List[SimulatedTrade] = []
+        seen_trade_ids: Set[str] = set()
         equity_curve: List[EquityPoint] = []
         pipeline_counts: Dict[str, int] = {
             "candidate_signals": 0,
@@ -312,6 +313,9 @@ class HistoricalBacktestEngine:
                     cash_inflow = exit_notional - exit_fee
                     cash_equity += cash_inflow
                     daily_realized_pnl += trade.net_pnl
+                    if trade.trade_id in seen_trade_ids:
+                        raise ValueError(f"Duplicate trade detected in ledger: {trade.trade_id}")
+                    seen_trade_ids.add(trade.trade_id)
                     completed_trades.append(trade)
                 else:
                     positions_to_keep.append(pos)
@@ -615,6 +619,8 @@ class HistoricalBacktestEngine:
         for pending_ord in self.scheduler.pending_orders:
             pending_ord.status = OrderStatus.CANCELLED
             pending_ord.rejection_reason = "Simulation ended before next eligible execution point"
+            if self.risk_manager is not None and hasattr(self.risk_manager, "release_token"):
+                self.risk_manager.release_token(pending_ord.risk_approval_token, pending_ord.order_id)
             self.scheduler.order_history.append(pending_ord)
         self.scheduler.pending_orders.clear()
 
@@ -628,6 +634,9 @@ class HistoricalBacktestEngine:
                 exit_notional = pos.position_size * trade.exit_price
                 exit_fee = exit_notional * self.config.taker_fee_pct
                 cash_equity += (exit_notional - exit_fee)
+                if trade.trade_id in seen_trade_ids:
+                    raise ValueError(f"Duplicate trade detected in ledger: {trade.trade_id}")
+                seen_trade_ids.add(trade.trade_id)
                 completed_trades.append(trade)
 
         open_positions.clear()
