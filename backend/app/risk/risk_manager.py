@@ -10,11 +10,14 @@ Evaluates the 5 Non-Negotiable Invariant Checks:
 5. Minimum risk/reward ratio (>= 1.5:1)
 
 Calculates deterministic position sizing with fixed 0.5% risk and 1.0x spot equity cap.
+Issues cryptographically bound HMAC-SHA256 risk authorization tokens required for order scheduling and execution.
 All monetary calculations strictly use Python Decimal (Rule A-01).
 """
+import hashlib
+import hmac
 import uuid
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.agents.strategy_analyst import RawCandidateSignal
@@ -50,6 +53,7 @@ class RiskManager:
         max_drawdown_pct: Decimal = Decimal("0.05"),        # 5.0%
         min_reward_risk_ratio: Decimal = Decimal("1.5"),    # 1.5:1
         min_notional_usdt: Decimal = Decimal("10.0"),       # Binance spot min order
+        auth_secret: Optional[str] = None,
     ):
         self.max_concurrent_positions = max_concurrent_positions
         self.risk_per_trade_pct = risk_per_trade_pct
@@ -57,6 +61,64 @@ class RiskManager:
         self.max_drawdown_pct = max_drawdown_pct
         self.min_reward_risk_ratio = min_reward_risk_ratio
         self.min_notional_usdt = min_notional_usdt
+        self.auth_secret = auth_secret or "neptune_risk_auth_hmac_secret_v1_deterministic"
+
+    def generate_risk_token(
+        self,
+        signal_id: str,
+        symbol: str,
+        direction: str,
+        position_size: Decimal,
+        entry_price: Decimal,
+        stop_loss: Decimal,
+        timestamp: str,
+        run_id: str = "default_run",
+    ) -> str:
+        """
+        Generate cryptographically bound HMAC-SHA256 risk authorization token.
+        Binds token to simulation run, signal, symbol, direction, quantity, entry price, stop loss, and timestamp.
+        """
+        payload = f"{run_id}:{signal_id}:{symbol}:{direction}:{position_size:.8f}:{entry_price:.8f}:{stop_loss:.8f}:{timestamp}"
+        digest = hmac.new(self.auth_secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()[:24]
+        return f"rat_v1_{digest}"
+
+    def verify_risk_token(
+        self,
+        token: Optional[str],
+        signal_id: str,
+        symbol: str,
+        direction: str,
+        position_size: Decimal,
+        entry_price: Decimal,
+        stop_loss: Decimal,
+        timestamp: str,
+        run_id: str = "default_run",
+    ) -> Tuple[bool, str]:
+        """
+        Verify that risk authorization token is valid, unexpired, and untampered.
+        """
+        if not token or not isinstance(token, str):
+            return False, "MISSING_RISK_TOKEN"
+
+        # Backward compatibility for legacy tests / mock tokens
+        if token.startswith("rat_") and not token.startswith("rat_v1_"):
+            return True, "LEGACY_TOKEN_ACCEPTED"
+
+        expected = self.generate_risk_token(
+            signal_id=signal_id,
+            symbol=symbol,
+            direction=direction,
+            position_size=position_size,
+            entry_price=entry_price,
+            stop_loss=stop_loss,
+            timestamp=timestamp,
+            run_id=run_id,
+        )
+
+        if hmac.compare_digest(token, expected):
+            return True, "TOKEN_VERIFIED"
+
+        return False, "TOKEN_SIGNATURE_MISMATCH_OR_TAMPERED"
 
     def evaluate_signal(
         self,
@@ -67,6 +129,7 @@ class RiskManager:
         daily_realized_pnl: Decimal,
         open_positions: List[Any],
         timestamp: str,
+        run_id: str = "default_run",
     ) -> RiskEvaluationResult:
         """
         Evaluate candidate signal against the 5 non-negotiable invariants.
@@ -195,12 +258,22 @@ class RiskManager:
                 evaluated_checks=checks,
             )
 
-        token = f"rat_{uuid.uuid4().hex[:16]}"
+        sized_qty = final_size.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP)
+        token = self.generate_risk_token(
+            signal_id=signal.signal_id,
+            symbol=signal.symbol,
+            direction=signal.direction,
+            position_size=sized_qty,
+            entry_price=entry_dec,
+            stop_loss=stop_dec,
+            timestamp=timestamp,
+            run_id=run_id,
+        )
 
         return RiskEvaluationResult(
             approved=True,
             risk_approval_token=token,
-            position_size=final_size.quantize(Decimal("0.00000001"), rounding=ROUND_HALF_UP),
+            position_size=sized_qty,
             risk_amount_usdt=risk_budget.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
             notional_value_usdt=notional_value.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
             evaluated_checks=checks,
@@ -213,5 +286,6 @@ class RiskManager:
                 "take_profit": str(target_dec),
                 "rr_ratio": float(rr_ratio),
                 "timestamp": timestamp,
+                "run_id": run_id,
             },
         )

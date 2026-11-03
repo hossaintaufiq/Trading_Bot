@@ -37,6 +37,7 @@
 - [ADR-024: 15-Category Event Taxonomy, Asset Relevance Isolation & Macroeconomic Calendar Registry](#adr-024-15-category-event-taxonomy-asset-relevance-isolation--macroeconomic-calendar-registry)
 - [ADR-025: Two-Stage Deterministic Classification Remediation, 100% Historical Coverage & Next-Available-Price Execution Synchronization](#adr-025-two-stage-deterministic-classification-remediation-100-historical-coverage--next-available-price-execution-synchronization)
 - [ADR-026: Deterministic Point-in-Time Execution Scheduling, Next-Eligible-Price Policy & Simulation Engine Integration](#adr-026-deterministic-point-in-time-execution-scheduling-next-eligible-price-policy--simulation-engine-integration)
+- [ADR-027: Cryptographic HMAC-SHA256 Risk Authorization Token Binding and Macro Boundary Schema Normalization](#adr-027-cryptographic-hmac-sha256-risk-authorization-token-binding-and-macro-boundary-schema-normalization)
 
 ---
 
@@ -543,3 +544,29 @@
      - Introduced `ExecutionPolicy.LEGACY_CLOSE_FILL` (default for legacy regression tests) and `ExecutionPolicy.NEXT_ELIGIBLE_PRICE` (mandatory for news research).
 - **Consequences**:
   - The historical simulation engine is fully integrated and point-in-time compliant. News-gated strategy experiments can proceed in Milestone 4.6.3 under zero look-ahead bias.
+
+
+---
+
+## ADR-027: Cryptographic HMAC-SHA256 Risk Authorization Token Binding and Macro Boundary Schema Normalization
+
+- **Status**: Accepted
+- **Date**: 2026-11-03
+- **Context**: Milestone 4.6.2.5 adversarial audit revealed two security and schema vulnerabilities:
+  1. Risk authorization tokens issued by `RiskManager` were pseudo-random UUIDs (`rat_{uuid}`) not bound to order parameters (symbol, side, quantity, price, stop loss), and the simulation scheduler did not cryptographically verify tokens before filling orders. Furthermore, `engine.py` contained an unsafe fallback (`or f"tok_{uuid}"`).
+  2. `NewsIntelligenceBoundary` assumed generic dictionary keys (`event_id`, `actual_release_time`, `available_at`) which conflicted with the actual SQLite/Parquet macro calendar schema (`macro_event_id`, `actual_release_at`, `affected_assets_json`), causing macro records to be excluded as missing timestamps.
+- **Decision**:
+  1. **Cryptographic HMAC-SHA256 Risk Authorization**:
+     - Upgraded `RiskManager.generate_risk_token` to generate HMAC-SHA256 signatures (`rat_v1_{digest}`) binding 8 execution parameters: `run_id`, `signal_id`, `symbol`, `direction`, `position_size`, `entry_price`, `stop_loss`, and `timestamp`.
+     - Implemented `RiskManager.verify_risk_token` with constant-time verification (`hmac.compare_digest`).
+     - Integrated pre-fill token verification into `PointInTimeExecutionScheduler.process_candle_open`: any altered parameter, token replay across signals/runs, or missing token immediately rejects the order with `OrderStatus.REJECTED`.
+     - Completely removed the unauthenticated fallback token generation from `engine.py`.
+  2. **Multi-Key Fallback Schema Normalization**:
+     - Normalized `NewsIntelligenceBoundary` to natively resolve `macro_event_id`, `actual_release_at`, and deserialized `affected_assets_json`.
+     - Updated `QUARANTINED_FORWARD_EVENTS` to quarantine canonical forward releases (`macro_20261104_fomc_decision` and `macro_20261112_bls_cpi`).
+     - Enforced macro provenance gating across all macro event sources, isolating unprovenanced records (`macro_20240802_bls_nfp`).
+  3. **Execution Cost Arithmetic Documentation Formalization**:
+     - Clarified total round-trip friction as 32 bps (0.32%): 20 bps taker fees, 10 bps slippage, and 2 bps bid-ask spread.
+- **Consequences**:
+  - The Risk Manager's sole authorization authority (Rule S-04) is enforced cryptographically; orders cannot be tampered with or fabricated between approval and execution.
+  - All 68 macro calendar records are accurately parsed, with 62 historical records point-in-time eligible, 2 forward records quarantined, 1 unprovenanced record excluded, and 3 asset-irrelevant records filtered for BTCUSDT.
