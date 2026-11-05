@@ -774,6 +774,36 @@ Milestone 4.6.2.5.1 resolved the remaining operational and cryptographic readine
 
 ---
 
+### 8.17 Milestone 4.6.3.0: News-Gated Experiment Design, Baseline Freeze & Research Protocol
+Milestone 4.6.3.0 established the formal empirical research design and frozen technical baseline required to evaluate whether point-in-time news intelligence improves net trading expectancy over a deterministic technical baseline after realistic execution costs:
+1. **Frozen Technical Baseline (ADR-029):**
+   - Conducted forensic parameter reconciliation across `settings.py`, `models.py`, `risk_manager.py`, and `execution.py`.
+   - Verified zero discrepancies: 1,000 USDT capital, 1.0x spot cap (no leverage), 0.5% risk per trade, 2.0% daily loss limit, 5.0% max drawdown circuit breaker, 1.5:1 min RR ratio, `NEXT_ELIGIBLE_PRICE` execution policy, 0.10% taker fee, 0.05% slippage, 0.01% half-spread (0.32% round trip).
+   - Generated immutable baseline configuration fingerprint: `33a5d9f67052fe25737e8e93011230462ab2250e1984395f2d69214f445f1278`.
+2. **Four-Group Experimental Architecture:**
+   - **Group A (Technical Baseline):** Unfiltered deterministic baseline reference group.
+   - **Group B (News Veto):** Primary treatment group. News layer acts strictly as an asymmetric veto filter at decision cutoff. Prohibited from generating directional trades or bypassing Risk Manager.
+   - **Group C (Frequency-Matched Control):** Controls for trade-reduction artifacts by thinning Group A candidates to match Group B's trade count ($N_B$) using deterministic zero-lookahead algorithms (systematic decimation, technical confidence priority, and cryptographic seed selection).
+   - **Group D (Exposure-Matched Control):** Controls for market exposure artifacts using a dynamic cooldown budget matching cumulative time-in-market and capital utilization to Group B without future data.
+3. **News-Veto Research Contract & 13-Category Taxonomy:**
+   - Implemented `NewsVetoContract` Pydantic model enforcing millisecond publication availability, revision isolation, and explicit exclusion reason logging.
+   - Formalized 13-category event taxonomy distinguishing research-eligible categories from excluded market commentary and promotional content.
+   - Re-verified strict GDELT intraday prohibition (`15m`, `1h`, `4h`).
+4. **Chronological Research Split & Cluster Isolation:**
+   - Established strict 3-way chronological partitioning across the 35-month corpus: Partition 1 Dev (2024, 380 records), Partition 2 Val (2025, 594 records), Partition 3 Locked Out-of-Sample (2026 Jan-Oct, 478 records, strictly untouched), and Quarantined Forward (Nov 2026, forward scheduled macro releases quarantined).
+   - Verified cluster boundary integrity: **0 clusters cross partition years**, eliminating duplicate news leakage.
+5. **Statistical Analysis Plan (SAP) & Reproducibility:**
+   - Defined primary metrics (net expectancy, net return, max drawdown, profit factor) and secondary metrics (win rate with 95% Wilson CI, Sharpe, Sortino, market exposure, capital utilization).
+   - Specified paired Wilcoxon signed-rank tests, 48-bar moving block bootstrap ($B=2000$), Benjamini-Hochberg FDR correction ($q=0.05$), and economic significance hurdle ($+\$0.50$ USDT net outperformance after 0.32% friction).
+   - Generated master reproducibility composite fingerprint: `5ffc9b1bed97138db0b8ceab7aab2514116b02c88cdac26f322af2d5f6b18ced`.
+6. **Implementation, Verification & Test Suite:**
+   - Implemented `backend/app/simulation/research_protocol.py` and 16 unit tests in `test_milestone_4_6_3_0_protocol.py`.
+   - Full test suite: **262 backend tests passed in 12.62s**, 4 frontend tests passed, Next.js production build compiled with 0 errors.
+   - Confirmed market dataset `v2.0.0` (tree SHA-256 `b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`) and news dataset `v2.0.0-news-historical` (manifest SHA-256 `6b7bb69c841ec9a5e1774b6f369c0d9c113df066d80357521ac92b937490f4ec`) remain 100% untouched.
+7. **Authoritative Decision:** **PASS**. The research protocol is fully frozen and certified ready for controlled experimentation. Strategy execution remains strictly halted awaiting independent authorization.
+
+---
+
 ## 10. Architecture Decision Records & Audit Index
 
 ### Architectural Records
@@ -791,9 +821,17 @@ Milestone 4.6.2.5.1 resolved the remaining operational and cryptographic readine
 - **[ADR-026: Deterministic Point-in-Time Execution Scheduling, Next-Eligible-Price Policy & Simulation Engine Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-026-deterministic-point-in-time-execution-scheduling-next-eligible-price-policy--simulation-engine-integration)**
 - **[ADR-027: Cryptographic HMAC-SHA256 Risk Authorization Token Binding and Macro Boundary Schema Normalization](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-027-cryptographic-hmac-sha256-risk-authorization-token-binding-and-macro-boundary-schema-normalization)**
 - **[ADR-028: Cryptographic Risk Authorization Lifecycle, Atomic Token Idempotency, and Timeframe-Calibrated Execution Gap Policy](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-028-cryptographic-risk-authorization-lifecycle-atomic-token-idempotency-and-timeframe-calibrated-execution-gap-policy)**
+- **[ADR-029: News-Gated Experiment Design, Baseline Freeze, and Four-Group Research Protocol](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-029-news-gated-experiment-design-baseline-freeze-and-four-group-research-protocol)**
 
 
 ### Research & Audit Documents
+- **Milestone 4.6.3.0 Experiment Protocol:** [`docs/research/MILESTONE_4_6_3_0_EXPERIMENT_PROTOCOL.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_EXPERIMENT_PROTOCOL.md)
+- **Milestone 4.6.3.0 Baseline Freeze:** [`docs/research/MILESTONE_4_6_3_0_BASELINE_FREEZE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_BASELINE_FREEZE.md)
+- **Milestone 4.6.3.0 News-Veto Contract:** [`docs/research/MILESTONE_4_6_3_0_NEWS_VETO_CONTRACT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_NEWS_VETO_CONTRACT.md)
+- **Milestone 4.6.3.0 Data Partition & Coverage:** [`docs/research/MILESTONE_4_6_3_0_DATA_PARTITION_AND_COVERAGE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_DATA_PARTITION_AND_COVERAGE.md)
+- **Milestone 4.6.3.0 Statistical Analysis Plan:** [`docs/research/MILESTONE_4_6_3_0_STATISTICAL_ANALYSIS_PLAN.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_STATISTICAL_ANALYSIS_PLAN.md)
+- **Milestone 4.6.3.0 Validation Report:** [`docs/research/MILESTONE_4_6_3_0_VALIDATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_VALIDATION_REPORT.md)
+- **Milestone 4.1.1 Audit:** [`docs/audits/MILESTONE_4_1_1_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_1_1_AUDIT.md)
 - **Milestone 4.1.1 Audit:** [`docs/audits/MILESTONE_4_1_1_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_1_1_AUDIT.md)
 - **Milestone 4.2.1 Audit:** [`docs/audits/MILESTONE_4_2_1_INDEPENDENT_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_2_INDEPENDENT_AUDIT.md)
 - **Milestone 4.3.1 Audit:** [`docs/audits/MILESTONE_4_3_1_AUDIT_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/audits/MILESTONE_4_3_1_AUDIT_REPORT.md)
