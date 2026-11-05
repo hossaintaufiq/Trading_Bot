@@ -601,3 +601,45 @@
   - Replay attacks, token double-spending, and duplicate ledger entries are architecturally impossible.
   - Risk Manager is the sole, stateful, and cryptographically verified order authority (Rule S-04).
   - The historical simulation engine is fully verified and hardened for upcoming news strategy experiments.
+
+
+---
+
+## ADR-029: News-Gated Experiment Design, Baseline Freeze, and Four-Group Research Protocol
+
+- **Status**: Accepted
+- **Date**: 2026-11-06
+- **Context**: Milestone 4.6.3.0 establishes the empirical evaluation framework to answer whether point-in-time news intelligence improves net trading expectancy over a deterministic technical baseline after realistic costs. Evaluating this requires freezing the baseline, defining appropriate controls, establishing the news-veto contract, creating non-overlapping chronological splits, and detailing the statistical testing plan.
+- **Decision**:
+  1. **Frozen Baseline Configuration**:
+     - Virtual capital: 1,000 USDT, spot leverage capped at 1.0x (no margin).
+     - Risk invariants: 0.5% risk per trade, 2.0% daily loss limit, 5.0% max drawdown circuit breaker, 1.5:1 min RR ratio.
+     - Execution policy: `NEXT_ELIGIBLE_PRICE` (Bar $T+1$ Open fill). Execution gap: 1 bar for 15m (30 min delay max), 3 bars for HTF.
+     - Cost model: 0.10% taker fee, 0.05% adverse slippage, 0.01% half-spread (0.32% round trip).
+     - Baseline configuration fingerprint SHA-256: `33a5d9f67052fe25737e8e93011230462ab2250e1984395f2d69214f445f1278`.
+  2. **Four-Group Research Architecture**:
+     - **Group A (Technical Baseline)**: Reference group running deterministic strategy without news intelligence.
+     - **Group B (News Veto)**: Technical candidates subjected to adverse point-in-time news veto. No directional trade generation; no Risk Manager override.
+     - **Group C (Frequency-Matched Control)**: Thins Group A candidates to match Group B's trade count using deterministic zero-lookahead methods (systematic decimation, technical confidence priority, cryptographic seed selection).
+     - **Group D (Exposure-Matched Control)**: Dynamic cooldown budget matching cumulative time-in-market and capital utilization to Group B without consuming future data.
+  3. **Formal News-Veto Contract & 13-Category Taxonomy**:
+     - Created `NewsVetoContract` Pydantic model enforcing millisecond publication availability, revision isolation, and exclusion reason codes.
+     - Codified 13-category taxonomy specifying research eligibility, affected assets, direct vs market-wide relevance, and timeframe eligibility.
+     - GDELT strictly prohibited for intraday (`15m`, `1h`, `4h`).
+  4. **Chronological Research Partitioning (35 Months)**:
+     - Partition 1 (Development / Training): `2024-01-01` to `2024-12-31` (12 months, 380 records).
+     - Partition 2 (Validation): `2025-01-01` to `2025-12-31` (12 months, 594 records).
+     - Partition 3 (Locked Out-of-Sample): `2026-01-01` to `2026-10-31` (10 months, 478 records, strictly locked).
+     - Quarantined Forward: `2026-11-01` to `2026-11-03` (4 records, forward macro events quarantined).
+     - Verified zero cluster leakage across partition years.
+  5. **Statistical Analysis Plan (SAP)**:
+     - Primary metrics: Net expectancy per trade, Net portfolio return, Maximum drawdown, Profit factor.
+     - Secondary metrics: Win rate (95% Wilson CI), Sharpe, Sortino, trade frequency, market exposure, capital utilization.
+     - Statistical testing: Paired Wilcoxon signed-rank test on candidate signals, 48-bar moving block bootstrap ($B=2000$), Benjamini-Hochberg FDR correction ($q=0.05$).
+     - Economic hurdle: $+\$0.50$ USDT net expectancy outperformance after 0.32% round-trip friction.
+  6. **Master Reproducibility Fingerprint**:
+     - Composite SHA-256 fingerprint: `5ffc9b1bed97138db0b8ceab7aab2514116b02c88cdac26f322af2d5f6b18ced`.
+- **Consequences**:
+  - The deterministic baseline is immutable and reproducible across independent audit runs.
+  - Disentangles genuine informational alpha from frequency reduction and exposure bias.
+  - The research protocol is fully frozen, documented, and ready for subsequent controlled execution.
