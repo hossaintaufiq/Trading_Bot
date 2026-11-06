@@ -1,0 +1,11 @@
+{
+  "milestone": "4.6.3.1",
+  "git_branch": "quant-expectancy-validation",
+  "market_dataset_tree_sha256": "b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c",
+  "news_dataset_manifest_sha256": "6b7bb69c841ec9a5e1774b6f369c0d9c113df066d80357521ac92b937490f4ec",
+  "frozen_baseline_fingerprint": "33a5d9f67052fe25737e8e93011230462ab2250e1984395f2d69214f445f1278",
+  "oos_partition_status": "CRYPTOGRAPHICALLY_LOCKED",
+  "oos_lock_start": "2026-01-01T00:00:00Z",
+  "oos_lock_end": "2026-10-31T23:59:59Z",
+  "execution_date_utc": "2026-11-06T18:26:52.946745+00:00"
+}

@@ -1,0 +1,1849 @@
+{
+  "total_vetoes": 183,
+  "veto_percentage": 4.98,
+  "vetoes_by_asset": {
+    "BNBUSDT": 57,
+    "BTCUSDT": 67,
+    "ETHUSDT": 59
+  },
+  "vetoes_by_category": {
+    "EXCHANGE_OPERATIONAL": 153,
+    "DIRECT_ETH": 4,
+    "NETWORK_PROTOCOL_INCIDENTS": 14,
+    "DIRECT_BTC": 6,
+    "DIRECT_BNB": 4,
+    "EXCHANGE_OUTAGES_SUSPENSIONS": 2
+  },
+  "decisions": [
+    {
+      "timestamp": "2024-01-03T07:30:00.000Z",
+      "candidate_id": "cand_8",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_e173e516b128d17d, Elapsed=3595s <= 7200s",
+      "triggering_event_id": "art_binance_e173e516b128d17d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_64a29a46f6ca77da"
+    },
+    {
+      "timestamp": "2024-01-12T04:30:00.000Z",
+      "candidate_id": "cand_97",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_e915e9f625eb5f61, Elapsed=1488s <= 7200s",
+      "triggering_event_id": "art_binance_e915e9f625eb5f61",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_08f2eaec824a22f8"
+    },
+    {
+      "timestamp": "2024-01-12T04:45:00.000Z",
+      "candidate_id": "cand_98",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_e915e9f625eb5f61, Elapsed=2388s <= 7200s",
+      "triggering_event_id": "art_binance_e915e9f625eb5f61",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_08f2eaec824a22f8"
+    },
+    {
+      "timestamp": "2024-01-12T08:45:00.000Z",
+      "candidate_id": "cand_99",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d89543229514edf0, Elapsed=4193s <= 7200s",
+      "triggering_event_id": "art_binance_d89543229514edf0",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bf267c5cca89638"
+    },
+    {
+      "timestamp": "2024-01-12T09:00:00.000Z",
+      "candidate_id": "cand_100",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d89543229514edf0, Elapsed=5093s <= 7200s",
+      "triggering_event_id": "art_binance_d89543229514edf0",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bf267c5cca89638"
+    },
+    {
+      "timestamp": "2024-01-12T09:15:00.000Z",
+      "candidate_id": "cand_101",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d89543229514edf0, Elapsed=5993s <= 7200s",
+      "triggering_event_id": "art_binance_d89543229514edf0",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bf267c5cca89638"
+    },
+    {
+      "timestamp": "2024-01-12T14:00:00.000Z",
+      "candidate_id": "cand_104",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_06a098c4a2967edc, Elapsed=1162s <= 7200s",
+      "triggering_event_id": "art_binance_06a098c4a2967edc",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9b4e49e6abd7c8aa"
+    },
+    {
+      "timestamp": "2024-01-12T15:00:00.000Z",
+      "candidate_id": "cand_105",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_06a098c4a2967edc, Elapsed=4762s <= 7200s",
+      "triggering_event_id": "art_binance_06a098c4a2967edc",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9b4e49e6abd7c8aa"
+    },
+    {
+      "timestamp": "2024-01-12T15:15:00.000Z",
+      "candidate_id": "cand_106",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_06a098c4a2967edc, Elapsed=5662s <= 7200s",
+      "triggering_event_id": "art_binance_06a098c4a2967edc",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9b4e49e6abd7c8aa"
+    },
+    {
+      "timestamp": "2024-01-18T13:15:00.000Z",
+      "candidate_id": "cand_146",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_8d5f4f0e0f2d256a, Elapsed=895s <= 7200s",
+      "triggering_event_id": "art_binance_8d5f4f0e0f2d256a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_e0903f89765351a9"
+    },
+    {
+      "timestamp": "2024-01-18T13:30:00.000Z",
+      "candidate_id": "cand_147",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_8d5f4f0e0f2d256a, Elapsed=1795s <= 7200s",
+      "triggering_event_id": "art_binance_8d5f4f0e0f2d256a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_e0903f89765351a9"
+    },
+    {
+      "timestamp": "2024-01-18T13:45:00.000Z",
+      "candidate_id": "cand_148",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_8d5f4f0e0f2d256a, Elapsed=2695s <= 7200s",
+      "triggering_event_id": "art_binance_8d5f4f0e0f2d256a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_e0903f89765351a9"
+    },
+    {
+      "timestamp": "2024-01-22T03:45:00.000Z",
+      "candidate_id": "cand_187",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_0369c04a198a28d9, Elapsed=2695s <= 7200s",
+      "triggering_event_id": "art_binance_0369c04a198a28d9",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c25fbde3a5ad71ac"
+    },
+    {
+      "timestamp": "2024-01-24T06:15:00.000Z",
+      "candidate_id": "cand_231",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_beb212d7b1ecc2b6, Elapsed=896s <= 7200s",
+      "triggering_event_id": "art_binance_beb212d7b1ecc2b6",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_23c7b3feba5fedfa"
+    },
+    {
+      "timestamp": "2024-01-30T15:30:00.000Z",
+      "candidate_id": "cand_311",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_b29a368954525b5b, Elapsed=5979s <= 7200s",
+      "triggering_event_id": "art_binance_b29a368954525b5b",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_f43da476b9f905a0"
+    },
+    {
+      "timestamp": "2024-01-30T15:30:00.000Z",
+      "candidate_id": "cand_312",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_b29a368954525b5b, Elapsed=5979s <= 7200s",
+      "triggering_event_id": "art_binance_b29a368954525b5b",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_f43da476b9f905a0"
+    },
+    {
+      "timestamp": "2024-02-06T03:15:00.000Z",
+      "candidate_id": "cand_364",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6283ba662f5b81cf, Elapsed=892s <= 7200s",
+      "triggering_event_id": "art_binance_6283ba662f5b81cf",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_7596a1474181e0a9"
+    },
+    {
+      "timestamp": "2024-02-06T03:30:00.000Z",
+      "candidate_id": "cand_365",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6283ba662f5b81cf, Elapsed=1792s <= 7200s",
+      "triggering_event_id": "art_binance_6283ba662f5b81cf",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_7596a1474181e0a9"
+    },
+    {
+      "timestamp": "2024-02-06T03:45:00.000Z",
+      "candidate_id": "cand_366",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6283ba662f5b81cf, Elapsed=2692s <= 7200s",
+      "triggering_event_id": "art_binance_6283ba662f5b81cf",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_7596a1474181e0a9"
+    },
+    {
+      "timestamp": "2024-02-06T04:00:00.000Z",
+      "candidate_id": "cand_367",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6283ba662f5b81cf, Elapsed=3592s <= 7200s",
+      "triggering_event_id": "art_binance_6283ba662f5b81cf",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_7596a1474181e0a9"
+    },
+    {
+      "timestamp": "2024-02-06T04:15:00.000Z",
+      "candidate_id": "cand_368",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6283ba662f5b81cf, Elapsed=4492s <= 7200s",
+      "triggering_event_id": "art_binance_6283ba662f5b81cf",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_7596a1474181e0a9"
+    },
+    {
+      "timestamp": "2024-02-06T09:00:00.000Z",
+      "candidate_id": "cand_369",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ab3e6d5495228dfb, Elapsed=3584s <= 7200s",
+      "triggering_event_id": "art_binance_ab3e6d5495228dfb",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_eb84304403530054"
+    },
+    {
+      "timestamp": "2024-02-06T10:00:00.000Z",
+      "candidate_id": "cand_370",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ab3e6d5495228dfb, Elapsed=7184s <= 7200s",
+      "triggering_event_id": "art_binance_ab3e6d5495228dfb",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_eb84304403530054"
+    },
+    {
+      "timestamp": "2024-02-06T15:45:00.000Z",
+      "candidate_id": "cand_372",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_ETH, Impact=0.810 >= 0.7, EventID=art_binance_908a42bf8ddf88a2, Elapsed=18597s <= 21600s",
+      "triggering_event_id": "art_binance_908a42bf8ddf88a2",
+      "triggering_category": "DIRECT_ETH",
+      "triggering_cluster": "cl_2e56853f14d514de"
+    },
+    {
+      "timestamp": "2024-02-06T16:00:00.000Z",
+      "candidate_id": "cand_373",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_ETH, Impact=0.810 >= 0.7, EventID=art_binance_908a42bf8ddf88a2, Elapsed=19497s <= 21600s",
+      "triggering_event_id": "art_binance_908a42bf8ddf88a2",
+      "triggering_category": "DIRECT_ETH",
+      "triggering_cluster": "cl_2e56853f14d514de"
+    },
+    {
+      "timestamp": "2024-02-06T16:30:00.000Z",
+      "candidate_id": "cand_375",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_ETH, Impact=0.810 >= 0.7, EventID=art_binance_908a42bf8ddf88a2, Elapsed=21297s <= 21600s",
+      "triggering_event_id": "art_binance_908a42bf8ddf88a2",
+      "triggering_category": "DIRECT_ETH",
+      "triggering_cluster": "cl_2e56853f14d514de"
+    },
+    {
+      "timestamp": "2024-02-09T03:15:00.000Z",
+      "candidate_id": "cand_404",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_363d62da0818140d, Elapsed=594s <= 7200s",
+      "triggering_event_id": "art_binance_363d62da0818140d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_a140e96bdb6cadd6"
+    },
+    {
+      "timestamp": "2024-02-09T03:15:00.000Z",
+      "candidate_id": "cand_405",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_363d62da0818140d, Elapsed=594s <= 7200s",
+      "triggering_event_id": "art_binance_363d62da0818140d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_a140e96bdb6cadd6"
+    },
+    {
+      "timestamp": "2024-02-09T03:30:00.000Z",
+      "candidate_id": "cand_406",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_363d62da0818140d, Elapsed=1494s <= 7200s",
+      "triggering_event_id": "art_binance_363d62da0818140d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_a140e96bdb6cadd6"
+    },
+    {
+      "timestamp": "2024-02-09T03:30:00.000Z",
+      "candidate_id": "cand_407",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_363d62da0818140d, Elapsed=1494s <= 7200s",
+      "triggering_event_id": "art_binance_363d62da0818140d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_a140e96bdb6cadd6"
+    },
+    {
+      "timestamp": "2024-02-09T04:15:00.000Z",
+      "candidate_id": "cand_408",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_363d62da0818140d, Elapsed=4194s <= 7200s",
+      "triggering_event_id": "art_binance_363d62da0818140d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_a140e96bdb6cadd6"
+    },
+    {
+      "timestamp": "2024-02-09T04:15:00.000Z",
+      "candidate_id": "cand_409",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_363d62da0818140d, Elapsed=4194s <= 7200s",
+      "triggering_event_id": "art_binance_363d62da0818140d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_a140e96bdb6cadd6"
+    },
+    {
+      "timestamp": "2024-02-09T04:45:00.000Z",
+      "candidate_id": "cand_410",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_363d62da0818140d, Elapsed=5994s <= 7200s",
+      "triggering_event_id": "art_binance_363d62da0818140d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_a140e96bdb6cadd6"
+    },
+    {
+      "timestamp": "2024-02-20T12:15:00.000Z",
+      "candidate_id": "cand_467",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_95e63b884b06aae7, Elapsed=701s <= 7200s",
+      "triggering_event_id": "art_binance_95e63b884b06aae7",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c3121ea2bea15a91"
+    },
+    {
+      "timestamp": "2024-02-20T12:30:00.000Z",
+      "candidate_id": "cand_468",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_95e63b884b06aae7, Elapsed=1601s <= 7200s",
+      "triggering_event_id": "art_binance_95e63b884b06aae7",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c3121ea2bea15a91"
+    },
+    {
+      "timestamp": "2024-02-20T14:00:00.000Z",
+      "candidate_id": "cand_469",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_95e63b884b06aae7, Elapsed=7001s <= 7200s",
+      "triggering_event_id": "art_binance_95e63b884b06aae7",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c3121ea2bea15a91"
+    },
+    {
+      "timestamp": "2024-02-20T14:15:00.000Z",
+      "candidate_id": "cand_470",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_f58dd1ffa072a26f, Elapsed=1245s <= 7200s",
+      "triggering_event_id": "art_binance_f58dd1ffa072a26f",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c9c708ad7c3b6759"
+    },
+    {
+      "timestamp": "2024-02-21T07:45:00.000Z",
+      "candidate_id": "cand_474",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_b2259f37b5b149ff, Elapsed=5972s <= 7200s",
+      "triggering_event_id": "art_binance_b2259f37b5b149ff",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_1c928e5894d609cd"
+    },
+    {
+      "timestamp": "2024-02-21T08:00:00.000Z",
+      "candidate_id": "cand_475",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_b2259f37b5b149ff, Elapsed=6872s <= 7200s",
+      "triggering_event_id": "art_binance_b2259f37b5b149ff",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_1c928e5894d609cd"
+    },
+    {
+      "timestamp": "2024-02-22T14:00:00.000Z",
+      "candidate_id": "cand_493",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_79a564b7b4d3b2b7, Elapsed=29995s <= 43200s",
+      "triggering_event_id": "art_binance_79a564b7b4d3b2b7",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_40e77e46aa471cd0"
+    },
+    {
+      "timestamp": "2024-02-22T14:15:00.000Z",
+      "candidate_id": "cand_494",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_79a564b7b4d3b2b7, Elapsed=30895s <= 43200s",
+      "triggering_event_id": "art_binance_79a564b7b4d3b2b7",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_40e77e46aa471cd0"
+    },
+    {
+      "timestamp": "2024-02-22T14:30:00.000Z",
+      "candidate_id": "cand_495",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_79a564b7b4d3b2b7, Elapsed=31795s <= 43200s",
+      "triggering_event_id": "art_binance_79a564b7b4d3b2b7",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_40e77e46aa471cd0"
+    },
+    {
+      "timestamp": "2024-02-22T15:00:00.000Z",
+      "candidate_id": "cand_496",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_79a564b7b4d3b2b7, Elapsed=33595s <= 43200s",
+      "triggering_event_id": "art_binance_79a564b7b4d3b2b7",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_40e77e46aa471cd0"
+    },
+    {
+      "timestamp": "2024-02-26T11:15:00.000Z",
+      "candidate_id": "cand_534",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_c91cb36c745d55c1, Elapsed=5086s <= 7200s",
+      "triggering_event_id": "art_binance_c91cb36c745d55c1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_81b84dcc56aa13ac"
+    },
+    {
+      "timestamp": "2024-02-26T11:30:00.000Z",
+      "candidate_id": "cand_535",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_c91cb36c745d55c1, Elapsed=5986s <= 7200s",
+      "triggering_event_id": "art_binance_c91cb36c745d55c1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_81b84dcc56aa13ac"
+    },
+    {
+      "timestamp": "2024-02-26T11:45:00.000Z",
+      "candidate_id": "cand_536",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_c91cb36c745d55c1, Elapsed=6886s <= 7200s",
+      "triggering_event_id": "art_binance_c91cb36c745d55c1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_81b84dcc56aa13ac"
+    },
+    {
+      "timestamp": "2024-02-27T04:00:00.000Z",
+      "candidate_id": "cand_545",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6635dd436d3d44ec, Elapsed=574s <= 7200s",
+      "triggering_event_id": "art_binance_6635dd436d3d44ec",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_0616c5e563d81206"
+    },
+    {
+      "timestamp": "2024-02-28T08:00:00.000Z",
+      "candidate_id": "cand_555",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_5b302c10bc1c17af, Elapsed=3555s <= 7200s",
+      "triggering_event_id": "art_binance_5b302c10bc1c17af",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9eb5d31d625dde31"
+    },
+    {
+      "timestamp": "2024-02-29T07:15:00.000Z",
+      "candidate_id": "cand_573",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BTC, Impact=0.810 >= 0.7, EventID=art_binance_76c000167d5e63a8, Elapsed=2691s <= 21600s",
+      "triggering_event_id": "art_binance_76c000167d5e63a8",
+      "triggering_category": "DIRECT_BTC",
+      "triggering_cluster": "cl_d735d5e4af9ca013"
+    },
+    {
+      "timestamp": "2024-02-29T07:30:00.000Z",
+      "candidate_id": "cand_574",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BTC, Impact=0.810 >= 0.7, EventID=art_binance_76c000167d5e63a8, Elapsed=3591s <= 21600s",
+      "triggering_event_id": "art_binance_76c000167d5e63a8",
+      "triggering_category": "DIRECT_BTC",
+      "triggering_cluster": "cl_d735d5e4af9ca013"
+    },
+    {
+      "timestamp": "2024-02-29T08:00:00.000Z",
+      "candidate_id": "cand_575",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BTC, Impact=0.810 >= 0.7, EventID=art_binance_76c000167d5e63a8, Elapsed=5391s <= 21600s",
+      "triggering_event_id": "art_binance_76c000167d5e63a8",
+      "triggering_category": "DIRECT_BTC",
+      "triggering_cluster": "cl_d735d5e4af9ca013"
+    },
+    {
+      "timestamp": "2024-03-04T09:15:00.000Z",
+      "candidate_id": "cand_589",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_44f87a1d50df3893, Elapsed=879s <= 7200s",
+      "triggering_event_id": "art_binance_44f87a1d50df3893",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_574a04cdd733fa90"
+    },
+    {
+      "timestamp": "2024-03-04T09:30:00.000Z",
+      "candidate_id": "cand_590",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_44f87a1d50df3893, Elapsed=1779s <= 7200s",
+      "triggering_event_id": "art_binance_44f87a1d50df3893",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_574a04cdd733fa90"
+    },
+    {
+      "timestamp": "2024-03-04T09:45:00.000Z",
+      "candidate_id": "cand_591",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_44f87a1d50df3893, Elapsed=2679s <= 7200s",
+      "triggering_event_id": "art_binance_44f87a1d50df3893",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_574a04cdd733fa90"
+    },
+    {
+      "timestamp": "2024-03-04T10:00:00.000Z",
+      "candidate_id": "cand_592",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_44f87a1d50df3893, Elapsed=3579s <= 7200s",
+      "triggering_event_id": "art_binance_44f87a1d50df3893",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_574a04cdd733fa90"
+    },
+    {
+      "timestamp": "2024-03-04T10:30:00.000Z",
+      "candidate_id": "cand_593",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_44f87a1d50df3893, Elapsed=5379s <= 7200s",
+      "triggering_event_id": "art_binance_44f87a1d50df3893",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_574a04cdd733fa90"
+    },
+    {
+      "timestamp": "2024-03-05T13:00:00.000Z",
+      "candidate_id": "cand_605",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9f94af3b7084702f, Elapsed=5655s <= 7200s",
+      "triggering_event_id": "art_binance_9f94af3b7084702f",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_1df351246fbe6e06"
+    },
+    {
+      "timestamp": "2024-03-05T13:15:00.000Z",
+      "candidate_id": "cand_606",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9f94af3b7084702f, Elapsed=6555s <= 7200s",
+      "triggering_event_id": "art_binance_9f94af3b7084702f",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_1df351246fbe6e06"
+    },
+    {
+      "timestamp": "2024-03-05T13:15:00.000Z",
+      "candidate_id": "cand_607",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9f94af3b7084702f, Elapsed=6555s <= 7200s",
+      "triggering_event_id": "art_binance_9f94af3b7084702f",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_1df351246fbe6e06"
+    },
+    {
+      "timestamp": "2024-03-06T12:15:00.000Z",
+      "candidate_id": "cand_615",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BNB, Impact=0.810 >= 0.7, EventID=art_binance_6dda5ad5c83c39dc, Elapsed=8933s <= 21600s",
+      "triggering_event_id": "art_binance_6dda5ad5c83c39dc",
+      "triggering_category": "DIRECT_BNB",
+      "triggering_cluster": "cl_79c810ff903d315b"
+    },
+    {
+      "timestamp": "2024-03-07T08:15:00.000Z",
+      "candidate_id": "cand_616",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_23183af6e2d96a46, Elapsed=3888s <= 7200s",
+      "triggering_event_id": "art_binance_23183af6e2d96a46",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_74f84685f92ac785"
+    },
+    {
+      "timestamp": "2024-03-07T08:30:00.000Z",
+      "candidate_id": "cand_617",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_23183af6e2d96a46, Elapsed=4788s <= 7200s",
+      "triggering_event_id": "art_binance_23183af6e2d96a46",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_74f84685f92ac785"
+    },
+    {
+      "timestamp": "2024-03-08T14:15:00.000Z",
+      "candidate_id": "cand_629",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BTC, Impact=0.810 >= 0.7, EventID=art_binance_183615b86e74b7bb, Elapsed=20669s <= 21600s",
+      "triggering_event_id": "art_binance_183615b86e74b7bb",
+      "triggering_category": "DIRECT_BTC",
+      "triggering_cluster": "cl_7d27899938170fc6"
+    },
+    {
+      "timestamp": "2024-03-12T05:45:00.000Z",
+      "candidate_id": "cand_657",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_e36adb05aca232c5, Elapsed=7196s <= 7200s",
+      "triggering_event_id": "art_binance_e36adb05aca232c5",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_4487430979de027d"
+    },
+    {
+      "timestamp": "2024-03-15T03:45:00.000Z",
+      "candidate_id": "cand_680",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_5e823f340d229e1a, Elapsed=1478s <= 7200s",
+      "triggering_event_id": "art_binance_5e823f340d229e1a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9c55da1089b949e2"
+    },
+    {
+      "timestamp": "2024-03-15T04:00:00.000Z",
+      "candidate_id": "cand_681",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_5e823f340d229e1a, Elapsed=2378s <= 7200s",
+      "triggering_event_id": "art_binance_5e823f340d229e1a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9c55da1089b949e2"
+    },
+    {
+      "timestamp": "2024-03-15T04:00:00.000Z",
+      "candidate_id": "cand_682",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_5e823f340d229e1a, Elapsed=2378s <= 7200s",
+      "triggering_event_id": "art_binance_5e823f340d229e1a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9c55da1089b949e2"
+    },
+    {
+      "timestamp": "2024-03-15T04:15:00.000Z",
+      "candidate_id": "cand_683",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_5e823f340d229e1a, Elapsed=3278s <= 7200s",
+      "triggering_event_id": "art_binance_5e823f340d229e1a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9c55da1089b949e2"
+    },
+    {
+      "timestamp": "2024-03-17T06:15:00.000Z",
+      "candidate_id": "cand_726",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_268b60fe84b7b0b2, Elapsed=5592s <= 7200s",
+      "triggering_event_id": "art_binance_268b60fe84b7b0b2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_05fb88fd4344c57b"
+    },
+    {
+      "timestamp": "2024-03-18T10:15:00.000Z",
+      "candidate_id": "cand_730",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_f32d0549fefc8719, Elapsed=1185s <= 7200s",
+      "triggering_event_id": "art_binance_f32d0549fefc8719",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_dc4b5a05cff34d61"
+    },
+    {
+      "timestamp": "2024-03-18T10:45:00.000Z",
+      "candidate_id": "cand_731",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_f32d0549fefc8719, Elapsed=2985s <= 7200s",
+      "triggering_event_id": "art_binance_f32d0549fefc8719",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_dc4b5a05cff34d61"
+    },
+    {
+      "timestamp": "2024-03-20T04:45:00.000Z",
+      "candidate_id": "cand_794",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_83478ec97886cba3, Elapsed=1496s <= 7200s",
+      "triggering_event_id": "art_binance_83478ec97886cba3",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_74406665a5ce6a80"
+    },
+    {
+      "timestamp": "2024-03-20T05:00:00.000Z",
+      "candidate_id": "cand_795",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_83478ec97886cba3, Elapsed=2396s <= 7200s",
+      "triggering_event_id": "art_binance_83478ec97886cba3",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_74406665a5ce6a80"
+    },
+    {
+      "timestamp": "2024-03-20T05:30:00.000Z",
+      "candidate_id": "cand_796",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_83478ec97886cba3, Elapsed=4196s <= 7200s",
+      "triggering_event_id": "art_binance_83478ec97886cba3",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_74406665a5ce6a80"
+    },
+    {
+      "timestamp": "2024-03-20T05:45:00.000Z",
+      "candidate_id": "cand_797",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_83478ec97886cba3, Elapsed=5096s <= 7200s",
+      "triggering_event_id": "art_binance_83478ec97886cba3",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_74406665a5ce6a80"
+    },
+    {
+      "timestamp": "2024-03-22T15:00:00.000Z",
+      "candidate_id": "cand_801",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_d0da580fce949b03, Elapsed=32762s <= 43200s",
+      "triggering_event_id": "art_binance_d0da580fce949b03",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_15ecc54b5556df20"
+    },
+    {
+      "timestamp": "2024-03-25T03:45:00.000Z",
+      "candidate_id": "cand_828",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_63e7a8e0637953f2, Elapsed=2045s <= 7200s",
+      "triggering_event_id": "art_binance_63e7a8e0637953f2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d1ed4095d4fe6b6b"
+    },
+    {
+      "timestamp": "2024-03-25T04:00:00.000Z",
+      "candidate_id": "cand_829",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_63e7a8e0637953f2, Elapsed=2945s <= 7200s",
+      "triggering_event_id": "art_binance_63e7a8e0637953f2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d1ed4095d4fe6b6b"
+    },
+    {
+      "timestamp": "2024-03-25T04:30:00.000Z",
+      "candidate_id": "cand_830",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_63e7a8e0637953f2, Elapsed=4745s <= 7200s",
+      "triggering_event_id": "art_binance_63e7a8e0637953f2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d1ed4095d4fe6b6b"
+    },
+    {
+      "timestamp": "2024-03-25T05:00:00.000Z",
+      "candidate_id": "cand_831",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_63e7a8e0637953f2, Elapsed=6545s <= 7200s",
+      "triggering_event_id": "art_binance_63e7a8e0637953f2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d1ed4095d4fe6b6b"
+    },
+    {
+      "timestamp": "2024-03-28T07:15:00.000Z",
+      "candidate_id": "cand_841",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d16f896823767239, Elapsed=3079s <= 7200s",
+      "triggering_event_id": "art_binance_d16f896823767239",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_0a981417cb32536a"
+    },
+    {
+      "timestamp": "2024-03-28T07:30:00.000Z",
+      "candidate_id": "cand_842",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d16f896823767239, Elapsed=3979s <= 7200s",
+      "triggering_event_id": "art_binance_d16f896823767239",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_0a981417cb32536a"
+    },
+    {
+      "timestamp": "2024-03-28T07:45:00.000Z",
+      "candidate_id": "cand_843",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d16f896823767239, Elapsed=4879s <= 7200s",
+      "triggering_event_id": "art_binance_d16f896823767239",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_0a981417cb32536a"
+    },
+    {
+      "timestamp": "2024-03-28T08:00:00.000Z",
+      "candidate_id": "cand_844",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d16f896823767239, Elapsed=5779s <= 7200s",
+      "triggering_event_id": "art_binance_d16f896823767239",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_0a981417cb32536a"
+    },
+    {
+      "timestamp": "2024-03-28T09:45:00.000Z",
+      "candidate_id": "cand_845",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BTC, Impact=0.810 >= 0.7, EventID=art_binance_9d9cda9546986210, Elapsed=3108s <= 21600s",
+      "triggering_event_id": "art_binance_9d9cda9546986210",
+      "triggering_category": "DIRECT_BTC",
+      "triggering_cluster": "cl_e35415ffe808cc5b"
+    },
+    {
+      "timestamp": "2024-04-04T04:00:00.000Z",
+      "candidate_id": "cand_887",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_c1e860be73a3dd8a, Elapsed=382s <= 7200s",
+      "triggering_event_id": "art_binance_c1e860be73a3dd8a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_843f31d6dba5ec8a"
+    },
+    {
+      "timestamp": "2024-04-04T04:30:00.000Z",
+      "candidate_id": "cand_888",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_c1e860be73a3dd8a, Elapsed=2182s <= 7200s",
+      "triggering_event_id": "art_binance_c1e860be73a3dd8a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_843f31d6dba5ec8a"
+    },
+    {
+      "timestamp": "2024-05-15T08:45:00.000Z",
+      "candidate_id": "cand_1272",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BTC, Impact=0.810 >= 0.7, EventID=art_binance_d0d2eab387d7808c, Elapsed=20686s <= 21600s",
+      "triggering_event_id": "art_binance_d0d2eab387d7808c",
+      "triggering_category": "DIRECT_BTC",
+      "triggering_cluster": "cl_9158dd552c896402"
+    },
+    {
+      "timestamp": "2024-05-16T13:30:00.000Z",
+      "candidate_id": "cand_1283",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BNB, Impact=0.810 >= 0.7, EventID=art_binance_2a5de918bb5f0027, Elapsed=3984s <= 21600s",
+      "triggering_event_id": "art_binance_2a5de918bb5f0027",
+      "triggering_category": "DIRECT_BNB",
+      "triggering_cluster": "cl_578b990536175a4d"
+    },
+    {
+      "timestamp": "2024-05-16T14:00:00.000Z",
+      "candidate_id": "cand_1284",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BNB, Impact=0.810 >= 0.7, EventID=art_binance_2a5de918bb5f0027, Elapsed=5784s <= 21600s",
+      "triggering_event_id": "art_binance_2a5de918bb5f0027",
+      "triggering_category": "DIRECT_BNB",
+      "triggering_cluster": "cl_578b990536175a4d"
+    },
+    {
+      "timestamp": "2024-05-24T07:15:00.000Z",
+      "candidate_id": "cand_1329",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ba8aebec309522b1, Elapsed=2697s <= 7200s",
+      "triggering_event_id": "art_binance_ba8aebec309522b1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_22cd721022d385df"
+    },
+    {
+      "timestamp": "2024-05-24T07:30:00.000Z",
+      "candidate_id": "cand_1330",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ba8aebec309522b1, Elapsed=3597s <= 7200s",
+      "triggering_event_id": "art_binance_ba8aebec309522b1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_22cd721022d385df"
+    },
+    {
+      "timestamp": "2024-05-24T07:45:00.000Z",
+      "candidate_id": "cand_1331",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ba8aebec309522b1, Elapsed=4497s <= 7200s",
+      "triggering_event_id": "art_binance_ba8aebec309522b1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_22cd721022d385df"
+    },
+    {
+      "timestamp": "2024-05-24T08:00:00.000Z",
+      "candidate_id": "cand_1332",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ba8aebec309522b1, Elapsed=5397s <= 7200s",
+      "triggering_event_id": "art_binance_ba8aebec309522b1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_22cd721022d385df"
+    },
+    {
+      "timestamp": "2024-05-24T08:15:00.000Z",
+      "candidate_id": "cand_1333",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ba8aebec309522b1, Elapsed=6297s <= 7200s",
+      "triggering_event_id": "art_binance_ba8aebec309522b1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_22cd721022d385df"
+    },
+    {
+      "timestamp": "2024-05-24T08:30:00.000Z",
+      "candidate_id": "cand_1334",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ba8aebec309522b1, Elapsed=7197s <= 7200s",
+      "triggering_event_id": "art_binance_ba8aebec309522b1",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_22cd721022d385df"
+    },
+    {
+      "timestamp": "2024-05-27T07:15:00.000Z",
+      "candidate_id": "cand_1353",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_ddeb2ffbc45026a3, Elapsed=4498s <= 7200s",
+      "triggering_event_id": "art_binance_ddeb2ffbc45026a3",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_1a69497034b1b4f0"
+    },
+    {
+      "timestamp": "2024-05-28T04:45:00.000Z",
+      "candidate_id": "cand_1355",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_47e5697dcec1a960, Elapsed=2699s <= 7200s",
+      "triggering_event_id": "art_binance_47e5697dcec1a960",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_62696245951a668a"
+    },
+    {
+      "timestamp": "2024-05-28T05:00:00.000Z",
+      "candidate_id": "cand_1356",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_47e5697dcec1a960, Elapsed=3599s <= 7200s",
+      "triggering_event_id": "art_binance_47e5697dcec1a960",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_62696245951a668a"
+    },
+    {
+      "timestamp": "2024-05-29T08:15:00.000Z",
+      "candidate_id": "cand_1358",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=885s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T08:15:00.000Z",
+      "candidate_id": "cand_1359",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=885s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T08:30:00.000Z",
+      "candidate_id": "cand_1360",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=1785s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T08:30:00.000Z",
+      "candidate_id": "cand_1361",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=1785s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T08:45:00.000Z",
+      "candidate_id": "cand_1362",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=2685s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T09:00:00.000Z",
+      "candidate_id": "cand_1363",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=3585s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T09:00:00.000Z",
+      "candidate_id": "cand_1364",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=3585s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T09:00:00.000Z",
+      "candidate_id": "cand_1365",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=3585s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T09:15:00.000Z",
+      "candidate_id": "cand_1366",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=4485s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T09:30:00.000Z",
+      "candidate_id": "cand_1367",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=5385s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T09:45:00.000Z",
+      "candidate_id": "cand_1368",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=6285s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T09:45:00.000Z",
+      "candidate_id": "cand_1369",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=6285s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T10:00:00.000Z",
+      "candidate_id": "cand_1370",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=7185s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T10:00:00.000Z",
+      "candidate_id": "cand_1371",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=7185s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-05-29T10:00:00.000Z",
+      "candidate_id": "cand_1372",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4b642fc7c085a0d, Elapsed=7185s <= 7200s",
+      "triggering_event_id": "art_binance_a4b642fc7c085a0d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b92de2de8290964a"
+    },
+    {
+      "timestamp": "2024-06-03T05:15:00.000Z",
+      "candidate_id": "cand_1406",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_389f82e49046514d, Elapsed=4498s <= 7200s",
+      "triggering_event_id": "art_binance_389f82e49046514d",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b45d4762f839b9e6"
+    },
+    {
+      "timestamp": "2024-06-04T10:00:00.000Z",
+      "candidate_id": "cand_1413",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_507f9df998f7712e, Elapsed=7197s <= 7200s",
+      "triggering_event_id": "art_binance_507f9df998f7712e",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_b8d899f4507e2723"
+    },
+    {
+      "timestamp": "2024-06-04T11:15:00.000Z",
+      "candidate_id": "cand_1415",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_fca837c53c9285c5, Elapsed=2698s <= 7200s",
+      "triggering_event_id": "art_binance_fca837c53c9285c5",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_8442e245ff5d15b6"
+    },
+    {
+      "timestamp": "2024-06-05T04:30:00.000Z",
+      "candidate_id": "cand_1422",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4aaa1e00cd5ef2aa, Elapsed=1793s <= 7200s",
+      "triggering_event_id": "art_binance_4aaa1e00cd5ef2aa",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c4f266f524cc07fb"
+    },
+    {
+      "timestamp": "2024-06-05T04:45:00.000Z",
+      "candidate_id": "cand_1423",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4aaa1e00cd5ef2aa, Elapsed=2693s <= 7200s",
+      "triggering_event_id": "art_binance_4aaa1e00cd5ef2aa",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c4f266f524cc07fb"
+    },
+    {
+      "timestamp": "2024-06-07T03:00:00.000Z",
+      "candidate_id": "cand_1434",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_c1608e5c08faf4ac, Elapsed=1798s <= 7200s",
+      "triggering_event_id": "art_binance_c1608e5c08faf4ac",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_f130bebbea3a0da2"
+    },
+    {
+      "timestamp": "2024-06-13T03:15:00.000Z",
+      "candidate_id": "cand_1519",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=873s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-13T03:30:00.000Z",
+      "candidate_id": "cand_1520",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=1773s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-13T04:00:00.000Z",
+      "candidate_id": "cand_1523",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=3573s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-13T06:45:00.000Z",
+      "candidate_id": "cand_1525",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=13473s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-13T07:00:00.000Z",
+      "candidate_id": "cand_1526",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=14373s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-13T09:45:00.000Z",
+      "candidate_id": "cand_1529",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=24273s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-13T10:00:00.000Z",
+      "candidate_id": "cand_1531",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=25173s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-13T10:00:00.000Z",
+      "candidate_id": "cand_1532",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=25173s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-13T10:15:00.000Z",
+      "candidate_id": "cand_1534",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=NETWORK_PROTOCOL_INCIDENTS, Impact=0.902 >= 0.7, EventID=art_binance_829dd7cc1bb5484b, Elapsed=26073s <= 43200s",
+      "triggering_event_id": "art_binance_829dd7cc1bb5484b",
+      "triggering_category": "NETWORK_PROTOCOL_INCIDENTS",
+      "triggering_cluster": "cl_eda1c947b2c586dc"
+    },
+    {
+      "timestamp": "2024-06-18T09:15:00.000Z",
+      "candidate_id": "cand_1577",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9743c558738fc244, Elapsed=3581s <= 7200s",
+      "triggering_event_id": "art_binance_9743c558738fc244",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3911155ab82c73d8"
+    },
+    {
+      "timestamp": "2024-06-21T08:00:00.000Z",
+      "candidate_id": "cand_1618",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_c2bd405f40ef75cc, Elapsed=7199s <= 7200s",
+      "triggering_event_id": "art_binance_c2bd405f40ef75cc",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_f920eb60b56b9c18"
+    },
+    {
+      "timestamp": "2024-06-24T06:45:00.000Z",
+      "candidate_id": "cand_1654",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_1bc0f487ab06da43, Elapsed=2697s <= 7200s",
+      "triggering_event_id": "art_binance_1bc0f487ab06da43",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_652024250252e32c"
+    },
+    {
+      "timestamp": "2024-06-26T10:15:00.000Z",
+      "candidate_id": "cand_1672",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4973c49bfa5d78e, Elapsed=894s <= 7200s",
+      "triggering_event_id": "art_binance_a4973c49bfa5d78e",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_450088b2392dddf3"
+    },
+    {
+      "timestamp": "2024-06-26T10:15:00.000Z",
+      "candidate_id": "cand_1673",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4973c49bfa5d78e, Elapsed=894s <= 7200s",
+      "triggering_event_id": "art_binance_a4973c49bfa5d78e",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_450088b2392dddf3"
+    },
+    {
+      "timestamp": "2024-06-26T10:45:00.000Z",
+      "candidate_id": "cand_1674",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4973c49bfa5d78e, Elapsed=2694s <= 7200s",
+      "triggering_event_id": "art_binance_a4973c49bfa5d78e",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_450088b2392dddf3"
+    },
+    {
+      "timestamp": "2024-06-26T11:00:00.000Z",
+      "candidate_id": "cand_1675",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a4973c49bfa5d78e, Elapsed=3594s <= 7200s",
+      "triggering_event_id": "art_binance_a4973c49bfa5d78e",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_450088b2392dddf3"
+    },
+    {
+      "timestamp": "2024-09-18T09:30:00.000Z",
+      "candidate_id": "cand_2527",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4e097644af8df9cd, Elapsed=5396s <= 7200s",
+      "triggering_event_id": "art_binance_4e097644af8df9cd",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_18c4ddd515ad88aa"
+    },
+    {
+      "timestamp": "2024-09-18T10:15:00.000Z",
+      "candidate_id": "cand_2528",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9e4d1908e57b5bf2, Elapsed=4490s <= 7200s",
+      "triggering_event_id": "art_binance_9e4d1908e57b5bf2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_53dee871e1f4832b"
+    },
+    {
+      "timestamp": "2024-09-18T10:30:00.000Z",
+      "candidate_id": "cand_2529",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9e4d1908e57b5bf2, Elapsed=5390s <= 7200s",
+      "triggering_event_id": "art_binance_9e4d1908e57b5bf2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_53dee871e1f4832b"
+    },
+    {
+      "timestamp": "2024-09-18T10:30:00.000Z",
+      "candidate_id": "cand_2530",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9e4d1908e57b5bf2, Elapsed=5390s <= 7200s",
+      "triggering_event_id": "art_binance_9e4d1908e57b5bf2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_53dee871e1f4832b"
+    },
+    {
+      "timestamp": "2024-09-18T10:45:00.000Z",
+      "candidate_id": "cand_2531",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9e4d1908e57b5bf2, Elapsed=6290s <= 7200s",
+      "triggering_event_id": "art_binance_9e4d1908e57b5bf2",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_53dee871e1f4832b"
+    },
+    {
+      "timestamp": "2024-09-24T02:00:00.000Z",
+      "candidate_id": "cand_2574",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_c91f087152fd57df, Elapsed=7200s <= 7200s",
+      "triggering_event_id": "art_binance_c91f087152fd57df",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_ca851c9441d393eb"
+    },
+    {
+      "timestamp": "2024-09-30T03:00:00.000Z",
+      "candidate_id": "cand_2616",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_57ecaceb89c6fa2b, Elapsed=7200s <= 7200s",
+      "triggering_event_id": "art_binance_57ecaceb89c6fa2b",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_654a287c6bf2f24d"
+    },
+    {
+      "timestamp": "2024-09-30T09:30:00.000Z",
+      "candidate_id": "cand_2620",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d82ed35054b70f68, Elapsed=1789s <= 7200s",
+      "triggering_event_id": "art_binance_d82ed35054b70f68",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_2dddcd2dd3f4dc0f"
+    },
+    {
+      "timestamp": "2024-09-30T11:00:00.000Z",
+      "candidate_id": "cand_2621",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d82ed35054b70f68, Elapsed=7189s <= 7200s",
+      "triggering_event_id": "art_binance_d82ed35054b70f68",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_2dddcd2dd3f4dc0f"
+    },
+    {
+      "timestamp": "2024-09-30T11:45:00.000Z",
+      "candidate_id": "cand_2622",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_a94d7b3ee1e1ab01, Elapsed=899s <= 7200s",
+      "triggering_event_id": "art_binance_a94d7b3ee1e1ab01",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_24da8b1e36c0c697"
+    },
+    {
+      "timestamp": "2024-10-08T07:15:00.000Z",
+      "candidate_id": "cand_2698",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_3b9515b8f3d8bf74, Elapsed=891s <= 7200s",
+      "triggering_event_id": "art_binance_3b9515b8f3d8bf74",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d69385a1a6ab31b1"
+    },
+    {
+      "timestamp": "2024-10-08T07:30:00.000Z",
+      "candidate_id": "cand_2699",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_3b9515b8f3d8bf74, Elapsed=1791s <= 7200s",
+      "triggering_event_id": "art_binance_3b9515b8f3d8bf74",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d69385a1a6ab31b1"
+    },
+    {
+      "timestamp": "2024-10-08T07:30:00.000Z",
+      "candidate_id": "cand_2700",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_3b9515b8f3d8bf74, Elapsed=1791s <= 7200s",
+      "triggering_event_id": "art_binance_3b9515b8f3d8bf74",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d69385a1a6ab31b1"
+    },
+    {
+      "timestamp": "2024-10-08T08:00:00.000Z",
+      "candidate_id": "cand_2701",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_3b9515b8f3d8bf74, Elapsed=3591s <= 7200s",
+      "triggering_event_id": "art_binance_3b9515b8f3d8bf74",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d69385a1a6ab31b1"
+    },
+    {
+      "timestamp": "2024-10-08T08:00:00.000Z",
+      "candidate_id": "cand_2702",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_3b9515b8f3d8bf74, Elapsed=3591s <= 7200s",
+      "triggering_event_id": "art_binance_3b9515b8f3d8bf74",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_d69385a1a6ab31b1"
+    },
+    {
+      "timestamp": "2024-10-08T11:00:00.000Z",
+      "candidate_id": "cand_2703",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OUTAGES_SUSPENSIONS, Impact=1.000 >= 0.7, EventID=art_binance_a4d5f42d2240634e, Elapsed=10795s <= 14400s",
+      "triggering_event_id": "art_binance_a4d5f42d2240634e",
+      "triggering_category": "EXCHANGE_OUTAGES_SUSPENSIONS",
+      "triggering_cluster": "cl_faf11e4a5aa6c1d3"
+    },
+    {
+      "timestamp": "2024-10-08T11:15:00.000Z",
+      "candidate_id": "cand_2704",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OUTAGES_SUSPENSIONS, Impact=1.000 >= 0.7, EventID=art_binance_a4d5f42d2240634e, Elapsed=11695s <= 14400s",
+      "triggering_event_id": "art_binance_a4d5f42d2240634e",
+      "triggering_category": "EXCHANGE_OUTAGES_SUSPENSIONS",
+      "triggering_cluster": "cl_faf11e4a5aa6c1d3"
+    },
+    {
+      "timestamp": "2024-10-22T01:15:00.000Z",
+      "candidate_id": "cand_2850",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_2fdf1aba50c7746a, Elapsed=898s <= 7200s",
+      "triggering_event_id": "art_binance_2fdf1aba50c7746a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_87df491291c18ea2"
+    },
+    {
+      "timestamp": "2024-10-22T01:30:00.000Z",
+      "candidate_id": "cand_2851",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_2fdf1aba50c7746a, Elapsed=1798s <= 7200s",
+      "triggering_event_id": "art_binance_2fdf1aba50c7746a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_87df491291c18ea2"
+    },
+    {
+      "timestamp": "2024-10-22T02:00:00.000Z",
+      "candidate_id": "cand_2852",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_2fdf1aba50c7746a, Elapsed=3598s <= 7200s",
+      "triggering_event_id": "art_binance_2fdf1aba50c7746a",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_87df491291c18ea2"
+    },
+    {
+      "timestamp": "2024-10-23T05:45:00.000Z",
+      "candidate_id": "cand_2858",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4153e7687d71bca6, Elapsed=2687s <= 7200s",
+      "triggering_event_id": "art_binance_4153e7687d71bca6",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_df082ae6a6a6194e"
+    },
+    {
+      "timestamp": "2024-10-24T09:15:00.000Z",
+      "candidate_id": "cand_2879",
+      "symbol": "ETHUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_ETH, Impact=0.810 >= 0.7, EventID=art_binance_bf0ebfa019034e77, Elapsed=8089s <= 21600s",
+      "triggering_event_id": "art_binance_bf0ebfa019034e77",
+      "triggering_category": "DIRECT_ETH",
+      "triggering_cluster": "cl_ce223147ea5016cd"
+    },
+    {
+      "timestamp": "2024-10-28T09:15:00.000Z",
+      "candidate_id": "cand_2920",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4920c284817283f4, Elapsed=897s <= 7200s",
+      "triggering_event_id": "art_binance_4920c284817283f4",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bfa9189567f41cc"
+    },
+    {
+      "timestamp": "2024-10-28T09:45:00.000Z",
+      "candidate_id": "cand_2921",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4920c284817283f4, Elapsed=2697s <= 7200s",
+      "triggering_event_id": "art_binance_4920c284817283f4",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bfa9189567f41cc"
+    },
+    {
+      "timestamp": "2024-10-28T10:00:00.000Z",
+      "candidate_id": "cand_2922",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4920c284817283f4, Elapsed=3597s <= 7200s",
+      "triggering_event_id": "art_binance_4920c284817283f4",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bfa9189567f41cc"
+    },
+    {
+      "timestamp": "2024-10-28T10:00:00.000Z",
+      "candidate_id": "cand_2923",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4920c284817283f4, Elapsed=3597s <= 7200s",
+      "triggering_event_id": "art_binance_4920c284817283f4",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bfa9189567f41cc"
+    },
+    {
+      "timestamp": "2024-10-28T10:00:00.000Z",
+      "candidate_id": "cand_2924",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4920c284817283f4, Elapsed=3597s <= 7200s",
+      "triggering_event_id": "art_binance_4920c284817283f4",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bfa9189567f41cc"
+    },
+    {
+      "timestamp": "2024-10-28T10:15:00.000Z",
+      "candidate_id": "cand_2925",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4920c284817283f4, Elapsed=4497s <= 7200s",
+      "triggering_event_id": "art_binance_4920c284817283f4",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_3bfa9189567f41cc"
+    },
+    {
+      "timestamp": "2024-10-29T10:00:00.000Z",
+      "candidate_id": "cand_2939",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=DIRECT_BNB, Impact=0.810 >= 0.7, EventID=art_binance_1326b63e0ebbfb2f, Elapsed=10792s <= 21600s",
+      "triggering_event_id": "art_binance_1326b63e0ebbfb2f",
+      "triggering_category": "DIRECT_BNB",
+      "triggering_cluster": "cl_3d7c26c5bdb9e8f0"
+    },
+    {
+      "timestamp": "2024-10-31T02:15:00.000Z",
+      "candidate_id": "cand_2954",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d4e0625246ebb97b, Elapsed=896s <= 7200s",
+      "triggering_event_id": "art_binance_d4e0625246ebb97b",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9e92b3f4bbcce2a1"
+    },
+    {
+      "timestamp": "2024-10-31T02:30:00.000Z",
+      "candidate_id": "cand_2955",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d4e0625246ebb97b, Elapsed=1796s <= 7200s",
+      "triggering_event_id": "art_binance_d4e0625246ebb97b",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9e92b3f4bbcce2a1"
+    },
+    {
+      "timestamp": "2024-10-31T03:15:00.000Z",
+      "candidate_id": "cand_2956",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d4e0625246ebb97b, Elapsed=4496s <= 7200s",
+      "triggering_event_id": "art_binance_d4e0625246ebb97b",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9e92b3f4bbcce2a1"
+    },
+    {
+      "timestamp": "2024-10-31T03:30:00.000Z",
+      "candidate_id": "cand_2957",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d4e0625246ebb97b, Elapsed=5396s <= 7200s",
+      "triggering_event_id": "art_binance_d4e0625246ebb97b",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_9e92b3f4bbcce2a1"
+    },
+    {
+      "timestamp": "2024-11-07T04:00:00.000Z",
+      "candidate_id": "cand_3046",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_32709d9de5ebbf99, Elapsed=7196s <= 7200s",
+      "triggering_event_id": "art_binance_32709d9de5ebbf99",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_f9240a6626a18d9a"
+    },
+    {
+      "timestamp": "2024-11-11T10:30:00.000Z",
+      "candidate_id": "cand_3091",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6ea70b3bf6ec6360, Elapsed=5380s <= 7200s",
+      "triggering_event_id": "art_binance_6ea70b3bf6ec6360",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c85fe887d4619af8"
+    },
+    {
+      "timestamp": "2024-11-11T11:00:00.000Z",
+      "candidate_id": "cand_3092",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6ea70b3bf6ec6360, Elapsed=7180s <= 7200s",
+      "triggering_event_id": "art_binance_6ea70b3bf6ec6360",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_c85fe887d4619af8"
+    },
+    {
+      "timestamp": "2024-11-13T04:00:00.000Z",
+      "candidate_id": "cand_3117",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d5e77b0dbcf90e95, Elapsed=1794s <= 7200s",
+      "triggering_event_id": "art_binance_d5e77b0dbcf90e95",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_6fc2c32bfaab6890"
+    },
+    {
+      "timestamp": "2024-11-13T04:15:00.000Z",
+      "candidate_id": "cand_3118",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d5e77b0dbcf90e95, Elapsed=2694s <= 7200s",
+      "triggering_event_id": "art_binance_d5e77b0dbcf90e95",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_6fc2c32bfaab6890"
+    },
+    {
+      "timestamp": "2024-11-13T04:45:00.000Z",
+      "candidate_id": "cand_3119",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d5e77b0dbcf90e95, Elapsed=4494s <= 7200s",
+      "triggering_event_id": "art_binance_d5e77b0dbcf90e95",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_6fc2c32bfaab6890"
+    },
+    {
+      "timestamp": "2024-11-13T05:00:00.000Z",
+      "candidate_id": "cand_3120",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_d5e77b0dbcf90e95, Elapsed=5394s <= 7200s",
+      "triggering_event_id": "art_binance_d5e77b0dbcf90e95",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_6fc2c32bfaab6890"
+    },
+    {
+      "timestamp": "2024-11-18T07:15:00.000Z",
+      "candidate_id": "cand_3167",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4fc1078eb874f5b6, Elapsed=899s <= 7200s",
+      "triggering_event_id": "art_binance_4fc1078eb874f5b6",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_353c6550278dedee"
+    },
+    {
+      "timestamp": "2024-11-18T07:30:00.000Z",
+      "candidate_id": "cand_3168",
+      "symbol": "BTCUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_4fc1078eb874f5b6, Elapsed=1799s <= 7200s",
+      "triggering_event_id": "art_binance_4fc1078eb874f5b6",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_353c6550278dedee"
+    },
+    {
+      "timestamp": "2024-11-19T10:00:00.000Z",
+      "candidate_id": "cand_3184",
+      "symbol": "BNBUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_9ba5952bd2073bd9, Elapsed=7197s <= 7200s",
+      "triggering_event_id": "art_binance_9ba5952bd2073bd9",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_14fec2b6a993d188"
+    },
+    {
+      "timestamp": "2024-11-21T14:30:00.000Z",
+      "candidate_id": "cand_3215",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6fb5a22288e25023, Elapsed=5397s <= 7200s",
+      "triggering_event_id": "art_binance_6fb5a22288e25023",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_ce13ac8b00996349"
+    },
+    {
+      "timestamp": "2024-11-21T14:45:00.000Z",
+      "candidate_id": "cand_3216",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6fb5a22288e25023, Elapsed=6297s <= 7200s",
+      "triggering_event_id": "art_binance_6fb5a22288e25023",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_ce13ac8b00996349"
+    },
+    {
+      "timestamp": "2024-11-21T15:00:00.000Z",
+      "candidate_id": "cand_3217",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_6fb5a22288e25023, Elapsed=7197s <= 7200s",
+      "triggering_event_id": "art_binance_6fb5a22288e25023",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_ce13ac8b00996349"
+    },
+    {
+      "timestamp": "2024-11-26T08:45:00.000Z",
+      "candidate_id": "cand_3262",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "veto_reason": "NEWS_VETO: Category=EXCHANGE_OPERATIONAL, Impact=0.722 >= 0.7, EventID=art_binance_8457a7d89afc2677, Elapsed=4497s <= 7200s",
+      "triggering_event_id": "art_binance_8457a7d89afc2677",
+      "triggering_category": "EXCHANGE_OPERATIONAL",
+      "triggering_cluster": "cl_87de087b9d339714"
+    }
+  ]
+}

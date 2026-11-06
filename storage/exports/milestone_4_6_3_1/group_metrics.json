@@ -1,0 +1,202 @@
+{
+  "GROUP_A": {
+    "trade_metrics": {
+      "eligible_candidate_count": 3678,
+      "executed_trade_count": 68,
+      "winning_trades": 17,
+      "losing_trades": 51,
+      "win_rate": 0.25,
+      "gross_profit_usdt": 108.24,
+      "gross_loss_usdt": 218.97,
+      "net_pnl_usdt": -214.72,
+      "total_fees_usdt": 79.53,
+      "total_slippage_usdt": 39.81,
+      "total_spread_usdt": 7.91,
+      "profit_factor": 0.494,
+      "average_win_usdt": 4.74,
+      "average_loss_usdt": -5.79,
+      "average_holding_duration_bars": 15.8
+    },
+    "expectancy": {
+      "e_trade_net_expectancy_usdt": -3.1576,
+      "e_cand_net_expectancy_usdt": -0.0584,
+      "denominator_e_trade": 68,
+      "denominator_e_cand": 3678
+    },
+    "portfolio_metrics": {
+      "ending_equity_usdt": 984.56,
+      "net_portfolio_return_pct": -1.54,
+      "max_drawdown_pct": 5.19,
+      "orders_scheduled": 68,
+      "orders_filled": 68,
+      "risk_rejected_count": 3610
+    },
+    "exposure_dimensions": {
+      "time_in_market_bars": 824,
+      "time_in_market_pct": 0.0235,
+      "trade_count": 68,
+      "average_holding_bars": 15.8,
+      "asset_breakdown_bars": {
+        "BTCUSDT": 381,
+        "ETHUSDT": 384,
+        "BNBUSDT": 308
+      },
+      "directional_duration_bars": {
+        "LONG": 275,
+        "SHORT": 798
+      },
+      "dollar_hours_capital_utilization": 133753.30117556243,
+      "simultaneous_multi_asset_bars": 249
+    }
+  },
+  "GROUP_B": {
+    "trade_metrics": {
+      "eligible_candidate_count": 3678,
+      "executed_trade_count": 47,
+      "winning_trades": 14,
+      "losing_trades": 33,
+      "win_rate": 0.2979,
+      "gross_profit_usdt": 92.43,
+      "gross_loss_usdt": 143.45,
+      "net_pnl_usdt": -114.42,
+      "total_fees_usdt": 49.73,
+      "total_slippage_usdt": 24.89,
+      "total_spread_usdt": 4.94,
+      "profit_factor": 0.644,
+      "average_win_usdt": 5.1,
+      "average_loss_usdt": -5.63,
+      "average_holding_duration_bars": 19.0
+    },
+    "expectancy": {
+      "e_trade_net_expectancy_usdt": -2.4345,
+      "e_cand_net_expectancy_usdt": -0.0311,
+      "denominator_e_trade": 47,
+      "denominator_e_cand": 3678
+    },
+    "portfolio_metrics": {
+      "ending_equity_usdt": 988.34,
+      "net_portfolio_return_pct": -1.17,
+      "max_drawdown_pct": 5.38,
+      "orders_scheduled": 48,
+      "orders_filled": 47,
+      "risk_rejected_count": 3447
+    },
+    "exposure_dimensions": {
+      "time_in_market_bars": 659,
+      "time_in_market_pct": 0.0188,
+      "trade_count": 47,
+      "average_holding_bars": 19.0,
+      "asset_breakdown_bars": {
+        "BTCUSDT": 349,
+        "ETHUSDT": 297,
+        "BNBUSDT": 248
+      },
+      "directional_duration_bars": {
+        "LONG": 236,
+        "SHORT": 658
+      },
+      "dollar_hours_capital_utilization": 101791.55368918722,
+      "simultaneous_multi_asset_bars": 235
+    }
+  },
+  "GROUP_C": {
+    "trade_metrics": {
+      "eligible_candidate_count": 3678,
+      "executed_trade_count": 62,
+      "winning_trades": 16,
+      "losing_trades": 46,
+      "win_rate": 0.2581,
+      "gross_profit_usdt": 101.49,
+      "gross_loss_usdt": 191.99,
+      "net_pnl_usdt": -186.21,
+      "total_fees_usdt": 71.14,
+      "total_slippage_usdt": 35.57,
+      "total_spread_usdt": 7.08,
+      "profit_factor": 0.529,
+      "average_win_usdt": 4.64,
+      "average_loss_usdt": -5.66,
+      "average_holding_duration_bars": 16.6
+    },
+    "expectancy": {
+      "e_trade_net_expectancy_usdt": -3.0034,
+      "e_cand_net_expectancy_usdt": -0.0506,
+      "denominator_e_trade": 62,
+      "denominator_e_cand": 3678
+    },
+    "portfolio_metrics": {
+      "ending_equity_usdt": 981.2,
+      "net_portfolio_return_pct": -1.88,
+      "max_drawdown_pct": 5.92,
+      "orders_scheduled": 62,
+      "orders_filled": 62,
+      "risk_rejected_count": 3079
+    },
+    "exposure_dimensions": {
+      "time_in_market_bars": 805,
+      "time_in_market_pct": 0.0229,
+      "trade_count": 62,
+      "average_holding_bars": 16.6,
+      "asset_breakdown_bars": {
+        "BTCUSDT": 381,
+        "ETHUSDT": 365,
+        "BNBUSDT": 284
+      },
+      "directional_duration_bars": {
+        "LONG": 267,
+        "SHORT": 763
+      },
+      "dollar_hours_capital_utilization": 127354.18677993632,
+      "simultaneous_multi_asset_bars": 225
+    }
+  },
+  "GROUP_D": {
+    "trade_metrics": {
+      "eligible_candidate_count": 3678,
+      "executed_trade_count": 60,
+      "winning_trades": 17,
+      "losing_trades": 43,
+      "win_rate": 0.2833,
+      "gross_profit_usdt": 119.95,
+      "gross_loss_usdt": 186.87,
+      "net_pnl_usdt": -164.8,
+      "total_fees_usdt": 73.25,
+      "total_slippage_usdt": 36.6,
+      "total_spread_usdt": 7.3,
+      "profit_factor": 0.642,
+      "average_win_usdt": 5.41,
+      "average_loss_usdt": -5.97,
+      "average_holding_duration_bars": 16.0
+    },
+    "expectancy": {
+      "e_trade_net_expectancy_usdt": -2.7467,
+      "e_cand_net_expectancy_usdt": -0.0448,
+      "denominator_e_trade": 60,
+      "denominator_e_cand": 3678
+    },
+    "portfolio_metrics": {
+      "ending_equity_usdt": 1001.79,
+      "net_portfolio_return_pct": 0.18,
+      "max_drawdown_pct": 5.79,
+      "orders_scheduled": 60,
+      "orders_filled": 60,
+      "risk_rejected_count": 3600
+    },
+    "exposure_dimensions": {
+      "time_in_market_bars": 772,
+      "time_in_market_pct": 0.022,
+      "trade_count": 60,
+      "average_holding_bars": 16.0,
+      "asset_breakdown_bars": {
+        "BTCUSDT": 365,
+        "ETHUSDT": 315,
+        "BNBUSDT": 280
+      },
+      "directional_duration_bars": {
+        "LONG": 251,
+        "SHORT": 709
+      },
+      "dollar_hours_capital_utilization": 121915.79194104757,
+      "simultaneous_multi_asset_bars": 188
+    }
+  }
+}

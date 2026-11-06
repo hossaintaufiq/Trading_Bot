@@ -1,0 +1,65 @@
+{
+  "hypotheses_evaluation": {
+    "H1_group_b_vs_group_a": {
+      "description": "Group B (News Veto) vs Group A (Technical Baseline)",
+      "mean_delta_e_cand_usdt": 0.0273,
+      "delta_e_trade_usdt": 0.7232,
+      "bootstrap_ci_95": [
+        0.0,
+        0.0511
+      ],
+      "p_value_bootstrap": 0.595,
+      "fdr_adjusted_significance": false,
+      "economic_hurdle_0_50_met": true
+    },
+    "H2_group_b_vs_group_c": {
+      "description": "Group B (News Veto) vs Group C (Online Frequency Control)",
+      "mean_delta_e_cand_usdt": 0.0195,
+      "bootstrap_ci_95": [
+        0.0,
+        0.0428
+      ],
+      "p_value_bootstrap": 0.595,
+      "fdr_adjusted_significance": false
+    },
+    "H3_group_b_vs_group_d": {
+      "description": "Group B (News Veto) vs Group D (Online Exposure Control)",
+      "mean_delta_e_cand_usdt": 0.0137,
+      "bootstrap_ci_95": [
+        0.0,
+        0.0272
+      ],
+      "p_value_bootstrap": 0.59,
+      "fdr_adjusted_significance": false
+    }
+  },
+  "benjamini_hochberg_fdr": {
+    "H3_group_b_vs_group_d": {
+      "p_value": 0.59,
+      "rank": 1,
+      "critical_value": 0.016667,
+      "is_significant_fdr": false
+    },
+    "H1_group_b_vs_group_a": {
+      "p_value": 0.595,
+      "rank": 2,
+      "critical_value": 0.033333,
+      "is_significant_fdr": false
+    },
+    "H2_group_b_vs_group_c": {
+      "p_value": 0.595,
+      "rank": 3,
+      "critical_value": 0.05,
+      "is_significant_fdr": false
+    }
+  },
+  "parameters": {
+    "iterations": 2000,
+    "block_size_bars": 384,
+    "block_size_hours": 96.0,
+    "block_size_days": 4.0,
+    "alpha": 0.05,
+    "fdr_q": 0.05,
+    "seed": 42
+  }
+}
