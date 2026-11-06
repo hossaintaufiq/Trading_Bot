@@ -1,0 +1,9 @@
+{
+  "milestone": "4.6.3.1",
+  "total_active_news_evaluated": 380,
+  "total_vetoes_triggered": 183,
+  "oos_access_attempts": 0,
+  "quarantined_forward_events_excluded": 4,
+  "rejected_provenance_events_excluded": 0,
+  "gdelt_intraday_events_excluded": 66
+}

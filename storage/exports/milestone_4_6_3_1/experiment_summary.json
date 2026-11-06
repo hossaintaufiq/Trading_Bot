@@ -1,0 +1,44 @@
+{
+  "experiment_id": "exp_m4631_dev_2024",
+  "milestone": "4.6.3.1",
+  "partition": "DEVELOPMENT_TRAINING",
+  "execution_date_utc": "2026-11-06T18:26:52.730855+00:00",
+  "baseline_config_fingerprint": "33a5d9f67052fe25737e8e93011230462ab2250e1984395f2d69214f445f1278",
+  "market_dataset_tree_sha256": "b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c",
+  "news_dataset_manifest_sha256": "6b7bb69c841ec9a5e1774b6f369c0d9c113df066d80357521ac92b937490f4ec",
+  "total_candles": 105408,
+  "total_candidates": 3678,
+  "primary_metric_h1": {
+    "description": "Group B (News Veto) vs Group A (Technical Baseline)",
+    "mean_delta_e_cand_usdt": 0.0273,
+    "delta_e_trade_usdt": 0.7232,
+    "bootstrap_ci_95": [
+      0.0,
+      0.0511
+    ],
+    "p_value_bootstrap": 0.595,
+    "fdr_adjusted_significance": false,
+    "economic_hurdle_0_50_met": true
+  },
+  "primary_metric_h2": {
+    "description": "Group B (News Veto) vs Group C (Online Frequency Control)",
+    "mean_delta_e_cand_usdt": 0.0195,
+    "bootstrap_ci_95": [
+      0.0,
+      0.0428
+    ],
+    "p_value_bootstrap": 0.595,
+    "fdr_adjusted_significance": false
+  },
+  "primary_metric_h3": {
+    "description": "Group B (News Veto) vs Group D (Online Exposure Control)",
+    "mean_delta_e_cand_usdt": 0.0137,
+    "bootstrap_ci_95": [
+      0.0,
+      0.0272
+    ],
+    "p_value_bootstrap": 0.59,
+    "fdr_adjusted_significance": false
+  },
+  "runtime_seconds": 723.5
+}

@@ -38,6 +38,10 @@
 - [ADR-025: Two-Stage Deterministic Classification Remediation, 100% Historical Coverage & Next-Available-Price Execution Synchronization](#adr-025-two-stage-deterministic-classification-remediation-100-historical-coverage--next-available-price-execution-synchronization)
 - [ADR-026: Deterministic Point-in-Time Execution Scheduling, Next-Eligible-Price Policy & Simulation Engine Integration](#adr-026-deterministic-point-in-time-execution-scheduling-next-eligible-price-policy--simulation-engine-integration)
 - [ADR-027: Cryptographic HMAC-SHA256 Risk Authorization Token Binding and Macro Boundary Schema Normalization](#adr-027-cryptographic-hmac-sha256-risk-authorization-token-binding-and-macro-boundary-schema-normalization)
+- [ADR-028: Ephemeral HMAC Secret Generation, Run-Isolated Risk Authorization, and Replay-Resistant Execution Token Lifecycle](#adr-028-ephemeral-hmac-secret-generation-run-isolated-risk-authorization-and-replay-resistant-execution-token-lifecycle)
+- [ADR-029: Protocol Freeze: 4-Group Controlled Experimental Design, 3-Partition Chronological Split, and Statistical Analysis Plan](#adr-029-protocol-freeze-4-group-controlled-experimental-design-3-partition-chronological-split-and-statistical-analysis-plan)
+- [ADR-030: Online Control Matching, Executable News Veto Engine, Timeframe Bootstrap Calibration, and OOS Access Guard](#adr-030-online-control-matching-executable-news-veto-engine-timeframe-bootstrap-calibration-and-oos-access-guard)
+- [ADR-031: Development-Partition Experimental Execution, 4-Group Synchronized Simulation Engine, and Candidate Stream Caching](#adr-031-development-partition-experimental-execution-4-group-synchronized-simulation-engine-and-candidate-stream-caching)
 
 ---
 
@@ -675,3 +679,33 @@
   - Eliminates subtle look-ahead leakage in control group matching.
   - Guarantees strict out-of-sample data protection against snooping.
   - Fortifies the statistical validity and economic interpretability of future news-gated strategy experiments.
+
+---
+
+## ADR-031: Development-Partition Experimental Execution, 4-Group Synchronized Simulation Engine, and Candidate Stream Caching
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**: Milestone 4.6.3.1 required the formal execution of the frozen research protocol across the 2024 Development partition (105,408 candles across BTCUSDT, ETHUSDT, BNBUSDT on 15m). The experiment evaluated whether point-in-time news intelligence improves net trading outcomes beyond the deterministic technical baseline. To ensure 100% scientific validity, execution required:
+  1. Synchronized parallel execution of all 4 experimental groups (A: Technical Baseline, B: News Veto, C: Frequency Control, D: Exposure Control) on the exact same candidate setup stream.
+  2. Point-in-time execution scheduling enforcing `NEXT_ELIGIBLE_PRICE` with cryptographic HMAC risk authorization tokens bound to the specific experimental run (`exp_{group_id}_2024`).
+  3. Strict isolation of 2024 data, cryptographically guarded against access to 2025 Validation and locked 2026 Out-of-Sample partitions.
+  4. Preservation and persistence of the raw candidate stream to guarantee deterministic, bit-for-bit reproducible bootstrap re-runs without 18-minute agent re-computations.
+- **Decision**:
+  1. **Development Partition Orchestration Architecture (`DevelopmentExperimentRunner`)**:
+     - Built `backend/app/simulation/development_orchestrator.py` executing a 4-group parallel event loop.
+     - Enforces complete independence between group portfolios while maintaining 100% synchronized market perceptions and candidate signals.
+     - Cryptographically binds Risk Manager HMAC tokens to each group run ID to strictly prevent cross-group token substitution (`CROSS_RUN_TOKEN_FORBIDDEN`).
+  2. **Candidate Stream Deterministic Caching**:
+     - Implemented candidate stream serialization and caching at `storage/exports/milestone_4_6_3_1/candidate_cache_2024.json`.
+     - Preserves the full perception state `(cand_dict, RawCandidateSignal, regime_str)` across all 105,408 timestamps.
+  3. **Multi-Hypothesis Bootstrap & Statistical Rigor**:
+     - Embedded 384-bar (4-day) Moving Block Bootstrap ($B=2000$) computing empirical p-values for H1 (Group B vs A), H2 (Group B vs C), and H3 (Group B vs D).
+     - Applied Benjamini-Hochberg False Discovery Rate ($q=0.05$) correction across all confirmatory tests.
+     - Evaluated economic hurdle requirement ($+\$0.50$ USDT net expectancy improvement per trade after 0.32% round-trip friction).
+  4. **Ex-Post Diagnostic Benchmarking Suite**:
+     - Retained and executed Methods C1 (Systematic Decimation), C2 (Confidence Pruning), C3 (Seed Selection), and D-ExPost (Exposure Budget) as retrospective diagnostic controls once $N_B$ and total exposure are observed.
+- **Consequences**:
+  - Delivers complete mathematical, operational, and execution provenance for Milestone 4.6.3.1.
+  - Guarantees zero look-ahead bias and bit-for-bit experimental reproducibility.
+  - Fully complies with Rules S-01, S-04, S-05, S-06, and ADR-001 through ADR-030.

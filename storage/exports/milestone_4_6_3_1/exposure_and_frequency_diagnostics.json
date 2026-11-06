@@ -1,0 +1,104 @@
+{
+  "online_exposure_dimensions": {
+    "GROUP_A": {
+      "time_in_market_bars": 824,
+      "time_in_market_pct": 0.0235,
+      "trade_count": 68,
+      "average_holding_bars": 15.8,
+      "asset_breakdown_bars": {
+        "BTCUSDT": 381,
+        "ETHUSDT": 384,
+        "BNBUSDT": 308
+      },
+      "directional_duration_bars": {
+        "LONG": 275,
+        "SHORT": 798
+      },
+      "dollar_hours_capital_utilization": 133753.30117556243,
+      "simultaneous_multi_asset_bars": 249
+    },
+    "GROUP_B": {
+      "time_in_market_bars": 659,
+      "time_in_market_pct": 0.0188,
+      "trade_count": 47,
+      "average_holding_bars": 19.0,
+      "asset_breakdown_bars": {
+        "BTCUSDT": 349,
+        "ETHUSDT": 297,
+        "BNBUSDT": 248
+      },
+      "directional_duration_bars": {
+        "LONG": 236,
+        "SHORT": 658
+      },
+      "dollar_hours_capital_utilization": 101791.55368918722,
+      "simultaneous_multi_asset_bars": 235
+    },
+    "GROUP_C": {
+      "time_in_market_bars": 805,
+      "time_in_market_pct": 0.0229,
+      "trade_count": 62,
+      "average_holding_bars": 16.6,
+      "asset_breakdown_bars": {
+        "BTCUSDT": 381,
+        "ETHUSDT": 365,
+        "BNBUSDT": 284
+      },
+      "directional_duration_bars": {
+        "LONG": 267,
+        "SHORT": 763
+      },
+      "dollar_hours_capital_utilization": 127354.18677993632,
+      "simultaneous_multi_asset_bars": 225
+    },
+    "GROUP_D": {
+      "time_in_market_bars": 772,
+      "time_in_market_pct": 0.022,
+      "trade_count": 60,
+      "average_holding_bars": 16.0,
+      "asset_breakdown_bars": {
+        "BTCUSDT": 365,
+        "ETHUSDT": 315,
+        "BNBUSDT": 280
+      },
+      "directional_duration_bars": {
+        "LONG": 251,
+        "SHORT": 709
+      },
+      "dollar_hours_capital_utilization": 121915.79194104757,
+      "simultaneous_multi_asset_bars": 188
+    }
+  },
+  "ex_post_diagnostic_benchmarks": {
+    "target_b_trade_count": 47,
+    "target_b_total_bars": 659,
+    "method_c1_systematic_decimation": {
+      "selected_count": 47,
+      "simulated_net_pnl_usdt": -0.44,
+      "e_trade_usdt": -0.0094,
+      "e_cand_usdt": -0.0001,
+      "is_ex_post_diagnostic": true
+    },
+    "method_c2_technical_confidence_priority": {
+      "selected_count": 47,
+      "simulated_net_pnl_usdt": 4.19,
+      "e_trade_usdt": 0.0891,
+      "e_cand_usdt": 0.0011,
+      "is_ex_post_diagnostic": true
+    },
+    "method_c3_cryptographic_seed_selection": {
+      "selected_count": 47,
+      "simulated_net_pnl_usdt": -0.51,
+      "e_trade_usdt": -0.0109,
+      "e_cand_usdt": -0.0001,
+      "is_ex_post_diagnostic": true
+    },
+    "method_d_ex_post_exposure_budget": {
+      "selected_count": 44,
+      "simulated_net_pnl_usdt": 0.0,
+      "e_trade_usdt": 0.0,
+      "e_cand_usdt": 0.0,
+      "is_ex_post_diagnostic": true
+    }
+  }
+}
