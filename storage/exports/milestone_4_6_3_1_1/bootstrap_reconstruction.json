@@ -1,0 +1,71 @@
+{
+  "H1_b_minus_a": {
+    "observed_mean_diff_usdt": 0.0273,
+    "zero_elements_count": 3622,
+    "zero_elements_pct": 98.48,
+    "positive_elements_count": 28,
+    "negative_elements_count": 28,
+    "bootstrap_distribution": {
+      "resamples_count": 2000,
+      "block_size": 384,
+      "mean_of_boot_means": 0.0102,
+      "ci_95_percentile": [
+        0.0,
+        0.0511
+      ],
+      "fraction_boot_means_exactly_zero": 0.582,
+      "fraction_boot_means_strictly_negative": 0.013,
+      "reported_p_value_empirical_le_zero": 0.595
+    },
+    "investigation_resolution": {
+      "ci_vs_p_value_anomaly_explained": "In H1_b_minus_a, 58.2% of all bootstrap resamples had a mean of EXACTLY 0.0000 due to extreme sparsity (98.5% zeros in candidate diffs). Because the cumulative distribution is completely flat at 0.0 from percentile 1.3% to 59.5%, the 2.5th percentile evaluates to 0.0000, while the one-sided p-value (measuring boot_means <= 0.0) sums all zero resamples to yield 0.595. The two figures are mathematically consistent reflections of a discrete point-mass at zero.",
+      "methodological_limitation": "The moving block bootstrap was applied to an irregularly spaced candidate stream rather than a regular time-grid of candles, inflating zero-density and distorting time-series blocks."
+    }
+  },
+  "H2_b_minus_c": {
+    "observed_mean_diff_usdt": 0.0195,
+    "zero_elements_count": 3620,
+    "zero_elements_pct": 98.42,
+    "positive_elements_count": 35,
+    "negative_elements_count": 23,
+    "bootstrap_distribution": {
+      "resamples_count": 2000,
+      "block_size": 384,
+      "mean_of_boot_means": 0.0085,
+      "ci_95_percentile": [
+        0.0,
+        0.0428
+      ],
+      "fraction_boot_means_exactly_zero": 0.582,
+      "fraction_boot_means_strictly_negative": 0.013,
+      "reported_p_value_empirical_le_zero": 0.595
+    },
+    "investigation_resolution": {
+      "ci_vs_p_value_anomaly_explained": "In H2_b_minus_c, 58.2% of all bootstrap resamples had a mean of EXACTLY 0.0000 due to extreme sparsity (98.5% zeros in candidate diffs). Because the cumulative distribution is completely flat at 0.0 from percentile 1.3% to 59.5%, the 2.5th percentile evaluates to 0.0000, while the one-sided p-value (measuring boot_means <= 0.0) sums all zero resamples to yield 0.595. The two figures are mathematically consistent reflections of a discrete point-mass at zero.",
+      "methodological_limitation": "The moving block bootstrap was applied to an irregularly spaced candidate stream rather than a regular time-grid of candles, inflating zero-density and distorting time-series blocks."
+    }
+  },
+  "H3_b_minus_d": {
+    "observed_mean_diff_usdt": 0.0137,
+    "zero_elements_count": 3629,
+    "zero_elements_pct": 98.67,
+    "positive_elements_count": 32,
+    "negative_elements_count": 17,
+    "bootstrap_distribution": {
+      "resamples_count": 2000,
+      "block_size": 384,
+      "mean_of_boot_means": 0.0061,
+      "ci_95_percentile": [
+        0.0,
+        0.0272
+      ],
+      "fraction_boot_means_exactly_zero": 0.582,
+      "fraction_boot_means_strictly_negative": 0.008,
+      "reported_p_value_empirical_le_zero": 0.59
+    },
+    "investigation_resolution": {
+      "ci_vs_p_value_anomaly_explained": "In H3_b_minus_d, 58.2% of all bootstrap resamples had a mean of EXACTLY 0.0000 due to extreme sparsity (98.5% zeros in candidate diffs). Because the cumulative distribution is completely flat at 0.0 from percentile 1.3% to 59.0%, the 2.5th percentile evaluates to 0.0000, while the one-sided p-value (measuring boot_means <= 0.0) sums all zero resamples to yield 0.59. The two figures are mathematically consistent reflections of a discrete point-mass at zero.",
+      "methodological_limitation": "The moving block bootstrap was applied to an irregularly spaced candidate stream rather than a regular time-grid of candles, inflating zero-density and distorting time-series blocks."
+    }
+  }
+}

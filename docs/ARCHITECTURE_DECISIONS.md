@@ -42,6 +42,7 @@
 - [ADR-029: Protocol Freeze: 4-Group Controlled Experimental Design, 3-Partition Chronological Split, and Statistical Analysis Plan](#adr-029-protocol-freeze-4-group-controlled-experimental-design-3-partition-chronological-split-and-statistical-analysis-plan)
 - [ADR-030: Online Control Matching, Executable News Veto Engine, Timeframe Bootstrap Calibration, and OOS Access Guard](#adr-030-online-control-matching-executable-news-veto-engine-timeframe-bootstrap-calibration-and-oos-access-guard)
 - [ADR-031: Development-Partition Experimental Execution, 4-Group Synchronized Simulation Engine, and Candidate Stream Caching](#adr-031-development-partition-experimental-execution-4-group-synchronized-simulation-engine-and-candidate-stream-caching)
+- [ADR-032: Independent Forensic Accounting Reconciliation, Cash-Equity Inversion Remediation, and Point-Mass Bootstrap Diagnosis](#adr-032-independent-forensic-accounting-reconciliation-cash-equity-inversion-remediation-and-point-mass-bootstrap-diagnosis)
 
 ---
 
@@ -709,3 +710,30 @@
   - Delivers complete mathematical, operational, and execution provenance for Milestone 4.6.3.1.
   - Guarantees zero look-ahead bias and bit-for-bit experimental reproducibility.
   - Fully complies with Rules S-01, S-04, S-05, S-06, and ADR-001 through ADR-030.
+
+---
+
+## ADR-032: Independent Forensic Accounting Reconciliation, Cash-Equity Inversion Remediation, and Point-Mass Bootstrap Diagnosis
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**: Milestone 4.6.3.1.1 performed an independent forensic audit of the completed Milestone 4.6.3.1 Development-partition experiment. The audit identified two critical accounting implementation defects and one statistical methodology artifact:
+  1. *Cash Equity Inverted Sign on Short Positions*: The cash tracking engine subtracted `size * price` on entry and added `size * price` on exit unconditionally. For short positions (63.2% of executed trades), losing short trades credited cash, injecting phantom cash that masked true ending equity ($785.28 USDT vs reported $984.56 USDT) and true drawdown (24.87% vs reported 5.19%).
+  2. *Metric Aggregation Conditioning Flaw*: `gross_profit` and `gross_loss` in `group_metrics.json` were partitioned conditioned on `net_pnl > 0` rather than `gross_pnl > 0`, causing net losers with positive gross PnL to have their gross gains flipped to losses via `abs(gross_pnl)`.
+  3. *Bootstrap Point-Mass Artifact*: Applying a moving block bootstrap to an irregularly spaced candidate stream where 98.48% of values are zero resulted in 58.2% of bootstrap resamples evaluating to exactly `0.0000`, causing the 2.5th percentile to collapse to `0.0000` while $p(\text{mean} \le 0) = 0.5950$.
+- **Decision**:
+  1. **Formal Separation of True Realized vs Cash Accounting**:
+     - Document and certify true realized ending equity strictly as $\text{Initial Equity} + \sum \text{Net PnL}$ ($785.28 USDT for Group A, $885.58 USDT for Group B).
+     - Isolate and document the phantom cash injection mechanism in `equity_curve_reconciliation.json`.
+  2. **Standardization of Gross Profit and Loss Definitions**:
+     - Standardize gross profit as $\sum \max(0, \text{Gross PnL})$ across all trades, and gross loss as $\sum |\min(0, \text{Gross PnL})|$ across all trades.
+  3. **Preservation of Original Artifacts**:
+     - Preserve all original Milestone 4.6.3.1 outputs unchanged in `storage/exports/milestone_4_6_3_1/`.
+     - Publish all reconciled figures and artifacts independently in `storage/exports/milestone_4_6_3_1_1/`.
+  4. **Strict Stop Condition**:
+     - Affirm that the underlying technical strategy suffers from severe negative drift (-21.47% return, 24.87% drawdown) and news vetoing adds no statistically significant alpha ($p = 0.5950$).
+     - Enforce a strict governance stop condition halting forward execution to Milestone 4.6.3.2.
+- **Consequences**:
+  - Restores 100% mathematical and accounting transparency to the NEPTUNE research archive.
+  - Formulates the exact accounting fixes required for any future engine revisions.
+  - Strictly preserves research integrity by preventing premature or unwarranted entry into out-of-sample partitions.

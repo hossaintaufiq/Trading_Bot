@@ -1,0 +1,52 @@
+{
+  "definitions": {
+    "E_trade": "Total Net PnL divided by executed trades count (N_trades). Reflects average realized edge per completed trade execution.",
+    "E_cand": "Total Net PnL divided by eligible candidate setups count (N_cand = 3678). Reflects unconditional edge of the raw candidate generation stream, treating rejected/vetoed setups as 0.0 contribution.",
+    "portfolio_return": "Cumulative PnL divided by initial capital (1000 USDT). Reflects compound portfolio growth."
+  },
+  "metrics_table": {
+    "GROUP_A": {
+      "net_pnl_usdt": -214.72,
+      "executed_trades_denominator": 68,
+      "E_trade_usdt": -3.1576,
+      "candidates_denominator": 3678,
+      "E_cand_usdt": -0.0584,
+      "true_portfolio_return_pct": -21.47
+    },
+    "GROUP_B": {
+      "net_pnl_usdt": -114.42,
+      "executed_trades_denominator": 47,
+      "E_trade_usdt": -2.4345,
+      "candidates_denominator": 3678,
+      "E_cand_usdt": -0.0311,
+      "true_portfolio_return_pct": -11.44
+    },
+    "GROUP_C": {
+      "net_pnl_usdt": -186.21,
+      "executed_trades_denominator": 62,
+      "E_trade_usdt": -3.0034,
+      "candidates_denominator": 3678,
+      "E_cand_usdt": -0.0506,
+      "true_portfolio_return_pct": -18.62
+    },
+    "GROUP_D": {
+      "net_pnl_usdt": -164.8,
+      "executed_trades_denominator": 60,
+      "E_trade_usdt": -2.7467,
+      "candidates_denominator": 3678,
+      "E_cand_usdt": -0.0448,
+      "true_portfolio_return_pct": -16.48
+    }
+  },
+  "comparisons": {
+    "H1_group_b_minus_group_a": {
+      "delta_E_trade_usdt": 0.7231,
+      "delta_E_cand_usdt": 0.0273,
+      "delta_true_portfolio_return_pct": 10.03,
+      "economic_hurdle_pre_registered": 0.5,
+      "economic_hurdle_applies_to": "E_trade (per executed trade outperformance)",
+      "passed_nominally": true,
+      "passed_statistically": false
+    }
+  }
+}

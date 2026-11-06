@@ -1,0 +1,28 @@
+{
+  "methodology": "Benjamini-Hochberg Step-Up Procedure (q = 0.05)",
+  "family_size_m": 3,
+  "hypotheses_sorted_by_p_value": {
+    "H3_group_b_vs_group_d": {
+      "raw_p_value": 0.59,
+      "sorted_rank": 1,
+      "critical_value_threshold": 0.016667,
+      "adjusted_p_value_q_val": 1.0,
+      "is_significant_fdr": false
+    },
+    "H1_group_b_vs_group_a": {
+      "raw_p_value": 0.595,
+      "sorted_rank": 2,
+      "critical_value_threshold": 0.033333,
+      "adjusted_p_value_q_val": 0.8925,
+      "is_significant_fdr": false
+    },
+    "H2_group_b_vs_group_c": {
+      "raw_p_value": 0.595,
+      "sorted_rank": 3,
+      "critical_value_threshold": 0.05,
+      "adjusted_p_value_q_val": 0.595,
+      "is_significant_fdr": false
+    }
+  },
+  "audit_verdict": "VERIFIED_CORRECT. All hypotheses fail to achieve significance (all p > 0.59 >> critical threshold)."
+}

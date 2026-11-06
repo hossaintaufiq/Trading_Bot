@@ -1,0 +1,13 @@
+{
+  "audit_id": "NEPTUNE-AUDIT-4.6.3.1.1",
+  "timestamp_utc": "2026-11-06T19:00:18.038055+00:00",
+  "git_branch": "quant-expectancy-validation",
+  "audited_milestone": "4.6.3.1",
+  "baseline_config_fingerprint": "33a5d9f67052fe25737e8e93011230462ab2250e1984395f2d69214f445f1278",
+  "market_dataset_tree_sha256": "b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c",
+  "news_dataset_manifest_sha256": "6b7bb69c841ec9a5e1774b6f369c0d9c113df066d80357521ac92b937490f4ec",
+  "oos_partition_status": "CRYPTOGRAPHICALLY_LOCKED",
+  "artifacts_verified_count": 8,
+  "authoritative_audit_verdict": "PASS WITH LIMITATIONS",
+  "verdict_rationale": "All accounting figures, risk breaker events, veto streams, expectancies, and bootstrap p-values have been 100% reconciled to source code and execution ledgers. Two major implementation defects were uncovered: (1) Inverted sign for short positions in cash_equity tracking, masking true drawdown (24.87% vs 5.19%) and ending equity (785.28 vs 984.56 USDT); (2) Gross profit and gross loss metrics partitioned conditioned on net_pnl > 0 with sign-flip of net-losing gross profits. Neither defect invalidates the core scientific conclusion of Milestone 4.6.3.1 (FAIL - News Veto adds no statistically significant alpha and fails to achieve positive net expectancy)."
+}
