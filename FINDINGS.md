@@ -897,6 +897,30 @@ Milestone 4.6.3.1.2 remediated the portfolio accounting defect identified in Mil
    - Economic hurdle: $\Delta E_{\text{trade}} = +\$0.0009$ USDT vs $+0.50$ USDT target $\to$ **DECISIVELY FAILED**.
 5. **Authoritative Verdict: PASS WITH REMEDIATION & RISK HALT.** The accounting defect is remediated, the Risk Manager is trustworthy, and the experiment is 100% reproducible. News vetoing fails to salvage the underlying technical continuation strategy. Mandatory stop condition enforced: zero access to Validation 2025 or locked OOS 2026.
 
+### 8.22 Milestone 4.6.3.1.3: Independent Portfolio Ledger, Short-Model & Risk-Breaker Verification
+
+Milestone 4.6.3.1.3 conducted an independent forensic audit of Milestone 4.6.3.1.2:
+1. **Mathematical Invariant Verification:** Verified that `PortfolioLedger` maintains exact double-entry cash flows, balance sheet invariants, and dollar symmetry between LONG and SHORT positions under identical price moves.
+2. **Short Position Architecture Classification:** Formally classified NEPTUNE v1 short positions as *Synthetic Fully Collateralized Short Exposure* (1.0x cash collateral reservation, zero leverage, cash-settled payoff), compliant with Rule S-01, while documenting the research omission of borrow interest and liquidity limits.
+3. **Risk Breaker Chronology Reconstruction:** Reconstructed the exact first breach across all four groups (January 5–6, 2024). Proved that the 5.51%–5.55% peak-to-trough drawdown overshoot is the expected behavior of an *Order Authorization Embargo (New Entry Halt)* allowing in-flight positions to resolve at their stop loss, rather than forced market liquidation.
+4. **Execution-Path Security:** Confirmed that cryptographic HMAC-SHA256 tokens (`rat_v1_...`) prevent replay, cross-run contamination, and unauthorized order injection. Zero trades were executed post-breach across 34,600+ subsequent bars.
+5. **Inactive Period Dominance & Statistical Partitioning:** Documented that 98.6% of chronological 15m bars in 2024 were zero returns due to the early risk halt. Proved that whether evaluated on the full year or active trading window, news vetoing generated a delta of only $+\$0.01$ USDT across 12 trades ($+\$0.0009$/trade), decisively failing the $+\$0.50$/trade economic hurdle by 555x.
+6. **Authoritative Verdict: PASS WITH LIMITATIONS.**
+
+---
+
+### 8.23 Milestone 4.6.3.1.4: Research Closure, Negative Results Preservation & Strategy Research Reset
+
+Milestone 4.6.3.1.4 formally concluded and closed the 2024 Development partition experiment series:
+1. **Hypothesis Freeze (`trend_continuation_v1`):** Formally classified as `UNSUCCESSFUL UNDER TESTED 2024 DEVELOPMENT CONDITIONS`. Baseline realized net loss of $-\$23.57$ USDT across 12 trades, $-1.964$ USDT/trade net expectancy, 5.55% max drawdown, and circuit breaker activation on Day 5. News vetoing failed the economic hurdle and failed to demonstrate statistically significant improvement ($p = 0.174$).
+2. **Negative Results Register:** Established [`NEPTUNE_NEGATIVE_RESULTS_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_NEGATIVE_RESULTS_REGISTER.md) preserving all failure modes, frictional drag measurements, and structural whipsaws to prevent recurring errors.
+3. **Infrastructure Capability Inventory:** Established [`NEPTUNE_INFRASTRUCTURE_VERIFICATION_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_INFRASTRUCTURE_VERIFICATION_REGISTER.md) cataloging verified capabilities, modeling assumptions, and known limitations across all 11 core subsystems.
+4. **Next-Generation Research Proposal:** Drafted [`NEPTUNE_NEXT_STRATEGY_RESEARCH_PROPOSAL.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_NEXT_STRATEGY_RESEARCH_PROPOSAL.md) defining three independent, unexecuted strategy hypotheses:
+   - *Hypothesis A:* Higher-Timeframe Trend-Following (`htf_trend_following_v1` on 1h/4h).
+   - *Hypothesis B:* Volatility-Compression & Expansion Breakout (`vol_compression_breakout_v1`).
+   - *Hypothesis C:* Regime-Conditioned Extreme Mean Reversion (`regime_mean_reversion_v1`).
+5. **Research Governance Enforcement:** Strictly halted all simulation progression. Zero access to 2025 Validation or 2026 OOS partitions. No code implementation or backtesting permitted until authorized by formal executive governance review.
+
 ---
 
 ## 10. Architecture Decision Records & Audit Index
@@ -924,6 +948,10 @@ Milestone 4.6.3.1.2 remediated the portfolio accounting defect identified in Mil
 - **[ADR-034: Synthetic Short Collateralization Classification, Risk-Breaker Embargo Semantics, and Statistical Active-Window Partitioning](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-034-synthetic-short-collateralization-classification-risk-breaker-embargo-semantics-and-statistical-active-window-partitioning)**
 
 ### Research & Audit Documents
+- **Milestone 4.6.3.1.4 Research Closure:** [`docs/research/MILESTONE_4_6_3_1_4_RESEARCH_CLOSURE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_4_RESEARCH_CLOSURE.md)
+- **Negative Results Register:** [`docs/research/NEPTUNE_NEGATIVE_RESULTS_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_NEGATIVE_RESULTS_REGISTER.md)
+- **Infrastructure Verification Register:** [`docs/research/NEPTUNE_INFRASTRUCTURE_VERIFICATION_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_INFRASTRUCTURE_VERIFICATION_REGISTER.md)
+- **Next-Generation Strategy Research Proposal:** [`docs/research/NEPTUNE_NEXT_STRATEGY_RESEARCH_PROPOSAL.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_NEXT_STRATEGY_RESEARCH_PROPOSAL.md)
 - **Milestone 4.6.3.1.3 Ledger Audit:** [`docs/research/MILESTONE_4_6_3_1_3_LEDGER_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_3_LEDGER_AUDIT.md)
 - **Milestone 4.6.3.1.3 Short Model Audit:** [`docs/research/MILESTONE_4_6_3_1_3_SHORT_MODEL_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_3_SHORT_MODEL_AUDIT.md)
 - **Milestone 4.6.3.1.3 Risk Breaker Audit:** [`docs/research/MILESTONE_4_6_3_1_3_RISK_BREAKER_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_3_RISK_BREAKER_AUDIT.md)
