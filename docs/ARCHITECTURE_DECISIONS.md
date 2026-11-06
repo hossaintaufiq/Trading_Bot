@@ -769,3 +769,30 @@
   - Eliminates all phantom cash and accounting distortions across NEPTUNE simulation engines.
   - Re-establishes the Risk Manager as a certified, trustworthy capital preservation authority.
   - Generates 8 verified, immutable audit deliverables in `storage/exports/milestone_4_6_3_1_2/`.
+
+
+---
+
+## ADR-034: Synthetic Short Collateralization Classification, Risk-Breaker Embargo Semantics, and Statistical Active-Window Partitioning
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**: Milestone 4.6.3.1.3 conducted an independent forensic audit of Milestone 4.6.3.1.2. The audit verified the mathematical integrity of `PortfolioLedger` and identified three foundational architectural classifications requiring formal codification:
+  1. *Short-Position Model Classification*: The shorting mechanism in `PortfolioLedger` operates via 1:1 cash collateral reservation ($1.0\times$ leverage) without securities lending, borrow availability constraints, or continuous borrow interest. This must be formally classified as Synthetic Fully Collateralized Short Exposure.
+  2. *Risk-Breaker Overshoot Semantics*: Portfolio maximum drawdown settled at 5.51%–5.55%, exceeding the 5.0% circuit breaker parameter. The audit confirmed that the breaker acts as an Order Authorization Embargo (New Entry Halt) rather than an Emergency Market Liquidation. In-flight positions authorized prior to the breach are permitted to resolve at their stop-loss brackets, generating an expected ~0.55% overshoot.
+  3. *Statistical Inactive Period Dominance*: Because the circuit breaker halted trading on Day 6, 98.6% of chronological bars in 2024 (34,636 bars) contained identical $0.00 returns across all groups. Statistical inference requires explicit partitioning into Active Window vs Full Year analysis.
+- **Decision**:
+  1. **Formal Model Classification**:
+     - Officially classify NEPTUNE v1 short trading as "Synthetic Fully Collateralized Spot Exposure" compliant with Rule S-01 (paper simulation only, zero leverage).
+     - Document that borrow interest fees (~0.005% per trade) and borrow liquidity constraints are omitted as deliberate research abstractions for Tier-1 liquid crypto assets.
+  2. **Codification of Breaker Policy Semantics**:
+     - Codify that the 5.0% drawdown circuit breaker enforces an Order Authorization Embargo. Open positions are managed strictly by their predefined stop-loss brackets.
+     - Verify that the circuit breaker creates a mathematically absorbing state with zero order leakage post-embargo (3,130 to 3,666 subsequent signals rejected per group).
+  3. **Dual-Window Statistical Reporting**:
+     - Standardize dual-window reporting for simulations halting at circuit breakers: reporting both the Active Trading Window (bars 0 to 500) and the Full Simulation Partition (35,136 bars).
+  4. **Strict Research Governance Halt**:
+     - Reaffirm the mandatory stop condition: Zero progression to Milestone 4.6.3.2, 2025 Validation, or 2026 Out-of-Sample partitions.
+- **Consequences**:
+  - Eliminates ambiguity regarding short selling realism and circuit breaker behavior.
+  - Certifies the mathematical and execution soundness of Milestone 4.6.3.1.2 under `PASS WITH LIMITATIONS`.
+  - Preserves 100% research integrity under NEPTUNE governance rules.

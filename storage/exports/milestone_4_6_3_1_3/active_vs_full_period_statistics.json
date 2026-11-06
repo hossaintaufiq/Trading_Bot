@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "milestone": "4.6.3.1.3",
+    "analysis": "Active Period vs Full Year Statistical Partitioning",
+    "active_window_bars": 500,
+    "active_window_calendar_time": "2024-01-01T00:00:00Z to 2024-01-06T05:15:00Z (5.2 days)",
+    "full_simulation_bars": 35136,
+    "inactive_zero_bars": 34636,
+    "inactive_percentage": 98.58
+  },
+  "period_comparison": {
+    "active_window": {
+      "bars": 500,
+      "GROUP_A": {
+        "starting_equity": 1000.0,
+        "ending_equity": 976.44,
+        "net_pnl_usdt": -23.57,
+        "executed_trades": 12,
+        "mean_pnl_per_trade_usdt": -1.9642,
+        "max_drawdown_pct": 5.55
+      },
+      "GROUP_B": {
+        "starting_equity": 1000.0,
+        "ending_equity": 976.44,
+        "net_pnl_usdt": -23.56,
+        "executed_trades": 12,
+        "mean_pnl_per_trade_usdt": -1.9633,
+        "max_drawdown_pct": 5.55
+      },
+      "GROUP_C": {
+        "starting_equity": 1000.0,
+        "ending_equity": 976.87,
+        "net_pnl_usdt": -23.13,
+        "executed_trades": 11,
+        "mean_pnl_per_trade_usdt": -2.1027,
+        "max_drawdown_pct": 5.55
+      },
+      "GROUP_D": {
+        "starting_equity": 1000.0,
+        "ending_equity": 976.79,
+        "net_pnl_usdt": -23.21,
+        "executed_trades": 12,
+        "mean_pnl_per_trade_usdt": -1.9342,
+        "max_drawdown_pct": 5.51
+      },
+      "delta_group_b_minus_group_a_usdt": 0.01,
+      "delta_per_trade_usdt": 0.0009
+    },
+    "full_year": {
+      "bars": 35136,
+      "GROUP_A_ending_equity": 976.44,
+      "GROUP_B_ending_equity": 976.44,
+      "delta_group_b_minus_group_a_usdt": 0.01,
+      "mean_bar_diff_usdt": 0.0,
+      "bootstrap_p_value_h1": 0.174,
+      "fdr_significant_h1": false
+    }
+  },
+  "economic_hurdle_evaluation": {
+    "pre_registered_hurdle_per_trade_usdt": 0.5,
+    "observed_delta_per_trade_usdt": 0.0009,
+    "hurdle_ratio_observed_to_required": 0.0018,
+    "hurdle_satisfied": false,
+    "conclusion": "News intelligence produces a negligible PnL difference of +$0.01 USDT across 12 trades (+$0.0009/trade), failing the economic threshold of +$0.50/trade by a factor of 555x. Both technical baseline (Group A) and news-gated (Group B) breach the 5% drawdown breaker, confirming that the underlying technical strategy is unprofitable in the 2024 development partition."
+  }
+}

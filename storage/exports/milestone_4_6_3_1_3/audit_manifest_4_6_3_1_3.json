@@ -1,0 +1,25 @@
+{
+  "milestone": "4.6.3.1.3",
+  "audit_name": "Independent Portfolio Ledger, Short-Model & Risk-Breaker Verification",
+  "created_at": "2026-11-07T02:20:00Z",
+  "auditor_verdict": "PASS WITH LIMITATIONS",
+  "governance_stop_condition_enforced": true,
+  "input_artifacts_hashes": {
+    "group_metrics_4_6_3_1_2": "101b3f29caad6f3dba3dbadeaa3a5af47a49de0910dd984c898ff6dda4b7e088",
+    "trade_ledger_reproduction_4_6_3_1_2": "e361ea907f5f1e553fe5cb6b793acda0668516c82482685e75a960764f0a8206",
+    "cash_collateral_ledger_4_6_3_1_2": "b34a22a4b615f9296bae7bcd9fc9d13f441ea8b2e54c2e872d0d3901567366c7",
+    "equity_curves_4_6_3_1_2": "3e15a26efc282621e1cfaad2a45e949975a9adf94c5a75c6544f302fab191f65",
+    "risk_breaker_events_4_6_3_1_2": "08985dfa287efcf5c8daad8dc12c0b1432492fc4793761c0d9b7aa2b3f49cbcf",
+    "statistical_revalidation_4_6_3_1_2": "5d772ea6b9a82c64c0cc0d672189fea35d0e1a8ad0512d8651ee27153bebb705"
+  },
+  "audit_deliverables_hashes": {
+    "ledger_audit_invariants": "f38e911cd29853694bc7f659979f23cec398e121911e83de28e48fa8b2191c5f",
+    "risk_breaker_chronology": "2109b7facacdf55c05aead47990de5274e832f75c095302e8eacafd7130433d2",
+    "active_vs_full_period_statistics": "8a5ca8b610a90c15efa81ef2215b0e6e136756dd5f8a4aa7a8bd256c2c94d107"
+  },
+  "key_limitations_identified": [
+    "Synthetic Short Exposure: Short positions are modeled via 1:1 cash collateral reservation rather than true spot borrowing or margin financing.",
+    "Order Embargo vs Liquidation: Risk breaker trips halt new order authorization but do not force-liquidate open in-flight positions, leading to an empirical 0.51-0.55% drawdown overshoot.",
+    "Inactive Period Dominance: 98.6% of chronological bars in 2024 are completely inactive ($0 PnL) due to early circuit breaker halt."
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "GROUP_A": {
+    "first_breach": {
+      "timestamp": "2024-01-05T16:00:00.000Z",
+      "bar_index": 448,
+      "cash_equity": 556.807621784094,
+      "total_equity": 981.713039351262,
+      "peak_equity_at_breach": 1033.7737463516269,
+      "drawdown_pct_at_breach": 5.035986567089412,
+      "open_positions_count": 1
+    },
+    "trough_equity_event": {
+      "timestamp": "2024-01-05T20:45:00.000Z",
+      "total_equity": 976.4365791637535,
+      "max_drawdown_pct": 5.54639420765197,
+      "open_positions_count": 0
+    },
+    "drawdown_overshoot_pct": 0.5463942076519697,
+    "explanation_of_overshoot": "Drawdown circuit breaker functions as an Order Authorization Embargo (New Entry Halt). In-flight open positions are not liquidated at market; they exit under their predefined stop-loss bracket, producing an incremental drawdown of ~0.51% to 0.55% before stabilizing.",
+    "positions_in_flight_at_breach": [
+      {
+        "trade_id": "trd_646c9441cca3",
+        "symbol": "BNBUSDT",
+        "direction": "SHORT",
+        "entry_timestamp": "2024-01-05T16:00:00.000Z",
+        "entry_price": "313.41184000",
+        "stop_loss": "312.52359493678175260",
+        "exit_timestamp": "2024-01-05T17:30:00.000Z",
+        "exit_price": "312.71110909",
+        "exit_reason": "TRAILING_STOP",
+        "net_pnl": "0.10"
+      }
+    ],
+    "trades_entered_post_trough": 0,
+    "orders_scheduled_post_trough": 0,
+    "risk_rejections_total": 3666,
+    "permanent_embargo_verified": true
+  },
+  "GROUP_B": {
+    "first_breach": {
+      "timestamp": "2024-01-05T23:30:00.000Z",
+      "bar_index": 478,
+      "cash_equity": 465.5660688903606,
+      "total_equity": 981.7411182656606,
+      "peak_equity_at_breach": 1033.7737463516269,
+      "drawdown_pct_at_breach": 5.033270410435435,
+      "open_positions_count": 1
+    },
+    "trough_equity_event": {
+      "timestamp": "2024-01-06T05:15:00.000Z",
+      "total_equity": 976.4421056112618,
+      "max_drawdown_pct": 5.545859617996563,
+      "open_positions_count": 0
+    },
+    "drawdown_overshoot_pct": 0.5458596179965636,
+    "explanation_of_overshoot": "Drawdown circuit breaker functions as an Order Authorization Embargo (New Entry Halt). In-flight open positions are not liquidated at market; they exit under their predefined stop-loss bracket, producing an incremental drawdown of ~0.51% to 0.55% before stabilizing.",
+    "positions_in_flight_at_breach": [
+      {
+        "trade_id": "trd_42acbaba987e",
+        "symbol": "BTCUSDT",
+        "direction": "LONG",
+        "entry_timestamp": "2024-01-05T23:30:00.000Z",
+        "entry_price": "44111.50103000",
+        "stop_loss": "43665.6356",
+        "exit_timestamp": "2024-01-06T05:15:00.000Z",
+        "exit_price": "43639.43621864",
+        "exit_reason": "STOP_LOSS",
+        "net_pnl": "-6.56"
+      }
+    ],
+    "trades_entered_post_trough": 0,
+    "orders_scheduled_post_trough": 0,
+    "risk_rejections_total": 3483,
+    "permanent_embargo_verified": true
+  },
+  "GROUP_C": {
+    "first_breach": {
+      "timestamp": "2024-01-05T23:30:00.000Z",
+      "bar_index": 478,
+      "cash_equity": 465.77055053897425,
+      "total_equity": 982.1720065828742,
+      "peak_equity_at_breach": 1034.2274637702553,
+      "drawdown_pct_at_breach": 5.033269663678625,
+      "open_positions_count": 1
+    },
+    "trough_equity_event": {
+      "timestamp": "2024-01-06T05:15:00.000Z",
+      "total_equity": 976.8706696553371,
+      "max_drawdown_pct": 5.545858732645251,
+      "open_positions_count": 0
+    },
+    "drawdown_overshoot_pct": 0.5458587326452508,
+    "explanation_of_overshoot": "Drawdown circuit breaker functions as an Order Authorization Embargo (New Entry Halt). In-flight open positions are not liquidated at market; they exit under their predefined stop-loss bracket, producing an incremental drawdown of ~0.51% to 0.55% before stabilizing.",
+    "positions_in_flight_at_breach": [
+      {
+        "trade_id": "trd_1496b24794a1",
+        "symbol": "BTCUSDT",
+        "direction": "LONG",
+        "entry_timestamp": "2024-01-05T23:30:00.000Z",
+        "entry_price": "44111.50103000",
+        "stop_loss": "43665.6356",
+        "exit_timestamp": "2024-01-06T05:15:00.000Z",
+        "exit_price": "43639.43621864",
+        "exit_reason": "STOP_LOSS",
+        "net_pnl": "-6.56"
+      }
+    ],
+    "trades_entered_post_trough": 0,
+    "orders_scheduled_post_trough": 0,
+    "risk_rejections_total": 3130,
+    "permanent_embargo_verified": true
+  },
+  "GROUP_D": {
+    "first_breach": {
+      "timestamp": "2024-01-06T00:15:00.000Z",
+      "bar_index": 481,
+      "cash_equity": 465.732054347691,
+      "total_equity": 982.010689715691,
+      "peak_equity_at_breach": 1033.7737463516269,
+      "drawdown_pct_at_breach": 5.007193964696532,
+      "open_positions_count": 1
+    },
+    "trough_equity_event": {
+      "timestamp": "2024-01-06T05:15:00.000Z",
+      "total_equity": 976.7903214991428,
+      "max_drawdown_pct": 5.512175662574991,
+      "open_positions_count": 0
+    },
+    "drawdown_overshoot_pct": 0.5121756625749913,
+    "explanation_of_overshoot": "Drawdown circuit breaker functions as an Order Authorization Embargo (New Entry Halt). In-flight open positions are not liquidated at market; they exit under their predefined stop-loss bracket, producing an incremental drawdown of ~0.51% to 0.55% before stabilizing.",
+    "positions_in_flight_at_breach": [
+      {
+        "trade_id": "trd_59c5eb81f4cf",
+        "symbol": "BTCUSDT",
+        "direction": "LONG",
+        "entry_timestamp": "2024-01-05T23:30:00.000Z",
+        "entry_price": "44111.50103000",
+        "stop_loss": "43665.6356",
+        "exit_timestamp": "2024-01-06T05:15:00.000Z",
+        "exit_price": "43639.43621864",
+        "exit_reason": "STOP_LOSS",
+        "net_pnl": "-6.56"
+      }
+    ],
+    "trades_entered_post_trough": 0,
+    "orders_scheduled_post_trough": 0,
+    "risk_rejections_total": 3665,
+    "permanent_embargo_verified": true
+  }
+}

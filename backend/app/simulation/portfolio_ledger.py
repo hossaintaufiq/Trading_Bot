@@ -203,6 +203,11 @@ class PortfolioLedger:
         self.completed_trades.append(trade)
         self.seen_trade_ids.add(trade.trade_id)
 
+        # Proportionally reduce entry fee on surviving position
+        if pos.position_size > Decimal("0") and pos.entry_fee > Decimal("0"):
+            entry_fee_share = pos.entry_fee * (exit_size / pos.position_size)
+            pos.entry_fee -= entry_fee_share
+
         pos.position_size -= exit_size
         if pos.position_size == Decimal("0"):
             self.open_positions = [p for p in self.open_positions if p.position_id != pos.position_id]

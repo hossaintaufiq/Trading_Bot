@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "milestone": "4.6.3.1.3",
+    "audit_type": "PortfolioLedger Mathematical Invariant Verification",
+    "initial_capital_usdt": 1000.0,
+    "verification_status": "VERIFIED_MATHEMATICALLY_CONSISTENT"
+  },
+  "groups": {
+    "GROUP_A": {
+      "initial_capital_usdt": 1000.0,
+      "ending_cash_balance_usdt": 976.4365791637535,
+      "ending_total_equity_usdt": 976.4365791637535,
+      "realized_net_pnl_usdt": -23.57,
+      "expected_ending_cash_usdt": 976.43,
+      "reconciliation_discrepancy_usdt": 0.0065791637535,
+      "balance_sheet_invariant_satisfied": true,
+      "total_completed_trades": 12,
+      "open_positions_at_simulation_end": 0,
+      "reserved_collateral_at_end_usdt": 0.0,
+      "long_inventory_cost_at_end_usdt": 0.0,
+      "cost_breakdown": {
+        "gross_profit_usdt": 37.98,
+        "gross_loss_usdt": -40.25,
+        "fees_usdt": 13.31,
+        "slippage_usdt": 6.65,
+        "spread_usdt": 1.33,
+        "total_frictional_costs_usdt": 21.29
+      },
+      "transaction_ledger_count": 25,
+      "post_close_conservation_verified": true
+    },
+    "GROUP_B": {
+      "initial_capital_usdt": 1000.0,
+      "ending_cash_balance_usdt": 976.4421056112618,
+      "ending_total_equity_usdt": 976.4421056112618,
+      "realized_net_pnl_usdt": -23.56,
+      "expected_ending_cash_usdt": 976.44,
+      "reconciliation_discrepancy_usdt": 0.0021056112618,
+      "balance_sheet_invariant_satisfied": true,
+      "total_completed_trades": 12,
+      "open_positions_at_simulation_end": 0,
+      "reserved_collateral_at_end_usdt": 0.0,
+      "long_inventory_cost_at_end_usdt": 0.0,
+      "cost_breakdown": {
+        "gross_profit_usdt": 37.99,
+        "gross_loss_usdt": -40.44,
+        "fees_usdt": 13.2,
+        "slippage_usdt": 6.6,
+        "spread_usdt": 1.32,
+        "total_frictional_costs_usdt": 21.12
+      },
+      "transaction_ledger_count": 25,
+      "post_close_conservation_verified": true
+    },
+    "GROUP_C": {
+      "initial_capital_usdt": 1000.0,
+      "ending_cash_balance_usdt": 976.8706696553371,
+      "ending_total_equity_usdt": 976.8706696553371,
+      "realized_net_pnl_usdt": -23.12,
+      "expected_ending_cash_usdt": 976.88,
+      "reconciliation_discrepancy_usdt": 0.0093303446629,
+      "balance_sheet_invariant_satisfied": true,
+      "total_completed_trades": 11,
+      "open_positions_at_simulation_end": 0,
+      "reserved_collateral_at_end_usdt": 0.0,
+      "long_inventory_cost_at_end_usdt": 0.0,
+      "cost_breakdown": {
+        "gross_profit_usdt": 35.59,
+        "gross_loss_usdt": -40.46,
+        "fees_usdt": 11.41,
+        "slippage_usdt": 5.71,
+        "spread_usdt": 1.14,
+        "total_frictional_costs_usdt": 18.26
+      },
+      "transaction_ledger_count": 23,
+      "post_close_conservation_verified": true
+    },
+    "GROUP_D": {
+      "initial_capital_usdt": 1000.0,
+      "ending_cash_balance_usdt": 976.7903214991428,
+      "ending_total_equity_usdt": 976.7903214991428,
+      "realized_net_pnl_usdt": -23.2,
+      "expected_ending_cash_usdt": 976.8,
+      "reconciliation_discrepancy_usdt": 0.0096785008572,
+      "balance_sheet_invariant_satisfied": true,
+      "total_completed_trades": 12,
+      "open_positions_at_simulation_end": 0,
+      "reserved_collateral_at_end_usdt": 0.0,
+      "long_inventory_cost_at_end_usdt": 0.0,
+      "cost_breakdown": {
+        "gross_profit_usdt": 37.99,
+        "gross_loss_usdt": -40.28,
+        "fees_usdt": 13.09,
+        "slippage_usdt": 6.54,
+        "spread_usdt": 1.31,
+        "total_frictional_costs_usdt": 20.94
+      },
+      "transaction_ledger_count": 25,
+      "post_close_conservation_verified": true
+    }
+  }
+}
