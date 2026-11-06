@@ -60,6 +60,7 @@ from app.simulation.models import (
 from app.simulation.scheduling import PointInTimeExecutionScheduler
 from app.simulation.news_boundary import NewsIntelligenceBoundary
 from app.simulation.reversal import MultiFactorReversalDetector
+from app.simulation.portfolio_ledger import PortfolioLedger
 
 
 class HistoricalBacktestEngine:
@@ -214,15 +215,11 @@ class HistoricalBacktestEngine:
         }
 
         # 2. Portfolio and Accounting State
-        cash_equity = self.config.initial_capital
-        peak_equity = self.config.initial_capital
-        daily_starting_equity = self.config.initial_capital
-        daily_realized_pnl = Decimal("0")
+        ledger = PortfolioLedger(
+            initial_capital=self.config.initial_capital,
+            taker_fee_pct=self.config.taker_fee_pct,
+        )
         current_day: Optional[str] = None
-
-        open_positions: List[ActivePosition] = []
-        completed_trades: List[SimulatedTrade] = []
-        seen_trade_ids: Set[str] = set()
         equity_curve: List[EquityPoint] = []
         pipeline_counts: Dict[str, int] = {
             "candidate_signals": 0,
@@ -238,12 +235,8 @@ class HistoricalBacktestEngine:
             if current_day != ts_date:
                 # 00:00:00 UTC day boundary reset
                 current_day = ts_date
-                # Total equity at day start
-                pos_value_day_start = sum(
-                    p.position_size * p.current_price for p in open_positions
-                )
-                daily_starting_equity = cash_equity + pos_value_day_start
-                daily_realized_pnl = Decimal("0")
+                ledger.daily_starting_equity = ledger.get_total_equity()
+                ledger.daily_realized_pnl = Decimal("0")
 
             # --- PHASE 0: Process scheduled orders at candle open (NEXT_ELIGIBLE_PRICE) ---
             if self.config.execution_policy == ExecutionPolicy.NEXT_ELIGIBLE_PRICE:
@@ -251,27 +244,29 @@ class HistoricalBacktestEngine:
                     curr_c = candle_lookup.get(sym, {}).get(ts)
                     if curr_c is None:
                         continue
-                    curr_tot_eq = cash_equity + sum(p.position_size * p.current_price for p in open_positions)
+                    curr_tot_eq = ledger.get_total_equity()
                     filled_pairs, _ = self.scheduler.process_candle_open(
                         curr_candle=curr_c,
-                        current_open_positions=open_positions,
+                        current_open_positions=ledger.open_positions,
                         current_equity=curr_tot_eq,
-                        peak_equity=peak_equity,
-                        daily_starting_equity=daily_starting_equity,
-                        daily_realized_pnl=daily_realized_pnl,
+                        peak_equity=ledger.peak_equity,
+                        daily_starting_equity=ledger.daily_starting_equity,
+                        daily_realized_pnl=ledger.daily_realized_pnl,
                         execution_simulator=self.execution_simulator,
                         max_concurrent_positions=self.config.max_concurrent_positions,
                         max_drawdown_pct=self.config.max_drawdown_pct,
                         daily_loss_limit_pct=self.config.daily_loss_limit_pct,
                     )
                     for sched_ord, new_pos in filled_pairs:
-                        cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
-                        cash_equity -= cash_outflow
-                        open_positions.append(new_pos)
+                        try:
+                            ledger.process_order_fill(new_pos)
+                        except Exception as e:
+                            sched_ord.status = OrderStatus.REJECTED
+                            sched_ord.rejection_reason = f"Execution rejected by ledger: {e}"
 
             # --- PHASE A: Update open positions against brackets & pending reversals ---
             positions_to_keep: List[ActivePosition] = []
-            for pos in open_positions:
+            for pos in list(ledger.open_positions):
                 curr_candle = candle_lookup.get(pos.symbol, {}).get(ts)
                 if curr_candle is None:
                     positions_to_keep.append(pos)
@@ -307,22 +302,16 @@ class HistoricalBacktestEngine:
                     trade = self.execution_simulator.evaluate_candle_bracket(pos, curr_candle)
 
                 if trade is not None:
-                    # Trade closed: credit actual cash proceeds (executed exit notional - exit fee)
                     exit_notional = pos.position_size * trade.exit_price
                     exit_fee = exit_notional * self.config.taker_fee_pct
-                    cash_inflow = exit_notional - exit_fee
-                    cash_equity += cash_inflow
-                    daily_realized_pnl += trade.net_pnl
-                    if trade.trade_id in seen_trade_ids:
-                        raise ValueError(f"Duplicate trade detected in ledger: {trade.trade_id}")
-                    seen_trade_ids.add(trade.trade_id)
-                    completed_trades.append(trade)
+                    ledger.process_trade_exit(pos, trade, exit_fee=exit_fee)
                 else:
                     positions_to_keep.append(pos)
 
-            open_positions = positions_to_keep
+            ledger.open_positions = positions_to_keep
 
             # --- PHASE B: Update trailing stops & evaluate reversals on surviving positions ---
+            open_positions = ledger.open_positions
             for pos in open_positions:
                 curr_candle = candle_lookup.get(pos.symbol, {}).get(ts)
                 if curr_candle is None:
@@ -513,17 +502,16 @@ class HistoricalBacktestEngine:
                         pipeline_counts["filter_accepted_signals"] += 1
 
                     # Total portfolio equity for risk sizing
-                    curr_pos_val = sum(p.position_size * p.current_price for p in open_positions) + sum(p.position_size * p.current_price for p in newly_opened_positions)
-                    total_equity_now = cash_equity + curr_pos_val
+                    total_equity_now = ledger.get_total_equity()
 
                     # Pass through Risk Manager (Rule S-04)
                     risk_eval = self.risk_manager.evaluate_signal(
                         signal=cand,
                         current_equity=total_equity_now,
-                        peak_equity=peak_equity,
-                        daily_starting_equity=daily_starting_equity,
-                        daily_realized_pnl=daily_realized_pnl,
-                        open_positions=open_positions + newly_opened_positions + list(self.scheduler.pending_orders),
+                        peak_equity=ledger.peak_equity,
+                        daily_starting_equity=ledger.daily_starting_equity,
+                        daily_realized_pnl=ledger.daily_realized_pnl,
+                        open_positions=ledger.open_positions + newly_opened_positions + list(self.scheduler.pending_orders),
                         timestamp=ts,
                         run_id=backtest_id,
                     )
@@ -564,9 +552,7 @@ class HistoricalBacktestEngine:
                                 execution_policy=self.config.execution_policy,
                             )
 
-                            # Deduct actual cash outflow at entry (executed notional + entry fee)
-                            cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
-                            cash_equity -= cash_outflow
+                            ledger.process_order_fill(new_pos)
                             newly_opened_positions.append(new_pos)
                         else:
                             # NEXT_ELIGIBLE_PRICE: schedule order for execution at next eligible candle open
@@ -591,27 +577,25 @@ class HistoricalBacktestEngine:
                     else:
                         pipeline_counts["risk_rejected_signals"] += 1
 
-            open_positions.extend(newly_opened_positions)
-
             # --- PHASE D: Mark-to-Market Equity Snapshot ---
-            open_val = sum(p.position_size * p.current_price for p in open_positions)
-            total_eq = cash_equity + open_val
-            if total_eq > peak_equity:
-                peak_equity = total_eq
+            for s in self.config.symbols:
+                sc = candle_lookup.get(s, {}).get(ts)
+                if sc is not None:
+                    ledger.update_candle_mark(s, sc)
 
-            dd_pct = (
-                float((peak_equity - total_eq) / peak_equity * Decimal("100.0"))
-                if peak_equity > Decimal("0")
-                else 0.0
-            )
+            total_eq = ledger.get_total_equity()
+            if total_eq > ledger.peak_equity:
+                ledger.peak_equity = total_eq
+
+            dd_pct = float(ledger.get_drawdown_pct())
 
             equity_curve.append(
                 EquityPoint(
                     timestamp=ts,
-                    cash_equity=round(float(cash_equity), 2),
+                    cash_equity=round(float(ledger.cash_balance), 2),
                     total_equity=round(float(total_eq), 2),
                     drawdown_pct=round(dd_pct, 2),
-                    open_positions_count=len(open_positions),
+                    open_positions_count=len(ledger.open_positions),
                 )
             )
 
@@ -625,7 +609,7 @@ class HistoricalBacktestEngine:
         self.scheduler.pending_orders.clear()
 
         # Force-close remaining open positions at final candle
-        for pos in open_positions:
+        for pos in list(ledger.open_positions):
             last_candle = candle_lookup.get(pos.symbol, {}).get(all_timestamps[-1])
             if last_candle:
                 trade = self.execution_simulator.force_close(
@@ -633,17 +617,13 @@ class HistoricalBacktestEngine:
                 )
                 exit_notional = pos.position_size * trade.exit_price
                 exit_fee = exit_notional * self.config.taker_fee_pct
-                cash_equity += (exit_notional - exit_fee)
-                if trade.trade_id in seen_trade_ids:
-                    raise ValueError(f"Duplicate trade detected in ledger: {trade.trade_id}")
-                seen_trade_ids.add(trade.trade_id)
-                completed_trades.append(trade)
+                ledger.process_trade_exit(pos, trade, exit_fee=exit_fee)
 
-        open_positions.clear()
+        ledger.assert_invariants()
 
         # 5. Compute Final Quantitative Performance Metrics
         metrics = calculate_backtest_metrics(
-            trades=completed_trades,
+            trades=ledger.completed_trades,
             equity_curve=equity_curve,
             initial_capital=self.config.initial_capital,
             timeframe=self.config.timeframe,
@@ -654,7 +634,7 @@ class HistoricalBacktestEngine:
             backtest_id=backtest_id,
             config=self.config,
             metrics=metrics,
-            trades=completed_trades,
+            trades=ledger.completed_trades,
             equity_curve=equity_curve,
         )
 

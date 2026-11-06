@@ -871,6 +871,34 @@ Milestone 4.6.3.1.1 conducted an independent forensic audit of the completed Mil
 
 ---
 
+### 8.21 Milestone 4.6.3.1.2: Portfolio Accounting Remediation, Risk Breaker Revalidation, and Statistical Reproduction
+
+Milestone 4.6.3.1.2 remediated the portfolio accounting defect identified in Milestone 4.6.3.1.1, validated Risk Manager circuit breaker enforcement, and reproduced the 2024 Development partition experiment under corrected risk and statistical models:
+
+1. **Portfolio Accounting Remediation (`PortfolioLedger`):**
+   - Implemented [`PortfolioLedger`](file:///d:/Project%202026/Trading_bot/backend/app/simulation/portfolio_ledger.py) maintaining cash balance, reserved collateral for short positions, long inventory cost basis, and marked-to-market position equity.
+   - Fixed the SHORT cash flow inversion: at exit, short proceeds are credited as $S \cdot (2 P_{\text{entry}} - P_{\text{exit}}) - \text{fees}$, guaranteeing that net cash delta strictly equals trade `net_pnl`.
+   - Verified 14 deterministic adversarial unit tests covering profitable/losing longs and shorts, partial exits, multi-candle holding, gap-through-stop fills, and balance sheet invariants.
+2. **Risk Manager 5.0% Circuit Breaker Enforcement:**
+   - Drawdown evaluation was connected directly to mathematically correct marked equity.
+   - In the reproduced 2024 Development experiment, the 5.0% circuit breaker tripped on **January 5, 2024 at 16:00 UTC** (Group A) and **January 5, 2024 at 23:30 UTC** (Group B).
+   - From that moment onward, all subsequent 3,666 candidate signals were rejected, capping maximum drawdown at **5.55%** (5.0% threshold plus standard intrabar overshoot on the final open trade) and preserving **\$181.85 USDT of capital** compared to the unhalted run.
+3. **Historical Reproduction Results Across All Four Groups:**
+   - **Group A (Baseline):** 12 trades, 25.0% win rate, Net PnL **-\$23.57 USDT**, Ending Equity **\$976.44 USDT (-2.36%)**, Max Drawdown 5.55%, Orders Rejected 3,666.
+   - **Group B (News Veto):** 12 trades, 25.0% win rate, Net PnL **-\$23.56 USDT**, Ending Equity **\$976.44 USDT (-2.36%)**, Max Drawdown 5.55%, Orders Rejected 3,483.
+   - **Group C (Frequency Thinning):** 11 trades, 27.3% win rate, Net PnL **-\$23.13 USDT**, Ending Equity **\$976.87 USDT (-2.31%)**, Max Drawdown 5.55%, Orders Rejected 3,130.
+   - **Group D (Exposure Cooldown):** 12 trades, 25.0% win rate, Net PnL **-\$23.21 USDT**, Ending Equity **\$976.79 USDT (-2.32%)**, Max Drawdown 5.51%, Orders Rejected 3,665.
+4. **Statistical Revalidation (Continuous Market-Time Grid & Null Centering):**
+   - Transferred bootstrap inference onto a continuous 15m regular market-time grid (35,136 bars, 384-bar / 4-day blocks) and centered resamples under $H_0: \mu \le 0$.
+   - Confirmatory hypotheses after Benjamini-Hochberg FDR correction:
+     - **H1 (Group B vs A):** $p = 0.1740$ (critical threshold $0.0167$) $\to$ **NOT SIGNIFICANT**.
+     - **H2 (Group B vs C):** $p = 0.9800$ (critical threshold $0.0500$) $\to$ **NOT SIGNIFICANT**.
+     - **H3 (Group B vs D):** $p = 0.9600$ (critical threshold $0.0333$) $\to$ **NOT SIGNIFICANT**.
+   - Economic hurdle: $\Delta E_{\text{trade}} = +\$0.0009$ USDT vs $+0.50$ USDT target $\to$ **DECISIVELY FAILED**.
+5. **Authoritative Verdict: PASS WITH REMEDIATION & RISK HALT.** The accounting defect is remediated, the Risk Manager is trustworthy, and the experiment is 100% reproducible. News vetoing fails to salvage the underlying technical continuation strategy. Mandatory stop condition enforced: zero access to Validation 2025 or locked OOS 2026.
+
+---
+
 ## 10. Architecture Decision Records & Audit Index
 
 ### Architectural Records
@@ -892,6 +920,19 @@ Milestone 4.6.3.1.1 conducted an independent forensic audit of the completed Mil
 - **[ADR-030: Online Control Matching, Executable News Veto Engine, Timeframe Bootstrap Calibration, and OOS Access Guard](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-030-online-control-matching-executable-news-veto-engine-timeframe-bootstrap-calibration-and-oos-access-guard)**
 - **[ADR-031: Development-Partition Experimental Execution, 4-Group Synchronized Simulation Engine, and Candidate Stream Caching](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-031-development-partition-experimental-execution-4-group-synchronized-simulation-engine-and-candidate-stream-caching)**
 - **[ADR-032: Independent Forensic Accounting Reconciliation, Cash-Equity Inversion Remediation, and Point-Mass Bootstrap Diagnosis](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-032-independent-forensic-accounting-reconciliation-cash-equity-inversion-remediation-and-point-mass-bootstrap-diagnosis)**
+- **[ADR-033: Portfolio Accounting Remediation, Double-Entry Short Collateral Model, and Risk Breaker Enforcement](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-033-portfolio-accounting-remediation-double-entry-short-collateral-model-and-risk-breaker-enforcement)**
+
+### Research & Audit Documents
+- **Milestone 4.6.3.1.2 Accounting Remediation:** [`docs/research/MILESTONE_4_6_3_1_2_ACCOUNTING_REMEDIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_2_ACCOUNTING_REMEDIATION.md)
+- **Milestone 4.6.3.1.2 Risk Revalidation:** [`docs/research/MILESTONE_4_6_3_1_2_RISK_REVALIDATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_2_RISK_REVALIDATION.md)
+- **Milestone 4.6.3.1.2 Historical Reproduction:** [`docs/research/MILESTONE_4_6_3_1_2_HISTORICAL_REPRODUCTION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_2_HISTORICAL_REPRODUCTION.md)
+- **Milestone 4.6.3.1.2 Statistical Revalidation:** [`docs/research/MILESTONE_4_6_3_1_2_STATISTICAL_REVALIDATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_2_STATISTICAL_REVALIDATION.md)
+- **Milestone 4.6.3.1.2 Final Verdict:** [`docs/research/MILESTONE_4_6_3_1_2_FINAL_VERDICT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_2_FINAL_VERDICT.md)
+- **Milestone 4.6.3.1.1 Forensic Audit:** [`docs/research/MILESTONE_4_6_3_1_1_FORENSIC_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_FORENSIC_AUDIT.md)
+- **Milestone 4.6.3.1.1 Accounting Reconciliation:** [`docs/research/MILESTONE_4_6_3_1_1_ACCOUNTING_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_ACCOUNTING_RECONCILIATION.md)
+- **Milestone 4.6.3.1.1 Risk Breaker Audit:** [`docs/research/MILESTONE_4_6_3_1_1_RISK_BREAKER_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_RISK_BREAKER_AUDIT.md)
+- **Milestone 4.6.3.1.1 Statistical Reconciliation:** [`docs/research/MILESTONE_4_6_3_1_1_STATISTICAL_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_STATISTICAL_RECONCILIATION.md)
+- **Milestone 4.6.3.1.1 Final Verdict:** [`docs/research/MILESTONE_4_6_3_1_1_FINAL_RESEARCH_VERDICT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_FINAL_RESEARCH_VERDICT.md)
 
 
 ### Research & Audit Documents

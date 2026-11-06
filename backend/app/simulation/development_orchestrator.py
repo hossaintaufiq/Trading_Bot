@@ -55,6 +55,7 @@ from app.simulation.models import (
 )
 from app.simulation.reversal import MultiFactorReversalDetector
 from app.simulation.scheduling import PointInTimeExecutionScheduler
+from app.simulation.portfolio_ledger import PortfolioLedger
 from app.simulation.research_protocol import (
     CATEGORY_EVENT_WINDOWS_SECONDS,
     ControlExecutionMode,
@@ -84,15 +85,7 @@ class GroupPortfolioState:
     ):
         self.group_id = group_id
         self.initial_capital = initial_capital
-        self.cash_equity = initial_capital
-        self.peak_equity = initial_capital
-        self.daily_starting_equity = initial_capital
-        self.daily_realized_pnl = Decimal("0")
-        self.current_day: Optional[str] = None
-
-        self.open_positions: List[ActivePosition] = []
-        self.completed_trades: List[SimulatedTrade] = []
-        self.seen_trade_ids: Set[str] = set()
+        self.ledger = PortfolioLedger(initial_capital=initial_capital, taker_fee_pct=config.taker_fee_pct)
         self.equity_curve: List[Dict[str, Any]] = []
 
         # Risk Manager & Execution Scheduler per group
@@ -129,6 +122,76 @@ class GroupPortfolioState:
         self.asset_bars: Dict[str, int] = {"BTCUSDT": 0, "ETHUSDT": 0, "BNBUSDT": 0}
         self.directional_bars: Dict[str, int] = {"LONG": 0, "SHORT": 0}
         self.cumulative_dollar_hours: Decimal = Decimal("0")
+
+    @property
+    def cash_equity(self) -> Decimal:
+        return self.ledger.cash_balance
+
+    @cash_equity.setter
+    def cash_equity(self, val: Decimal) -> None:
+        self.ledger.cash_balance = val
+
+    @property
+    def open_positions(self) -> List[ActivePosition]:
+        return self.ledger.open_positions
+
+    @open_positions.setter
+    def open_positions(self, val: List[ActivePosition]) -> None:
+        self.ledger.open_positions = val
+
+    @property
+    def completed_trades(self) -> List[SimulatedTrade]:
+        return self.ledger.completed_trades
+
+    @completed_trades.setter
+    def completed_trades(self, val: List[SimulatedTrade]) -> None:
+        self.ledger.completed_trades = val
+
+    @property
+    def seen_trade_ids(self) -> Set[str]:
+        return self.ledger.seen_trade_ids
+
+    @seen_trade_ids.setter
+    def seen_trade_ids(self, val: Set[str]) -> None:
+        self.ledger.seen_trade_ids = val
+
+    @property
+    def peak_equity(self) -> Decimal:
+        return self.ledger.peak_equity
+
+    @peak_equity.setter
+    def peak_equity(self, val: Decimal) -> None:
+        self.ledger.peak_equity = val
+
+    @property
+    def daily_starting_equity(self) -> Decimal:
+        return self.ledger.daily_starting_equity
+
+    @daily_starting_equity.setter
+    def daily_starting_equity(self, val: Decimal) -> None:
+        self.ledger.daily_starting_equity = val
+
+    @property
+    def daily_realized_pnl(self) -> Decimal:
+        return self.ledger.daily_realized_pnl
+
+    @daily_realized_pnl.setter
+    def daily_realized_pnl(self, val: Decimal) -> None:
+        self.ledger.daily_realized_pnl = val
+
+    @property
+    def current_day(self) -> Optional[str]:
+        return self.ledger.current_day
+
+    @current_day.setter
+    def current_day(self, val: Optional[str]) -> None:
+        self.ledger.current_day = val
+
+    def get_total_equity(self) -> Decimal:
+        return self.ledger.get_total_equity()
+
+    def get_drawdown_pct(self) -> Decimal:
+        return self.ledger.get_drawdown_pct()
 
 
 class DevelopmentExperimentRunner:
@@ -438,8 +501,7 @@ class DevelopmentExperimentRunner:
             for group_key, grp in self.groups.items():
                 if grp.current_day != ts_date:
                     grp.current_day = ts_date
-                    pos_val_start = sum(p.position_size * p.current_price for p in grp.open_positions)
-                    grp.daily_starting_equity = grp.cash_equity + pos_val_start
+                    grp.daily_starting_equity = grp.get_total_equity()
                     grp.daily_realized_pnl = Decimal("0")
 
                 # Phase 0: Process scheduled orders at candle open
@@ -447,7 +509,7 @@ class DevelopmentExperimentRunner:
                     curr_c = candle_lookup.get(sym, {}).get(ts)
                     if curr_c is None:
                         continue
-                    tot_eq = grp.cash_equity + sum(p.position_size * p.current_price for p in grp.open_positions)
+                    tot_eq = grp.get_total_equity()
                     filled_pairs, _ = grp.scheduler.process_candle_open(
                         curr_candle=curr_c,
                         current_open_positions=grp.open_positions,
@@ -461,14 +523,17 @@ class DevelopmentExperimentRunner:
                         daily_loss_limit_pct=self.backtest_cfg.daily_loss_limit_pct,
                     )
                     for sched_ord, new_pos in filled_pairs:
-                        cash_outflow = (new_pos.position_size * new_pos.entry_price) + new_pos.entry_fee
-                        grp.cash_equity -= cash_outflow
-                        grp.open_positions.append(new_pos)
-                        grp.orders_filled_count += 1
+                        try:
+                            grp.ledger.process_order_fill(new_pos)
+                            grp.orders_filled_count += 1
+                        except Exception as e:
+                            sched_ord.status = OrderStatus.REJECTED
+                            sched_ord.rejection_reason = f"Execution rejected by ledger: {e}"
+                            grp.risk_rejected_count += 1
 
                 # Phase A: Update open positions against brackets & reversals
                 positions_to_keep: List[ActivePosition] = []
-                for pos in grp.open_positions:
+                for pos in list(grp.open_positions):
                     curr_c = candle_lookup.get(pos.symbol, {}).get(ts)
                     if curr_c is None:
                         positions_to_keep.append(pos)
@@ -502,9 +567,7 @@ class DevelopmentExperimentRunner:
                     if trade is not None:
                         exit_notional = pos.position_size * trade.exit_price
                         exit_fee = exit_notional * self.backtest_cfg.taker_fee_pct
-                        grp.cash_equity += (exit_notional - exit_fee)
-                        grp.daily_realized_pnl += trade.net_pnl
-                        grp.completed_trades.append(trade)
+                        grp.ledger.process_trade_exit(pos, trade, exit_fee=exit_fee)
 
                         # Update Group D online cooldown tracker upon trade exit
                         if group_key == "GROUP_D":
@@ -700,15 +763,16 @@ class DevelopmentExperimentRunner:
 
             # Phase D: Update Mark-to-Market Snapshots and Exposure Metrics
             for grp in self.groups.values():
-                open_val = sum(p.position_size * p.current_price for p in grp.open_positions)
-                tot_eq = grp.cash_equity + open_val
+                for s in self.symbols:
+                    sc = candle_lookup.get(s, {}).get(ts)
+                    if sc is not None:
+                        grp.ledger.update_candle_mark(s, sc)
+
+                tot_eq = grp.get_total_equity()
                 if tot_eq > grp.peak_equity:
                     grp.peak_equity = tot_eq
 
-                dd_pct = (
-                    float((grp.peak_equity - tot_eq) / grp.peak_equity * Decimal("100.0"))
-                    if grp.peak_equity > Decimal("0") else 0.0
-                )
+                dd_pct = float(grp.get_drawdown_pct())
                 grp.equity_curve.append({
                     "timestamp": ts,
                     "cash_equity": float(grp.cash_equity),
@@ -747,15 +811,14 @@ class DevelopmentExperimentRunner:
             grp.scheduler.pending_orders.clear()
 
             # Force-close any surviving open positions at last candle
-            for pos in grp.open_positions:
+            for pos in list(grp.open_positions):
                 last_c = candle_lookup.get(pos.symbol, {}).get(all_timestamps[-1])
                 if last_c:
                     t = grp.execution_simulator.force_close(pos, last_c, reason="FORCE_CLOSE_END_OF_TEST")
                     exit_notional = pos.position_size * t.exit_price
                     exit_fee = exit_notional * self.backtest_cfg.taker_fee_pct
-                    grp.cash_equity += (exit_notional - exit_fee)
-                    grp.completed_trades.append(t)
-            grp.open_positions.clear()
+                    grp.ledger.process_trade_exit(pos, t, exit_fee=exit_fee)
+            grp.ledger.assert_invariants()
 
         # 5. Compile comprehensive results
         return self._compile_experiment_results(total_steps)
@@ -786,8 +849,7 @@ class DevelopmentExperimentRunner:
             grp.risk_rejected_count += 1
             return
 
-        curr_pos_val = sum(p.position_size * p.current_price for p in grp.open_positions)
-        tot_eq = grp.cash_equity + curr_pos_val
+        tot_eq = grp.get_total_equity()
 
         risk_eval = grp.risk_manager.evaluate_signal(
             signal=cand,
@@ -869,8 +931,8 @@ class DevelopmentExperimentRunner:
             n_losses = len(losses)
             win_rate = (n_wins / n_trades) if n_trades > 0 else 0.0
 
-            gross_profit = sum(t.gross_pnl for t in wins) if wins else Decimal("0")
-            gross_loss = sum(abs(t.gross_pnl) for t in losses) if losses else Decimal("0")
+            gross_profit = sum((t.gross_pnl for t in trades if t.gross_pnl > Decimal("0")), Decimal("0.00"))
+            gross_loss = sum((abs(t.gross_pnl) for t in trades if t.gross_pnl < Decimal("0")), Decimal("0.00"))
             net_pnl = sum(t.net_pnl for t in trades) if trades else Decimal("0")
             total_fees = sum(t.fees for t in trades) if trades else Decimal("0")
             total_slippage = sum(t.slippage_cost for t in trades) if trades else Decimal("0")
