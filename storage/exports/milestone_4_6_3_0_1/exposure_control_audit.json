@@ -1,0 +1,44 @@
+{
+  "milestone": "4.6.3.0.1",
+  "audit_name": "Group D Exposure Control Integrity Audit",
+  "audit_timestamp_utc": "2026-11-06T21:36:40Z",
+  "governing_rules": ["Rule S-05", "Rule S-06", "ADR-028", "ADR-030"],
+  "audit_finding": "TRADE_COUNT_DOES_NOT_EQUAL_EXPOSURE",
+  "exposure_dimensions_formalized": [
+    "time_in_market_bars",
+    "time_in_market_pct",
+    "trade_count",
+    "average_holding_bars",
+    "asset_breakdown_bars",
+    "directional_duration_bars (LONG vs SHORT)",
+    "dollar_hours_capital_utilization",
+    "simultaneous_multi_asset_bars",
+    "gross_exposure_pct",
+    "net_exposure_pct"
+  ],
+  "methodology_classification": {
+    "online_point_in_time": {
+      "method_id": "METHOD_D_ONLINE_DYNAMIC_COOLDOWN",
+      "engine_class": "OnlineExposureMatchingEngine",
+      "execution_mode": "ONLINE_POINT_IN_TIME",
+      "is_executable_online": true,
+      "mechanism": "Enforces pre-registered post-trade cooldown (e.g. 4 bars) per symbol",
+      "consumes_future_holding_duration": false,
+      "consumes_future_returns": false,
+      "lookahead_leakage_risk": 0.0
+    },
+    "ex_post_diagnostic_benchmarks": [
+      {
+        "method_id": "METHOD_D_EX_POST_EXPOSURE_BUDGET",
+        "engine_class": "ExPostExposureMatchingEngine",
+        "execution_mode": "EX_POST_DIAGNOSTIC",
+        "is_executable_online": false,
+        "mechanism": "Translates cumulative target exposure bars into trade budget using average holding duration",
+        "requires_future_total_exposure": true,
+        "operational_role": "Ex-post diagnostic control for retrospective exposure matching",
+        "lookahead_leakage_risk": "Requires batch finalization; invalid as online strategy"
+      }
+    ]
+  },
+  "verification_verdict": "PASS WITH 7-DIMENSIONAL MODEL AND EX-POST LABELING"
+}

@@ -1,0 +1,53 @@
+{
+  "milestone": "4.6.3.0.1",
+  "audit_name": "Group C Frequency Control Integrity Audit",
+  "audit_timestamp_utc": "2026-11-06T21:36:30Z",
+  "governing_rules": ["Rule S-05", "Rule S-06", "ADR-028", "ADR-030"],
+  "audit_finding": "BATCH_MATCHING_IS_EX_POST_DIAGNOSTIC",
+  "methodology_classification": {
+    "online_point_in_time": {
+      "method_id": "METHOD_C_ONLINE_CRYPTOGRAPHIC_THINNING",
+      "engine_class": "OnlineFrequencyMatchingEngine",
+      "execution_mode": "ONLINE_POINT_IN_TIME",
+      "is_executable_online": true,
+      "requires_future_total_count": false,
+      "requires_future_veto_count": false,
+      "thinning_parameter": "rho_calib (calibrated strictly on Development partition, e.g. 0.85)",
+      "acceptance_formula": "int(sha256(seed + signal_id + timestamp + symbol)[:8], 16) / 0xFFFFFFFF < rho_calib",
+      "lookahead_leakage_risk": 0.0
+    },
+    "ex_post_diagnostic_benchmarks": [
+      {
+        "method_id": "METHOD_C1_SYSTEMATIC_DECIMATION",
+        "engine_class": "ExPostFrequencyMatchingEngine",
+        "execution_mode": "EX_POST_DIAGNOSTIC",
+        "is_executable_online": false,
+        "requires_future_total_count": true,
+        "requires_future_veto_count": true,
+        "operational_role": "Ex-post diagnostic control once N_B is known across the test partition",
+        "lookahead_leakage_risk": "Requires batch finalization; invalid as online strategy"
+      },
+      {
+        "method_id": "METHOD_C2_TECHNICAL_CONFIDENCE_PRIORITY",
+        "engine_class": "ExPostFrequencyMatchingEngine",
+        "execution_mode": "EX_POST_DIAGNOSTIC",
+        "is_executable_online": false,
+        "requires_future_total_count": true,
+        "requires_future_veto_count": true,
+        "operational_role": "Ex-post diagnostic control ranking all candidates retrospectively",
+        "lookahead_leakage_risk": "Requires batch finalization; invalid as online strategy"
+      },
+      {
+        "method_id": "METHOD_C3_CRYPTOGRAPHIC_SEED_DECIMATION",
+        "engine_class": "ExPostFrequencyMatchingEngine",
+        "execution_mode": "EX_POST_DIAGNOSTIC",
+        "is_executable_online": false,
+        "requires_future_total_count": true,
+        "requires_future_veto_count": true,
+        "operational_role": "Ex-post diagnostic control selecting exact target count N_B retrospectively",
+        "lookahead_leakage_risk": "Requires batch finalization; invalid as online strategy"
+      }
+    ]
+  },
+  "verification_verdict": "PASS WITH FORMAL SEPARATION"
+}

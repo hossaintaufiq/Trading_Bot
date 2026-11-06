@@ -1,0 +1,33 @@
+{
+  "milestone": "4.6.3.0.1",
+  "validation_name": "Statistical Analysis Plan Validation & Bootstrap Calibration",
+  "validation_version": "v1.1.0-m46301",
+  "governing_rules": ["Rule S-05", "Rule S-06", "ADR-028", "ADR-030"],
+  "denominator_separation_audit": {
+    "finding": "E_trade, E_cand, and R_portfolio are mathematically distinct and must never be conflated",
+    "definitions": {
+      "expectancy_per_trade": "E_trade = Sum(net_pnl) / N_trades (measures quality of executed positions)",
+      "expectancy_per_candidate": "E_cand = Sum(net_pnl) / N_candidates (measures opportunity-set efficiency)",
+      "portfolio_total_return": "R_portfolio = Sum(net_pnl) / initial_equity (measures aggregate portfolio growth)"
+    },
+    "pairing_requirement": "Candidate-level pairing (Group A vs Group B on identical candidate timestamps) is mandatory for matched-pairs bootstrap"
+  },
+  "moving_block_bootstrap_calibration": {
+    "target_temporal_duration": "~4 calendar days (96 hours) across all timeframes to preserve regime autocorrelation",
+    "calibrated_block_sizes_bars": {
+      "15m": 384,
+      "1h": 96,
+      "4h": 24,
+      "1d": 7
+    },
+    "audit_remedy": "Replaced uniform 48-bar block (which yielded 12h on 15m and 48d on 1d) with timeframe-calibrated block mapping"
+  },
+  "confirmatory_family": [
+    "H1: Group B achieves higher net expectancy per trade than Group A after 0.32% round-trip costs",
+    "H2: Group B achieves higher net expectancy per trade than Group C (frequency-matched control)",
+    "H3: Group B achieves higher net expectancy per trade than Group D (exposure-matched control)"
+  ],
+  "multiple_testing_correction": "Benjamini-Hochberg FDR at q = 0.05",
+  "economic_significance_hurdle": "0.50 USDT per trade after 32 bps round-trip friction",
+  "verification_verdict": "PASS WITH CALIBRATED BLOCK BOOTSTRAP AND SEPARATED DENOMINATORS"
+}
