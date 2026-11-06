@@ -1,0 +1,27 @@
+{
+  "milestone": "4.6.3.0.1",
+  "audit_name": "Locked Out-of-Sample Protection & Access Guard Verification",
+  "audit_timestamp_utc": "2026-11-06T21:37:00Z",
+  "governing_rules": ["Rule S-05", "Rule S-06", "ADR-030"],
+  "locked_partition_boundaries": {
+    "start_timestamp_utc": "2026-01-01T00:00:00Z",
+    "end_timestamp_utc": "2026-10-31T23:59:59Z",
+    "duration_months": 10,
+    "status": "CRYPTOGRAPHICALLY_LOCKED"
+  },
+  "guard_implementation": {
+    "guard_class": "OOSAccessGuard",
+    "method": "verify_partition_access",
+    "behavior_without_token": "Raises PermissionError('LOCKED_OOS_PARTITION_VIOLATION')",
+    "behavior_with_forged_token": "Raises PermissionError('LOCKED_OOS_PARTITION_VIOLATION: Invalid or forged out-of-sample authorization token')",
+    "behavior_with_authorized_token": "Permits execution",
+    "dev_and_val_partitions": "Permitted without token (2023-12-01 to 2025-12-31)"
+  },
+  "adversarial_test_cases_verified": [
+    "test_unauthorized_oos_access_raises_permission_error",
+    "test_authorized_governance_token_permits_access",
+    "test_forged_governance_token_rejected",
+    "test_dev_and_val_partitions_accessible_without_token"
+  ],
+  "verification_verdict": "PASS WITH ENFORCED PROGRAMMATIC CRYPTOGRAPHIC GUARD"
+}

@@ -804,6 +804,32 @@ Milestone 4.6.3.0 established the formal empirical research design and frozen te
 
 ---
 
+### 8.18 Milestone 4.6.3.0.1: Independent Experimental Protocol Integrity Audit & Leakage Verification
+
+An adversarial quantitative and methodological audit of Milestone 4.6.3.0 was conducted to eliminate look-ahead leakage, exposure confounding, and out-of-sample data snooping:
+
+1. **Ex-Post Diagnostic Benchmarks vs. Online Strategies (Group C):**
+   - The audit discovered that batch decimation and technical confidence ranking require knowing the final trade count $N_B$ across the entire partition, making them retrospective diagnostic benchmarks rather than point-in-time online trading strategies.
+   - Formalized `ControlExecutionMode` (`ONLINE_POINT_IN_TIME` vs `EX_POST_DIAGNOSTIC`).
+   - Implemented `OnlineFrequencyMatchingEngine` (Method C-Online) operating sequentially using a pre-registered thinning probability $\rho_{\text{calib}}$ calibrated on the Dev partition and candidate HMAC hashing without future knowledge. Labeled `ExPostFrequencyMatchingEngine` as an ex-post diagnostic control.
+2. **Seven-Dimensional Exposure Tracking (Group D):**
+   - Established that trade count does not match exposure due to holding time variance under trailing stops, multi-asset concurrent capital utilization, and directional duration asymmetry.
+   - Formalized a 7-dimensional exposure model (`ExposureDimensions`) and implemented `OnlineExposureMatchingEngine` enforcing a dynamic post-trade cooldown online, labeling ex-post exposure budgeting accordingly.
+3. **Executable Point-in-Time News-Veto Engine:**
+   - Implemented `NewsVetoDecisionEngine` parameterizing pre-registered decay windows (2h to 24h), an adverse threshold $\theta = 0.70$, cluster deduplication (earliest article in cluster triggers), and strict revision cutoff isolation (revisions occurring after decision time are invisible).
+4. **Statistical Analysis Plan Calibration & Denominator Separation:**
+   - Calibrated Moving Block Bootstrap sizes to ~4 calendar days across all timeframes (15m: 384 bars, 1h: 96 bars, 4h: 24 bars, 1d: 7 bars) to preserve regime autocorrelation.
+   - Explicitly separated $E_{\text{trade}}$ (expectancy per executed trade), $E_{\text{cand}}$ (expectancy per candidate signal), and $R_{\text{portfolio}}$ (portfolio return).
+5. **Programmatic Cryptographic Guard for Locked OOS Partition:**
+   - Implemented `OOSAccessGuard` raising `PermissionError` on unauthorized simulation requests overlapping `2026-01-01` to `2026-10-31`, requiring an HMAC-SHA256 governance token.
+6. **Implementation, Verification & Test Suite:**
+   - Updated `backend/app/simulation/research_protocol.py` and implemented 18 comprehensive adversarial tests in `test_milestone_4_6_3_0_1_adversarial.py`.
+   - Full test suite: **280 backend tests passed in 13.64s**, 4 frontend tests passed, Next.js production build compiled with 0 errors.
+   - Market dataset `v2.0.0` (SHA-256 `b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c`) and news dataset `v2.0.0-news-historical` (SHA-256 `6b7bb69c841ec9a5e1774b6f369c0d9c113df066d80357521ac92b937490f4ec`) remain 100% untouched.
+7. **Authoritative Verdict:** **PASS WITH LIMITATIONS**. The protocol is certified point-in-time compliant and cryptographically secured against snooping. Strategy execution remains strictly halted awaiting formal authorization.
+
+---
+
 ## 10. Architecture Decision Records & Audit Index
 
 ### Architectural Records
@@ -822,9 +848,17 @@ Milestone 4.6.3.0 established the formal empirical research design and frozen te
 - **[ADR-027: Cryptographic HMAC-SHA256 Risk Authorization Token Binding and Macro Boundary Schema Normalization](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-027-cryptographic-hmac-sha256-risk-authorization-token-binding-and-macro-boundary-schema-normalization)**
 - **[ADR-028: Cryptographic Risk Authorization Lifecycle, Atomic Token Idempotency, and Timeframe-Calibrated Execution Gap Policy](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-028-cryptographic-risk-authorization-lifecycle-atomic-token-idempotency-and-timeframe-calibrated-execution-gap-policy)**
 - **[ADR-029: News-Gated Experiment Design, Baseline Freeze, and Four-Group Research Protocol](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-029-news-gated-experiment-design-baseline-freeze-and-four-group-research-protocol)**
+- **[ADR-030: Online Control Matching, Executable News Veto Engine, Timeframe Bootstrap Calibration, and OOS Access Guard](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-030-online-control-matching-executable-news-veto-engine-timeframe-bootstrap-calibration-and-oos-access-guard)**
 
 
 ### Research & Audit Documents
+- **Milestone 4.6.3.0.1 Independent Protocol Audit:** [`docs/research/MILESTONE_4_6_3_0_1_INDEPENDENT_PROTOCOL_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_1_INDEPENDENT_PROTOCOL_AUDIT.md)
+- **Milestone 4.6.3.0.1 Frequency Control Audit:** [`docs/research/MILESTONE_4_6_3_0_1_FREQUENCY_CONTROL_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_1_FREQUENCY_CONTROL_AUDIT.md)
+- **Milestone 4.6.3.0.1 Exposure Control Audit:** [`docs/research/MILESTONE_4_6_3_0_1_EXPOSURE_CONTROL_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_1_EXPOSURE_CONTROL_AUDIT.md)
+- **Milestone 4.6.3.0.1 News Veto Rule Specification:** [`docs/research/MILESTONE_4_6_3_0_1_NEWS_VETO_RULE_SPECIFICATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_1_NEWS_VETO_RULE_SPECIFICATION.md)
+- **Milestone 4.6.3.0.1 Statistical Method Validation:** [`docs/research/MILESTONE_4_6_3_0_1_STATISTICAL_METHOD_VALIDATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_1_STATISTICAL_METHOD_VALIDATION.md)
+- **Milestone 4.6.3.0.1 OOS Protection Audit:** [`docs/research/MILESTONE_4_6_3_0_1_OOS_PROTECTION_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_1_OOS_PROTECTION_AUDIT.md)
+- **Milestone 4.6.3.0.1 Validation Report:** [`docs/research/MILESTONE_4_6_3_0_1_VALIDATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_1_VALIDATION_REPORT.md)
 - **Milestone 4.6.3.0 Experiment Protocol:** [`docs/research/MILESTONE_4_6_3_0_EXPERIMENT_PROTOCOL.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_EXPERIMENT_PROTOCOL.md)
 - **Milestone 4.6.3.0 Baseline Freeze:** [`docs/research/MILESTONE_4_6_3_0_BASELINE_FREEZE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_BASELINE_FREEZE.md)
 - **Milestone 4.6.3.0 News-Veto Contract:** [`docs/research/MILESTONE_4_6_3_0_NEWS_VETO_CONTRACT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_0_NEWS_VETO_CONTRACT.md)

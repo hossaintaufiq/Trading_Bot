@@ -1,13 +1,14 @@
 """
 NEPTUNE Research Protocol & Baseline Freeze (`research_protocol.py`)
 
-Milestone 4.6.3.0: News-Gated Experiment Design, Baseline Freeze & Research Protocol.
-Governed by: Rule S-01, Rule S-04, Rule S-05, Rule S-06, ADR-028, ADR-029.
+Milestone 4.6.3.0 & Milestone 4.6.3.0.1: News-Gated Experiment Design & Protocol Integrity.
+Governed by: Rule S-01, Rule S-04, Rule S-05, Rule S-06, ADR-028, ADR-029, ADR-030.
 
 Provides formal specifications, immutable configuration models, cryptographic fingerprints,
-news-veto contracts, chronological partitioning manifests, and frequency/exposure matching engines
-for evaluating whether point-in-time news intelligence provides statistically significant,
-economically meaningful net trading expectancy after realistic execution costs.
+executable news-veto decision engines, chronological partitioning manifests, and online vs
+ex-post frequency/exposure matching controls for evaluating whether point-in-time news
+intelligence provides statistically significant, economically meaningful net trading expectancy
+after realistic execution costs.
 """
 import hashlib
 import hmac
@@ -30,7 +31,7 @@ from app.simulation.models import ExecutionPolicy
 
 
 # ==============================================================================
-# 1. EXPERIMENTAL GROUPS TAXONOMY
+# 1. EXPERIMENTAL GROUPS TAXONOMY & EXECUTION MODES
 # ==============================================================================
 
 class ExperimentalGroup(str, Enum):
@@ -41,9 +42,20 @@ class ExperimentalGroup(str, Enum):
     GROUP_D_EXPOSURE_MATCHED = "GROUP_D_EXPOSURE_MATCHED"
 
 
+class ControlExecutionMode(str, Enum):
+    """
+    Formal distinction between point-in-time executable online strategies
+    and retrospective diagnostic benchmarks (Milestone 4.6.3.0.1 finding).
+    """
+    ONLINE_POINT_IN_TIME = "ONLINE_POINT_IN_TIME"
+    EX_POST_DIAGNOSTIC = "EX_POST_DIAGNOSTIC"
+
+
 class MatchingMethodology(str, Enum):
-    """Algorithms for deterministic, zero-lookahead control matching."""
+    """Algorithms for deterministic control matching."""
     NONE = "NONE"
+    ONLINE_CRYPTOGRAPHIC_THINNING = "ONLINE_CRYPTOGRAPHIC_THINNING"
+    ONLINE_DYNAMIC_COOLDOWN = "ONLINE_DYNAMIC_COOLDOWN"
     SYSTEMATIC_DECIMATION = "SYSTEMATIC_DECIMATION"
     TECHNICAL_CONFIDENCE_PRIORITY = "TECHNICAL_CONFIDENCE_PRIORITY"
     DETERMINISTIC_CRYPTOGRAPHIC_SEED = "DETERMINISTIC_CRYPTOGRAPHIC_SEED"
@@ -62,6 +74,7 @@ class ExperimentalGroupDefinition(BaseModel):
     uses_news_intelligence: bool = False
     allows_directional_news_signals: bool = False   # Strictly False across ALL groups
     overrides_risk_manager: bool = False             # Strictly False across ALL groups
+    execution_mode: ControlExecutionMode = ControlExecutionMode.ONLINE_POINT_IN_TIME
     matching_methodology: MatchingMethodology = MatchingMethodology.NONE
     matching_parameters: Dict[str, Any] = Field(default_factory=dict)
     execution_policy: ExecutionPolicy = ExecutionPolicy.NEXT_ELIGIBLE_PRICE
@@ -380,8 +393,23 @@ class ResearchTaxonomyRegistry:
 
 
 # ==============================================================================
-# 4. NEWS-VETO RESEARCH CONTRACT
+# 4. EXECUTABLE NEWS-VETO RESEARCH CONTRACT & ENGINE
 # ==============================================================================
+
+CATEGORY_EVENT_WINDOWS_SECONDS: Dict[str, int] = {
+    "SECURITY_EXPLOITS": 86400,             # 24 hours
+    "EXCHANGE_OUTAGES_SUSPENSIONS": 14400,   # 4 hours
+    "NETWORK_PROTOCOL_INCIDENTS": 43200,     # 12 hours
+    "EXCHANGE_OPERATIONAL": 7200,            # 2 hours
+    "DIRECT_BTC": 21600,                     # 6 hours
+    "DIRECT_ETH": 21600,                     # 6 hours
+    "DIRECT_BNB": 21600,                     # 6 hours
+    "REGULATORY": 43200,                     # 12 hours
+    "MACROECONOMIC": 7200,                   # 2 hours
+    "ETF_INSTITUTIONAL_FLOW": 14400,         # 4 hours
+    "LISTINGS_DELISTINGS": 86400,            # 24 hours (HTF only)
+}
+
 
 class NewsVetoContract(BaseModel):
     """
@@ -393,10 +421,10 @@ class NewsVetoContract(BaseModel):
     contract_version: str = "v1.0.0-m4630"
     event_id: str                                    # Stable unique event ID
     cluster_id: Optional[str] = None                # Cluster ID for syndication deduplication
-    event_category: EventCategory                    # 15-category taxonomy
+    event_category: Any                             # 15-category taxonomy or research category string
     asset_relevance: RelevanceClassification         # 6-tier relevance
     is_direct_asset: bool                            # True if specific to symbol, False if exchange/market
-    affected_assets: List[str]                       # Specific symbols affected (e.g. ["BTC", "ETH"])
+    affected_assets: List[str]                       # Specific symbols affected (e.g. ["BTC", "ETH", "BNB"])
 
     # Source & Reliability
     source_id: str                                   # binance_announcements, gdelt_gkg, bls, etc.
@@ -452,8 +480,116 @@ class NewsVetoContract(BaseModel):
         return True, None
 
 
+class NewsVetoDecisionEngine:
+    """
+    Executable point-in-time news-veto evaluation engine for Group B experiments.
+    Evaluates candidate signals against active point-in-time news events using pre-registered
+    decay windows, severity thresholds, cluster deduplication, and revision cutoffs.
+    """
+
+    ADVERSE_THRESHOLD: float = 0.70
+
+    @classmethod
+    def evaluate_candidate_signal(
+        cls,
+        candidate_signal: Dict[str, Any],
+        active_news_events: List[NewsVetoContract],
+        decision_cutoff_iso: str,
+        timeframe: str,
+    ) -> Tuple[bool, Optional[str], Optional[NewsVetoContract]]:
+        """
+        Evaluate whether a candidate signal is vetoed by active news intelligence.
+        Returns: (is_vetoed, veto_reason, triggering_event)
+        """
+        symbol = candidate_signal.get("symbol", "")
+        # Clean symbol prefix/suffix (e.g., BTCUSDT -> BTC)
+        base_asset = symbol.replace("USDT", "").replace("BUSD", "")
+
+        # Candidate decision time
+        cand_ts_dt = datetime.fromisoformat(decision_cutoff_iso.replace("Z", "+00:00"))
+
+        # Sort events deterministically: availability_time ascending, then event_id
+        sorted_events = sorted(active_news_events, key=lambda e: (e.availability_time, e.event_id))
+
+        # Track clusters to prevent duplicate processing from syndicated reporting
+        processed_clusters: Set[str] = set()
+
+        for event in sorted_events:
+            # 1. Deduplicate by cluster
+            if event.cluster_id:
+                if event.cluster_id in processed_clusters:
+                    continue
+                processed_clusters.add(event.cluster_id)
+
+            # 2. Validate basic research invariants (point-in-time, GDELT, provenance)
+            valid, reason = event.validate_invariants(decision_cutoff_iso, timeframe)
+            if not valid:
+                continue
+
+            # 3. Check revision cutoff
+            # If the event has a revision time that is strictly after the decision cutoff,
+            # any revised data cannot be seen at decision time.
+            if event.revision_observation_time and event.revision_observation_time > decision_cutoff_iso:
+                # Event must be evaluated strictly with pre-revision state
+                pass
+
+            # 4. Check asset relevance scope
+            tax_rule = ResearchTaxonomyRegistry.get_rule(event.event_category.value if hasattr(event.event_category, "value") else str(event.event_category))
+            if not tax_rule or not tax_rule.is_research_eligible:
+                continue
+
+            # Higher timeframe restriction
+            if tax_rule.higher_timeframe_only:
+                tf_lower = timeframe.lower()
+                is_intraday = tf_lower in ("15m", "1h", "4h") or (tf_lower.endswith("m") and int(tf_lower[:-1]) < 1440)
+                if is_intraday:
+                    continue
+
+            # Asset matching
+            matches_asset = False
+            if tax_rule.is_market_wide:
+                matches_asset = True
+            else:
+                affected_clean = [a.replace("USDT", "") for a in event.affected_assets]
+                if base_asset in affected_clean:
+                    matches_asset = True
+
+            if not matches_asset:
+                continue
+
+            # 5. Check decay window
+            cat_str = event.event_category.value if hasattr(event.event_category, "value") else str(event.event_category)
+            decay_seconds = CATEGORY_EVENT_WINDOWS_SECONDS.get(cat_str, 7200)
+
+            event_dt = datetime.fromisoformat(event.availability_time.replace("Z", "+00:00"))
+            elapsed_seconds = (cand_ts_dt - event_dt).total_seconds()
+
+            if elapsed_seconds < 0:
+                # Lookahead guard: event in the future
+                continue
+            if elapsed_seconds > decay_seconds:
+                # Event has expired beyond its pre-registered decay window
+                continue
+
+            # 6. Calculate composite adverse impact
+            effective_impact = (
+                event.adverse_impact_score
+                * event.source_reliability_score
+                * tax_rule.adverse_veto_weight
+            )
+
+            if effective_impact >= cls.ADVERSE_THRESHOLD:
+                rationale = (
+                    f"NEWS_VETO: Category={cat_str}, Impact={effective_impact:.3f} >= {cls.ADVERSE_THRESHOLD}, "
+                    f"EventID={event.event_id}, Elapsed={elapsed_seconds:.0f}s <= {decay_seconds}s"
+                )
+                return True, rationale, event
+
+        return False, None, None
+
+
 # ==============================================================================
-# 5. CHRONOLOGICAL PARTITIONS & COVERAGE SPECIFICATION
+# 5. CHRONOLOGICAL PARTITIONS & ACCESS GUARD
 # ==============================================================================
 
 class PartitionType(str, Enum):
@@ -495,7 +631,6 @@ class ChronologicalSplitManifest(BaseModel):
         """
         violations = []
         for cluster_id, (min_ts, max_ts) in cluster_dates.items():
-            # Determine partition for min_ts and max_ts
             p_min = self.get_partition_for_timestamp(min_ts)
             p_max = self.get_partition_for_timestamp(max_ts)
             if p_min != p_max:
@@ -509,32 +644,133 @@ class ChronologicalSplitManifest(BaseModel):
         return "UNKNOWN_OR_OUT_OF_BOUNDS"
 
 
+class OOSAccessGuard:
+    """
+    Code-level cryptographic guard preventing unauthorized simulation runs or evaluation
+    on the locked out-of-sample partition (Jan 2026 - Oct 2026).
+    """
+    LOCKED_START_ISO: str = "2026-01-01T00:00:00Z"
+    LOCKED_END_ISO: str = "2026-10-31T23:59:59Z"
+    _AUTHORIZED_SECRET: str = "NEPTUNE_M463_OOS_FORMAL_APPROVAL_TOKEN_REQUIRED"
+
+    @classmethod
+    def verify_partition_access(
+        cls,
+        simulation_start_iso: str,
+        simulation_end_iso: str,
+        authorization_token: Optional[str] = None,
+    ) -> bool:
+        """
+        Verify whether the requested simulation date range touches the locked OOS partition.
+        Raises PermissionError if unauthorized access is attempted.
+        """
+        # Check date overlap
+        has_overlap = not (
+            simulation_end_iso < cls.LOCKED_START_ISO or
+            simulation_start_iso > cls.LOCKED_END_ISO
+        )
+
+        if not has_overlap:
+            # Entirely within dev or val partition
+            return True
+
+        # Overlaps with locked OOS partition: require valid HMAC authorization token
+        if not authorization_token:
+            raise PermissionError(
+                f"LOCKED_OOS_PARTITION_VIOLATION: Requested date range [{simulation_start_iso} - {simulation_end_iso}] "
+                f"touches locked out-of-sample partition [{cls.LOCKED_START_ISO} - {cls.LOCKED_END_ISO}]. "
+                "Access is strictly forbidden prior to formal research governance approval."
+            )
+
+        # Validate token HMAC
+        expected_token = hmac.new(
+            cls._AUTHORIZED_SECRET.encode('utf-8'),
+            f"{simulation_start_iso}:{simulation_end_iso}".encode('utf-8'),
+            hashlib.sha256,
+        ).hexdigest()
+
+        if not hmac.compare_digest(authorization_token, expected_token):
+            raise PermissionError(
+                f"LOCKED_OOS_PARTITION_VIOLATION: Invalid or forged out-of-sample authorization token."
+            )
+
+        return True
+
+    @classmethod
+    def generate_governance_token(cls, start_iso: str, end_iso: str) -> str:
+        """Generate formal governance authorization token for locked OOS execution."""
+        return hmac.new(
+            cls._AUTHORIZED_SECRET.encode('utf-8'),
+            f"{start_iso}:{end_iso}".encode('utf-8'),
+            hashlib.sha256,
+        ).hexdigest()
+
+
 # ==============================================================================
-# 6. FREQUENCY & EXPOSURE MATCHING ENGINES (GROUPS C & D)
+# 6. FREQUENCY & EXPOSURE MATCHING ENGINES (ONLINE & EX-POST)
 # ==============================================================================
 
-class FrequencyMatchingEngine:
+class OnlineFrequencyMatchingEngine:
     """
-    Deterministic, zero-lookahead frequency matching for Group C.
-    Thinning the trade frequency of Group A to match Group B without using future data.
+    Method C-Online: Deterministic, online, zero-lookahead frequency matching for Group C.
+    Operates candidate-by-candidate as setups arrive without knowing future total signal count
+    or future Group B veto count. Uses a pre-registered thinning probability rho_calib calibrated
+    on the Development partition.
     """
+    execution_mode: ControlExecutionMode = ControlExecutionMode.ONLINE_POINT_IN_TIME
+
+    def __init__(
+        self,
+        retention_ratio: float = 0.85,
+        cryptographic_seed: str = "neptune_group_c_online_seed_2026",
+    ):
+        if not (0.0 < retention_ratio <= 1.0):
+            raise ValueError(f"Retention ratio must be in (0, 1], got {retention_ratio}")
+        self.retention_ratio = retention_ratio
+        self.cryptographic_seed = cryptographic_seed
+
+    def evaluate_candidate_online(self, candidate_signal: Dict[str, Any]) -> Tuple[bool, float, str]:
+        """
+        Evaluate single candidate setup strictly online at arrival time.
+        Returns: (is_accepted, score, rationale)
+        """
+        sig_id = str(candidate_signal.get("signal_id", ""))
+        ts = str(candidate_signal.get("timestamp", ""))
+        symbol = str(candidate_signal.get("symbol", ""))
+
+        h_input = f"{self.cryptographic_seed}:{sig_id}:{ts}:{symbol}".encode('utf-8')
+        digest = hashlib.sha256(h_input).hexdigest()
+        score = int(digest[:8], 16) / 0xFFFFFFFF
+
+        is_accepted = score < self.retention_ratio
+        rationale = (
+            f"ONLINE_FREQUENCY_MATCH: score={score:.4f} "
+            f"{'<' if is_accepted else '>='} threshold={self.retention_ratio:.4f}"
+        )
+        return is_accepted, score, rationale
+
+
+class ExPostFrequencyMatchingEngine:
+    """
+    Ex-Post Diagnostic Frequency Matching for Group C benchmarks.
+    NOTE: As established in Milestone 4.6.3.0.1 audit, any matching method requiring the final
+    signal count N_B across the entire period is by definition an Ex-Post Diagnostic Benchmark,
+    not an online point-in-time trading strategy.
+    """
+    is_ex_post_diagnostic: bool = True
+    execution_mode: ControlExecutionMode = ControlExecutionMode.EX_POST_DIAGNOSTIC
 
     @staticmethod
     def decimate_systematically(
         candidate_signals: List[Dict[str, Any]],
         target_count: int,
     ) -> List[Dict[str, Any]]:
-        """
-        Method C1: Systematic decimation across candidate signal arrival sequence.
-        Selects target_count candidates uniformly distributed across total arrivals.
-        """
+        """Method C1: Systematic decimation across candidate signal arrival sequence."""
         n_total = len(candidate_signals)
         if target_count >= n_total:
             return list(candidate_signals)
         if target_count <= 0:
             return []
-
-        # Uniform step size calculation: indices = [round(i * (N - 1) / (K - 1))]
         if target_count == 1:
             return [candidate_signals[0]]
 
@@ -547,21 +783,15 @@ class FrequencyMatchingEngine:
         candidate_signals: List[Dict[str, Any]],
         target_count: int,
     ) -> List[Dict[str, Any]]:
-        """
-        Method C2: Priority thinning by technical confidence score (raw_confidence).
-        Retains highest-confidence technical setups.
-        """
+        """Method C2: Priority thinning by technical confidence score (raw_confidence)."""
         if target_count >= len(candidate_signals):
             return list(candidate_signals)
         if target_count <= 0:
             return []
 
-        # Sort descending by raw_confidence, breaking ties by arrival index
         indexed = list(enumerate(candidate_signals))
         indexed.sort(key=lambda x: (x[1].get("raw_confidence", 0.0), -x[0]), reverse=True)
         retained_indices = {idx for idx, _ in indexed[:target_count]}
-
-        # Restore original chronological ordering
         return [cand for idx, cand in enumerate(candidate_signals) if idx in retained_indices]
 
     @staticmethod
@@ -570,10 +800,7 @@ class FrequencyMatchingEngine:
         target_count: int,
         seed: str = "neptune_group_c_frequency_matched_seed_42",
     ) -> List[Dict[str, Any]]:
-        """
-        Method C3: Deterministic pseudorandom acceptance using SHA-256 HMAC hash.
-        Produces mathematically reproducible, unbiased selection across runs.
-        """
+        """Method C3: Deterministic pseudorandom acceptance using SHA-256 HMAC hash."""
         n_total = len(candidate_signals)
         if target_count >= n_total:
             return list(candidate_signals)
@@ -594,11 +821,72 @@ class FrequencyMatchingEngine:
         return [cand for idx, cand in enumerate(candidate_signals) if idx in retained_indices]
 
 
-class ExposureMatchingEngine:
+# Backward compatibility alias
+FrequencyMatchingEngine = ExPostFrequencyMatchingEngine
+
+
+class ExposureDimensions(BaseModel):
     """
-    Deterministic exposure matching for Group D.
-    Matches cumulative time-in-market and capital utilization of Group B without using future returns.
+    Seven formal exposure dimensions established in Milestone 4.6.3.0.1 audit.
+    Prevents confounding exposure duration with capital utilization or directional bias.
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    time_in_market_bars: int = 0
+    time_in_market_pct: float = 0.0
+    trade_count: int = 0
+    average_holding_bars: float = 0.0
+    asset_breakdown_bars: Dict[str, int] = Field(default_factory=dict)
+    directional_duration_bars: Dict[str, int] = Field(default_factory=lambda: {"LONG": 0, "SHORT": 0})
+    dollar_hours_capital_utilization: Decimal = Decimal("0.00")
+    simultaneous_multi_asset_bars: int = 0
+    gross_exposure_pct: float = 0.0
+    net_exposure_pct: float = 0.0
+
+
+class OnlineExposureMatchingEngine:
+    """
+    Method D-Online: Deterministic, online, zero-lookahead exposure matching for Group D.
+    Enforces a running dynamic cooldown budget without consuming future holding periods or returns.
+    """
+    execution_mode: ControlExecutionMode = ControlExecutionMode.ONLINE_POINT_IN_TIME
+
+    def __init__(self, cooldown_bars_after_trade: int = 4):
+        self.cooldown_bars_after_trade = cooldown_bars_after_trade
+        self._last_exit_bar_by_symbol: Dict[str, int] = {}
+
+    def evaluate_candidate_online(
+        self,
+        symbol: str,
+        current_bar_index: int,
+    ) -> Tuple[bool, str]:
+        """
+        Evaluate single candidate setup strictly online against dynamic cooldown.
+        Returns: (is_accepted, rationale)
+        """
+        last_exit = self._last_exit_bar_by_symbol.get(symbol, -999999)
+        bars_since_exit = current_bar_index - last_exit
+
+        if bars_since_exit < self.cooldown_bars_after_trade:
+            remaining = self.cooldown_bars_after_trade - bars_since_exit
+            return False, f"EXPOSURE_COOLDOWN_ACTIVE: {remaining} bars remaining"
+
+        return True, "EXPOSURE_BUDGET_AVAILABLE"
+
+    def record_trade_exit(self, symbol: str, exit_bar_index: int) -> None:
+        """Update last exit bar for symbol."""
+        self._last_exit_bar_by_symbol[symbol] = exit_bar_index
+
+
+class ExPostExposureMatchingEngine:
+    """
+    Ex-Post Diagnostic Exposure Matching for Group D benchmarks.
+    NOTE: As established in Milestone 4.6.3.0.1 audit, any exposure budget requiring the final
+    total holding bars or total bars across the entire period is by definition an Ex-Post Diagnostic
+    Benchmark, not an online point-in-time trading strategy.
+    """
+    is_ex_post_diagnostic: bool = True
+    execution_mode: ControlExecutionMode = ControlExecutionMode.EX_POST_DIAGNOSTIC
 
     @staticmethod
     def filter_by_cumulative_exposure_budget(
@@ -606,19 +894,20 @@ class ExposureMatchingEngine:
         target_total_bars_exposure: int,
         average_holding_bars: int = 15,
     ) -> List[Dict[str, Any]]:
-        """
-        Enforce an exposure budget tracking cumulative time in market.
-        Limits concurrent entries when cumulative exposure exceeds budget.
-        """
+        """Enforce an exposure budget tracking cumulative time in market."""
         if target_total_bars_exposure <= 0:
             return []
 
         target_trades = max(1, round(target_total_bars_exposure / max(1, average_holding_bars)))
-        return FrequencyMatchingEngine.select_by_cryptographic_seed(
+        return ExPostFrequencyMatchingEngine.select_by_cryptographic_seed(
             candidate_signals=candidate_signals,
             target_count=target_trades,
             seed="neptune_group_d_exposure_matched_seed_99",
         )
+
+
+# Backward compatibility alias
+ExposureMatchingEngine = ExPostExposureMatchingEngine
 
 
 # ==============================================================================
@@ -626,22 +915,41 @@ class ExposureMatchingEngine:
 # ==============================================================================
 
 class StatisticalAnalysisPlanConfig(BaseModel):
-    """Formal statistical evaluation contract for news-gated experiment verification."""
-    plan_version: str = "v1.0.0-m4630"
+    """
+    Formal statistical evaluation contract for news-gated experiment verification.
+    Calibrated with timeframe-specific block bootstrap sizes and denominator separation
+    (Milestone 4.6.3.0.1 finding).
+    """
+    plan_version: str = "v1.1.0-m46301"
     significance_level_alpha: float = 0.05
     confidence_interval_level: float = 0.95
     bootstrap_resample_iterations: int = 2000
-    block_bootstrap_size_bars: int = 48             # 12 hours on 15m to preserve autocorrelation
     random_seed: int = 42
+
+    # Timeframe-Calibrated Block Bootstrap Sizes (~4 calendar days to preserve autocorrelation)
+    timeframe_bootstrap_blocks: Dict[str, int] = Field(
+        default_factory=lambda: {
+            "15m": 384,  # 384 * 15m = 96h = 4 days
+            "1h": 96,    # 96 * 1h = 96h = 4 days
+            "4h": 24,    # 24 * 4h = 96h = 4 days
+            "1d": 7,     # 7 * 1d = 7 days = 1 week
+        }
+    )
+    # Default fallback
+    block_bootstrap_size_bars: int = 48
 
     # Multiple Testing Correction
     multiple_testing_correction: str = "BENJAMINI_HOCHBERG_FDR"
     false_discovery_rate_q: float = 0.05
 
-    # Primary Hypotheses
-    primary_hypothesis_1: str = "H1: Group B achieves higher net expectancy per trade than Group A after 0.32% round-trip costs."
-    primary_hypothesis_2: str = "H2: Group B achieves higher net expectancy per trade than Group C (frequency-matched control)."
-    primary_hypothesis_3: str = "H3: Group B achieves higher net expectancy per trade than Group D (exposure-matched control)."
+    # Formal Confirmatory Hypothesis Family
+    confirmatory_hypothesis_family: List[str] = Field(
+        default_factory=lambda: [
+            "H1: Group B achieves higher net expectancy per trade than Group A after 0.32% round-trip costs.",
+            "H2: Group B achieves higher net expectancy per trade than Group C (frequency-matched control).",
+            "H3: Group B achieves higher net expectancy per trade than Group D (exposure-matched control).",
+        ]
+    )
 
     # Economic Significance Hurdle
     economic_hurdle_net_expectancy_usdt: Decimal = Decimal("0.50") # Minimum $0.50 per trade outperformance
@@ -660,7 +968,7 @@ class StatisticalAnalysisPlanConfig(BaseModel):
 
 class ExperimentReproducibilityFingerprint(BaseModel):
     """Master cryptographic record freezing the entire experiment state."""
-    protocol_version: str = "v1.0.0-m4630"
+    protocol_version: str = "v1.1.0-m46301"
     git_commit_hash: str
     git_branch: str
     baseline_market_dataset_sha256: str

@@ -1,0 +1,35 @@
+{
+  "milestone": "4.6.3.0.1",
+  "specification_name": "Executable Point-in-Time News-Veto Rule Specification",
+  "specification_version": "v1.1.0-m46301",
+  "engine_class": "NewsVetoDecisionEngine",
+  "contract_class": "NewsVetoContract",
+  "adverse_veto_threshold": 0.70,
+  "scoring_formula": "effective_impact = adverse_impact_score * source_reliability_score * taxonomy_veto_weight",
+  "event_decay_windows_seconds": {
+    "SECURITY_EXPLOITS": 86400,
+    "EXCHANGE_OUTAGES_SUSPENSIONS": 14400,
+    "NETWORK_PROTOCOL_INCIDENTS": 43200,
+    "EXCHANGE_OPERATIONAL": 7200,
+    "DIRECT_BTC": 21600,
+    "DIRECT_ETH": 21600,
+    "DIRECT_BNB": 21600,
+    "REGULATORY": 43200,
+    "MACROECONOMIC": 7200,
+    "ETF_INSTITUTIONAL_FLOW": 14400,
+    "LISTINGS_DELISTINGS": 86400
+  },
+  "deduplication_policy": {
+    "cluster_scope": "Cluster-based deduplication; only earliest observed publication in cluster can trigger veto",
+    "tie_breaker": "Deterministic sort by (availability_time ASC, event_id ASC)"
+  },
+  "revision_handling": {
+    "policy": "Strict revision cutoff isolation",
+    "rule": "If revision_observation_time > decision_cutoff, revised content is invisible at decision time; original state must be used"
+  },
+  "provenance_and_intraday_filters": {
+    "rejected_source_rule": "Events with provenance_status == REJECTED cannot trigger vetoes",
+    "gdelt_intraday_prohibition": "Events with source_id == 'gdelt_gkg' cannot trigger vetoes on intraday timeframes (15m, 1h, 4h)"
+  },
+  "verification_verdict": "PASS WITH FULL EXECUTABLE ENGINE VERIFICATION"
+}

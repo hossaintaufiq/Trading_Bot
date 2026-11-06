@@ -1,0 +1,102 @@
+{
+  "milestone": "4.6.3.0.1",
+  "test_suite": "backend/tests/unit/test_milestone_4_6_3_0_1_adversarial.py",
+  "executed_at_utc": "2026-11-06T21:35:28Z",
+  "total_tests": 18,
+  "passed": 18,
+  "failed": 0,
+  "skipped": 0,
+  "test_cases": [
+    {
+      "test_name": "TestGroupCFrequencyMatchingAdversarial::test_online_frequency_matching_zero_lookahead",
+      "status": "PASSED",
+      "category": "Group C Online Point-in-Time Compliance"
+    },
+    {
+      "test_name": "TestGroupCFrequencyMatchingAdversarial::test_ex_post_frequency_engine_explicitly_labeled",
+      "status": "PASSED",
+      "category": "Group C Ex-Post Benchmark Flagging"
+    },
+    {
+      "test_name": "TestGroupDExposureMatchingAdversarial::test_seven_exposure_dimensions_integrity",
+      "status": "PASSED",
+      "category": "Group D 7-Dimensional Exposure Tracking"
+    },
+    {
+      "test_name": "TestGroupDExposureMatchingAdversarial::test_online_exposure_cooldown_engine",
+      "status": "PASSED",
+      "category": "Group D Online Cooldown Budget"
+    },
+    {
+      "test_name": "TestGroupDExposureMatchingAdversarial::test_ex_post_exposure_engine_labeled",
+      "status": "PASSED",
+      "category": "Group D Ex-Post Benchmark Flagging"
+    },
+    {
+      "test_name": "TestNewsVetoDecisionEngineAdversarial::test_future_publication_rejected_as_lookahead",
+      "status": "PASSED",
+      "category": "News Veto Temporal Isolation"
+    },
+    {
+      "test_name": "TestNewsVetoDecisionEngineAdversarial::test_expired_event_beyond_decay_window_rejected",
+      "status": "PASSED",
+      "category": "News Veto Pre-Registered Decay Windows"
+    },
+    {
+      "test_name": "TestNewsVetoDecisionEngineAdversarial::test_active_event_within_decay_window_triggers_veto",
+      "status": "PASSED",
+      "category": "News Veto Active Execution"
+    },
+    {
+      "test_name": "TestNewsVetoDecisionEngineAdversarial::test_cluster_deduplication_prevents_duplicate_processing",
+      "status": "PASSED",
+      "category": "News Veto Cluster Deduplication"
+    },
+    {
+      "test_name": "TestNewsVetoDecisionEngineAdversarial::test_wrong_asset_relevance_ignored",
+      "status": "PASSED",
+      "category": "News Veto Asset Scope Enforcement"
+    },
+    {
+      "test_name": "TestNewsVetoDecisionEngineAdversarial::test_gdelt_intraday_veto_prohibited",
+      "status": "PASSED",
+      "category": "News Veto GDELT Intraday Prohibition"
+    },
+    {
+      "test_name": "TestNewsVetoDecisionEngineAdversarial::test_rejected_provenance_cannot_veto",
+      "status": "PASSED",
+      "category": "News Veto Provenance Quality Filter"
+    },
+    {
+      "test_name": "TestStatisticalAnalysisPlanAndBootstrapAdversarial::test_timeframe_calibrated_bootstrap_block_sizes",
+      "status": "PASSED",
+      "category": "Statistical Plan Autocorrelation Calibration"
+    },
+    {
+      "test_name": "TestStatisticalAnalysisPlanAndBootstrapAdversarial::test_denominator_separation_mathematical_invariants",
+      "status": "PASSED",
+      "category": "Statistical Plan Denominator Separation"
+    },
+    {
+      "test_name": "TestOOSAccessGuardAdversarial::test_unauthorized_oos_access_raises_permission_error",
+      "status": "PASSED",
+      "category": "OOS Guard Unauthorized Access Prevention"
+    },
+    {
+      "test_name": "TestOOSAccessGuardAdversarial::test_authorized_governance_token_permits_access",
+      "status": "PASSED",
+      "category": "OOS Guard HMAC Authorization Verification"
+    },
+    {
+      "test_name": "TestOOSAccessGuardAdversarial::test_forged_governance_token_rejected",
+      "status": "PASSED",
+      "category": "OOS Guard Forgery Rejection"
+    },
+    {
+      "test_name": "TestOOSAccessGuardAdversarial::test_dev_and_val_partitions_accessible_without_token",
+      "status": "PASSED",
+      "category": "OOS Guard Non-OOS Accessibility"
+    }
+  ],
+  "verification_verdict": "ALL_ADVERSARIAL_TESTS_PASSED"
+}

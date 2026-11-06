@@ -643,3 +643,35 @@
   - The deterministic baseline is immutable and reproducible across independent audit runs.
   - Disentangles genuine informational alpha from frequency reduction and exposure bias.
   - The research protocol is fully frozen, documented, and ready for subsequent controlled execution.
+
+---
+
+## ADR-030: Online Control Matching, Executable News Veto Engine, Timeframe Bootstrap Calibration, and OOS Access Guard
+
+- **Status**: Accepted
+- **Date**: 2026-11-06
+- **Context**: Milestone 4.6.3.0.1 conducted an independent quantitative and methodological audit of the research protocol established in Milestone 4.6.3.0. The audit revealed five critical areas requiring formal architectural remediation:
+  1. *Ex-Post Diagnostic Benchmarking vs Online Execution (Group C)*: Batch decimation and confidence pruning algorithms require the final count of Group B trades ($N_B$) across the partition, making them retrospective diagnostic benchmarks rather than point-in-time executable online strategies.
+  2. *Exposure Conflation (Group D)*: Scalar trade count does not match exposure due to holding time variance under trailing stops, overlapping multi-asset positions, and directional asymmetry.
+  3. *Executable News-Veto Contract*: Category rules lacked an executable decision engine parameterizing decay windows, severity thresholds, cluster deduplication, and revision cutoff isolation.
+  4. *Bootstrap Timeframe Mismatch*: A uniform 48-bar block produced 12 hours on 15m (too short to preserve autocorrelation) and 48 days on 1d (too long). Denominators ($E_{\text{trade}}$ vs $E_{\text{cand}}$) required explicit mathematical separation.
+  5. *Out-of-Sample Snooping Protection*: Documentation alone did not prevent automated backtests from accidentally querying the locked Jan-Oct 2026 partition.
+- **Decision**:
+  1. **Control Execution Mode Taxonomy**:
+     - Introduced `ControlExecutionMode` separating `ONLINE_POINT_IN_TIME` from `EX_POST_DIAGNOSTIC`.
+     - Implemented `OnlineFrequencyMatchingEngine` (Method C-Online) evaluating candidates sequentially using a pre-registered thinning probability $\rho_{\text{calib}}$ and candidate-level cryptographic HMAC-SHA256 hashing without future knowledge.
+     - Labeled `ExPostFrequencyMatchingEngine` explicitly as an ex-post diagnostic control for retrospective benchmarking once $N_B$ is known.
+  2. **Seven-Dimensional Exposure Tracking**:
+     - Formalized `ExposureDimensions` tracking: time in market bars, time in market percentage, trade count, average holding bars, asset breakdown, directional duration (LONG vs SHORT), dollar-hours capital utilization, simultaneous multi-asset bars, and gross/net exposure.
+     - Implemented `OnlineExposureMatchingEngine` enforcing a dynamic post-trade cooldown online, with `ExPostExposureMatchingEngine` retained as a retrospective benchmark.
+  3. **Executable News-Veto Engine**:
+     - Implemented `NewsVetoDecisionEngine` with pre-registered category decay windows (2h for operational/macro to 24h for security exploits), adverse threshold $\theta = 0.70$, cluster deduplication, and revision cutoff enforcement.
+  4. **Timeframe-Calibrated Block Bootstrap & Denominator Separation**:
+     - Calibrated moving block bootstrap sizes to ~4 calendar days (96 hours) across all timeframes: 15m (384 bars), 1h (96 bars), 4h (24 bars), 1d (7 bars).
+     - Formalized distinct reporting of expectancy per trade ($E_{\text{trade}}$), expectancy per candidate ($E_{\text{cand}}$), and portfolio return ($R_{\text{portfolio}}$).
+  5. **Programmatic Cryptographic OOS Guard**:
+     - Implemented `OOSAccessGuard` raising `PermissionError` on unauthorized simulation dates overlapping `2026-01-01` to `2026-10-31`, requiring an HMAC-SHA256 governance authorization token.
+- **Consequences**:
+  - Eliminates subtle look-ahead leakage in control group matching.
+  - Guarantees strict out-of-sample data protection against snooping.
+  - Fortifies the statistical validity and economic interpretability of future news-gated strategy experiments.

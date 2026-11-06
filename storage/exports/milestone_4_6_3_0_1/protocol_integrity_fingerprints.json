@@ -1,0 +1,16 @@
+{
+  "milestone": "4.6.3.0.1",
+  "audit_name": "Protocol Integrity & State Cryptographic Fingerprints",
+  "created_at_utc": "2026-11-06T21:37:10Z",
+  "git_branch": "quant-expectancy-validation",
+  "baseline_commit_m4630": "56af6a91d297ffb13e9a7852a4666cf7304da571",
+  "remote_main_merge_commit": "2c4de497f66a2f79cecb2666da812f8618eb98fe",
+  "dataset_market_v2_tree_sha256": "b4c139f813be84be48e93bdc79d7bc5faba0d6b94d13376e63b3e83849ffdc7c",
+  "dataset_news_v2_manifest_sha256": "6b7bb69c841ec9a5e1774b6f369c0d9c113df066d80357521ac92b937490f4ec",
+  "frozen_baseline_configuration_sha256": "33a5d9f67052fe25737e8e93011230462ab2250e1984395f2d69214f445f1278",
+  "research_protocol_code_path": "backend/app/simulation/research_protocol.py",
+  "adversarial_test_suite_path": "backend/tests/unit/test_milestone_4_6_3_0_1_adversarial.py",
+  "total_backend_unit_tests": 280,
+  "total_frontend_unit_tests": 4,
+  "verification_verdict": "INTEGRITY_VERIFIED_UNCHANGED"
+}
