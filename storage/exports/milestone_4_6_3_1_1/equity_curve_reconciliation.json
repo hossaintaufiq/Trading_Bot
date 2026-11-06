@@ -1,0 +1,106 @@
+{
+  "GROUP_A": {
+    "initial_capital_usdt": 1000.0,
+    "trade_breakdown": {
+      "total_trades": 68,
+      "long_trades_count": 25,
+      "short_trades_count": 43,
+      "short_trades_percentage": 63.24
+    },
+    "true_accounting": {
+      "cumulative_realized_net_pnl": -214.72,
+      "unrealized_pnl_at_end": 0.0,
+      "true_ending_equity_usdt": 785.28,
+      "true_portfolio_return_pct": -21.47
+    },
+    "flawed_reported_accounting": {
+      "reported_ending_equity_usdt": 984.56,
+      "reported_portfolio_return_pct": -1.54,
+      "calculated_flawed_cash_equity": 984.593330991857,
+      "discrepancy_vs_true_equity": 199.28
+    },
+    "defect_root_cause": {
+      "mechanism": "Inverted cash-flow sign on SHORT positions in cash_equity tracking. Engine treated short opens as cash outflows and short closes as cash inflows, crediting short trade losses as cash gains.",
+      "total_phantom_cash_credited": 199.32986561308928,
+      "reconciliation_equation": "Reported Equity (984.56) = True Equity (785.28) + Phantom Short Credits (199.33)"
+    }
+  },
+  "GROUP_B": {
+    "initial_capital_usdt": 1000.0,
+    "trade_breakdown": {
+      "total_trades": 47,
+      "long_trades_count": 19,
+      "short_trades_count": 28,
+      "short_trades_percentage": 59.57
+    },
+    "true_accounting": {
+      "cumulative_realized_net_pnl": -114.42,
+      "unrealized_pnl_at_end": 0.0,
+      "true_ending_equity_usdt": 885.58,
+      "true_portfolio_return_pct": -11.44
+    },
+    "flawed_reported_accounting": {
+      "reported_ending_equity_usdt": 988.34,
+      "reported_portfolio_return_pct": -1.17,
+      "calculated_flawed_cash_equity": 988.3604510393849,
+      "discrepancy_vs_true_equity": 102.76
+    },
+    "defect_root_cause": {
+      "mechanism": "Inverted cash-flow sign on SHORT positions in cash_equity tracking. Engine treated short opens as cash outflows and short closes as cash inflows, crediting short trade losses as cash gains.",
+      "total_phantom_cash_credited": 102.76076136256451,
+      "reconciliation_equation": "Reported Equity (988.34) = True Equity (885.58) + Phantom Short Credits (102.76)"
+    }
+  },
+  "GROUP_C": {
+    "initial_capital_usdt": 1000.0,
+    "trade_breakdown": {
+      "total_trades": 62,
+      "long_trades_count": 23,
+      "short_trades_count": 39,
+      "short_trades_percentage": 62.9
+    },
+    "true_accounting": {
+      "cumulative_realized_net_pnl": -186.21,
+      "unrealized_pnl_at_end": 0.0,
+      "true_ending_equity_usdt": 813.79,
+      "true_portfolio_return_pct": -18.62
+    },
+    "flawed_reported_accounting": {
+      "reported_ending_equity_usdt": 981.2,
+      "reported_portfolio_return_pct": -1.88,
+      "calculated_flawed_cash_equity": 981.1923410984657,
+      "discrepancy_vs_true_equity": 167.41
+    },
+    "defect_root_cause": {
+      "mechanism": "Inverted cash-flow sign on SHORT positions in cash_equity tracking. Engine treated short opens as cash outflows and short closes as cash inflows, crediting short trade losses as cash gains.",
+      "total_phantom_cash_credited": 167.41689841131756,
+      "reconciliation_equation": "Reported Equity (981.20) = True Equity (813.79) + Phantom Short Credits (167.42)"
+    }
+  },
+  "GROUP_D": {
+    "initial_capital_usdt": 1000.0,
+    "trade_breakdown": {
+      "total_trades": 60,
+      "long_trades_count": 22,
+      "short_trades_count": 38,
+      "short_trades_percentage": 63.33
+    },
+    "true_accounting": {
+      "cumulative_realized_net_pnl": -164.8,
+      "unrealized_pnl_at_end": 0.0,
+      "true_ending_equity_usdt": 835.2,
+      "true_portfolio_return_pct": -16.48
+    },
+    "flawed_reported_accounting": {
+      "reported_ending_equity_usdt": 1001.79,
+      "reported_portfolio_return_pct": 0.18,
+      "calculated_flawed_cash_equity": 1001.7517788452874,
+      "discrepancy_vs_true_equity": 166.59
+    },
+    "defect_root_cause": {
+      "mechanism": "Inverted cash-flow sign on SHORT positions in cash_equity tracking. Engine treated short opens as cash outflows and short closes as cash inflows, crediting short trade losses as cash gains.",
+      "total_phantom_cash_credited": 166.56924539271938,
+      "reconciliation_equation": "Reported Equity (1001.79) = True Equity (835.20) + Phantom Short Credits (166.57)"
+    }
+  }
+}

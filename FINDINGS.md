@@ -850,6 +850,25 @@ Milestone 4.6.3.1 executed the first controlled, reproducible experiment evaluat
    - Retrospective diagnostic Method C2 (technical confidence prioritization) achieved $+4.19$ USDT ($E_{\text{trade}} = +\$0.0891$), confirming that news vetoing did not isolate toxic trades more effectively than simple technical confidence ranking.
 5. **Authoritative Verdict: FAIL (No Statistically Significant Alpha or Positive Net Expectancy).** All 9 machine-readable JSON exports verified in `storage/exports/milestone_4_6_3_1/`. Zero access to 2025 Validation or locked 2026 OOS partitions. Execution halted awaiting governance review.
 
+### 8.20 Milestone 4.6.3.1.1: Forensic Accounting Reconciliation, Risk-Breaker Verification & Statistical Integrity Audit
+
+Milestone 4.6.3.1.1 conducted an independent forensic audit of the completed Milestone 4.6.3.1 Development-partition experiment, reconciling all accounting, risk breaker, veto streams, and bootstrap distributions to primary execution ledgers:
+
+1. **Reconciliation of Net Trading Results:**
+   - Group A (Technical Baseline): Net Realized PnL **-$214.72 USDT** ($E_{\text{trade}} = -\$3.1576$ USDT, $E_{\text{cand}} = -\$0.0584$ USDT).
+   - Group B (News-Veto Treatment): Net Realized PnL **-$114.42 USDT** ($E_{\text{trade}} = -\$2.4345$ USDT, $E_{\text{cand}} = -\$0.0311$ USDT).
+   - Confirmatory hypotheses H1, H2, H3 confirmed statistically non-significant ($p = 0.5950 > 0.05$).
+2. **Identification & Resolution of Implementation Defects:**
+   - **Cash Equity Inversion on Short Trades:** The engine subtracted `size * price` on entry and added `size * price` on exit unconditionally. For short positions (63.2% of trades), losing short trades credited phantom cash to `cash_equity`. True ending equity for Group A was **785.28 USDT** (-21.47% return), not $984.56 USDT (-1.54% return).
+   - **Gross Profit/Loss Metric Aggregation Defect:** In `group_metrics.json`, `gross_profit` and `gross_loss` were partitioned conditioned on `net_pnl > 0`, causing 6 trades with positive price movement that lost money net due to friction to have their gains flipped to losses via `abs(gross_pnl)`. True Gross PnL (-87.49 USDT) - Friction (127.25 USDT) = Reconstructed Net (-214.74 USDT), matching reported Net (-214.72 USDT) within $\pm 0.02$ rounding drift.
+3. **Risk Breaker Timeline & Severe Drawdown Reality:**
+   - True realized maximum drawdown reached **24.87%** (Group A) and **13.95%** (Group B), permanently breaching the 5.0% circuit breaker on **January 5, 2024**. The engine continued executing subsequent trades because phantom cash from losing shorts falsely buoyed total equity above $950.
+4. **Candidate Veto Redundancy & Path Dependency:**
+   - Out of 183 news vetoes, **178 (97.27%) were redundant rejections** that would have been rejected by the Risk Manager anyway. Only 5 trades were directly prevented by news vetoes. The net 21-trade difference between A and B was driven by portfolio state divergence ($23 - 2 = 21$).
+5. **Moving Block Bootstrap Point Mass at Zero:**
+   - 98.48% of candidate setup differences were zero. Consequently, 58.2% of bootstrap resample means were exactly `0.0000`, explaining why the percentile 95% CI lower bound is `0.0000` while the one-sided empirical $p$-value ($P \le 0$) is `0.5950`.
+6. **Authoritative Verdict: PASS WITH LIMITATIONS.** Core scientific conclusion is confirmed: News Veto adds no statistically significant alpha and fails to achieve positive net expectancy. Strategy execution remains strictly halted at Milestone 4.6.3.1.1.
+
 ---
 
 ## 10. Architecture Decision Records & Audit Index
@@ -872,9 +891,15 @@ Milestone 4.6.3.1 executed the first controlled, reproducible experiment evaluat
 - **[ADR-029: News-Gated Experiment Design, Baseline Freeze, and Four-Group Research Protocol](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-029-news-gated-experiment-design-baseline-freeze-and-four-group-research-protocol)**
 - **[ADR-030: Online Control Matching, Executable News Veto Engine, Timeframe Bootstrap Calibration, and OOS Access Guard](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-030-online-control-matching-executable-news-veto-engine-timeframe-bootstrap-calibration-and-oos-access-guard)**
 - **[ADR-031: Development-Partition Experimental Execution, 4-Group Synchronized Simulation Engine, and Candidate Stream Caching](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-031-development-partition-experimental-execution-4-group-synchronized-simulation-engine-and-candidate-stream-caching)**
+- **[ADR-032: Independent Forensic Accounting Reconciliation, Cash-Equity Inversion Remediation, and Point-Mass Bootstrap Diagnosis](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-032-independent-forensic-accounting-reconciliation-cash-equity-inversion-remediation-and-point-mass-bootstrap-diagnosis)**
 
 
 ### Research & Audit Documents
+- **Milestone 4.6.3.1.1 Forensic Audit:** [`docs/research/MILESTONE_4_6_3_1_1_FORENSIC_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_FORENSIC_AUDIT.md)
+- **Milestone 4.6.3.1.1 Accounting Reconciliation:** [`docs/research/MILESTONE_4_6_3_1_1_ACCOUNTING_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_ACCOUNTING_RECONCILIATION.md)
+- **Milestone 4.6.3.1.1 Risk Breaker Audit:** [`docs/research/MILESTONE_4_6_3_1_1_RISK_BREAKER_AUDIT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_RISK_BREAKER_AUDIT.md)
+- **Milestone 4.6.3.1.1 Statistical Reconciliation:** [`docs/research/MILESTONE_4_6_3_1_1_STATISTICAL_RECONCILIATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_STATISTICAL_RECONCILIATION.md)
+- **Milestone 4.6.3.1.1 Final Verdict:** [`docs/research/MILESTONE_4_6_3_1_1_FINAL_RESEARCH_VERDICT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_1_FINAL_RESEARCH_VERDICT.md)
 - **Milestone 4.6.3.1 Experiment Report:** [`docs/research/MILESTONE_4_6_3_1_EXPERIMENT_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_EXPERIMENT_REPORT.md)
 - **Milestone 4.6.3.1 Methodology & Limitations:** [`docs/research/MILESTONE_4_6_3_1_METHODOLOGY_AND_LIMITATIONS.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_METHODOLOGY_AND_LIMITATIONS.md)
 - **Milestone 4.6.3.1 Reproduction Guide:** [`docs/research/MILESTONE_4_6_3_1_REPRODUCTION_GUIDE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_REPRODUCTION_GUIDE.md)

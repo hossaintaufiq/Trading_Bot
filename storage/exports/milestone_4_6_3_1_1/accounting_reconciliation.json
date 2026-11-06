@@ -1,0 +1,102 @@
+{
+  "GROUP_A": {
+    "trade_count": 68,
+    "reconstructed_true_gross_pnl": -87.49,
+    "true_positive_gross_profit": 119.86,
+    "true_negative_gross_loss": 207.35,
+    "total_fees": 79.53,
+    "total_slippage": 39.81,
+    "total_spread": 7.91,
+    "total_friction": 127.25,
+    "reconstructed_net_pnl_pre_rounding": -214.74,
+    "reported_net_pnl_sum": -214.72,
+    "quantization_rounding_drift": -0.02,
+    "flawed_reported_metrics": {
+      "reported_gross_profit": 108.24,
+      "reported_gross_loss": 218.97,
+      "reported_difference": -110.73,
+      "reported_friction_sum": 127.25
+    },
+    "defect_root_cause": {
+      "mechanism": "gross_profit and gross_loss were partitioned conditioned on net_pnl > 0 rather than gross_pnl > 0, and net losers with positive gross PnL had their gains flipped to losses via abs(gross_pnl)",
+      "positive_gross_net_losing_trades_count": 8,
+      "positive_gross_net_losing_trades_gross_pnl": 11.62,
+      "mathematical_reconciliation": "True Gross (-87.49) - Friction (127.25) = -214.74 USDT, matching Reported Net (-214.72) within -0.02 USDT rounding drift"
+    }
+  },
+  "GROUP_B": {
+    "trade_count": 47,
+    "reconstructed_true_gross_pnl": -34.84,
+    "true_positive_gross_profit": 100.52,
+    "true_negative_gross_loss": 135.36,
+    "total_fees": 49.73,
+    "total_slippage": 24.89,
+    "total_spread": 4.94,
+    "total_friction": 79.56,
+    "reconstructed_net_pnl_pre_rounding": -114.4,
+    "reported_net_pnl_sum": -114.42,
+    "quantization_rounding_drift": 0.02,
+    "flawed_reported_metrics": {
+      "reported_gross_profit": 92.43,
+      "reported_gross_loss": 143.45,
+      "reported_difference": -51.02,
+      "reported_friction_sum": 79.56
+    },
+    "defect_root_cause": {
+      "mechanism": "gross_profit and gross_loss were partitioned conditioned on net_pnl > 0 rather than gross_pnl > 0, and net losers with positive gross PnL had their gains flipped to losses via abs(gross_pnl)",
+      "positive_gross_net_losing_trades_count": 6,
+      "positive_gross_net_losing_trades_gross_pnl": 8.09,
+      "mathematical_reconciliation": "True Gross (-34.84) - Friction (79.56) = -114.40 USDT, matching Reported Net (-114.42) within +0.02 USDT rounding drift"
+    }
+  },
+  "GROUP_C": {
+    "trade_count": 62,
+    "reconstructed_true_gross_pnl": -72.36,
+    "true_positive_gross_profit": 110.56,
+    "true_negative_gross_loss": 182.92,
+    "total_fees": 71.14,
+    "total_slippage": 35.57,
+    "total_spread": 7.08,
+    "total_friction": 113.79,
+    "reconstructed_net_pnl_pre_rounding": -186.15,
+    "reported_net_pnl_sum": -186.21,
+    "quantization_rounding_drift": 0.06,
+    "flawed_reported_metrics": {
+      "reported_gross_profit": 101.49,
+      "reported_gross_loss": 191.99,
+      "reported_difference": -90.5,
+      "reported_friction_sum": 113.79
+    },
+    "defect_root_cause": {
+      "mechanism": "gross_profit and gross_loss were partitioned conditioned on net_pnl > 0 rather than gross_pnl > 0, and net losers with positive gross PnL had their gains flipped to losses via abs(gross_pnl)",
+      "positive_gross_net_losing_trades_count": 8,
+      "positive_gross_net_losing_trades_gross_pnl": 9.07,
+      "mathematical_reconciliation": "True Gross (-72.36) - Friction (113.79) = -186.15 USDT, matching Reported Net (-186.21) within +0.06 USDT rounding drift"
+    }
+  },
+  "GROUP_D": {
+    "trade_count": 60,
+    "reconstructed_true_gross_pnl": -47.64,
+    "true_positive_gross_profit": 129.59,
+    "true_negative_gross_loss": 177.23,
+    "total_fees": 73.25,
+    "total_slippage": 36.6,
+    "total_spread": 7.3,
+    "total_friction": 117.15,
+    "reconstructed_net_pnl_pre_rounding": -164.79,
+    "reported_net_pnl_sum": -164.8,
+    "quantization_rounding_drift": 0.01,
+    "flawed_reported_metrics": {
+      "reported_gross_profit": 119.95,
+      "reported_gross_loss": 186.87,
+      "reported_difference": -66.92,
+      "reported_friction_sum": 117.15
+    },
+    "defect_root_cause": {
+      "mechanism": "gross_profit and gross_loss were partitioned conditioned on net_pnl > 0 rather than gross_pnl > 0, and net losers with positive gross PnL had their gains flipped to losses via abs(gross_pnl)",
+      "positive_gross_net_losing_trades_count": 6,
+      "positive_gross_net_losing_trades_gross_pnl": 9.64,
+      "mathematical_reconciliation": "True Gross (-47.64) - Friction (117.15) = -164.79 USDT, matching Reported Net (-164.80) within +0.01 USDT rounding drift"
+    }
+  }
+}

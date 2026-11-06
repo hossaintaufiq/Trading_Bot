@@ -1,0 +1,65 @@
+{
+  "summary_counts": {
+    "total_eligible_candidates": 3678,
+    "total_news_veto_decisions": 183,
+    "unique_candidates_vetoed": 183,
+    "group_a_executed_trades": 68,
+    "group_b_executed_trades": 47,
+    "net_trade_difference_a_minus_b": 21
+  },
+  "veto_effectiveness_breakdown": {
+    "vetoed_candidates_directly_preventing_trades": 5,
+    "vetoed_candidates_redundant_due_to_risk_or_capacity": 178,
+    "redundancy_percentage": 97.27
+  },
+  "path_dependency_reconciliation": {
+    "trades_executed_in_both_groups": 45,
+    "trades_executed_in_a_only": 23,
+    "trades_executed_in_a_only_directly_vetoed_by_news": 5,
+    "trades_executed_in_a_only_due_to_downstream_state_divergence": 18,
+    "trades_executed_in_b_only_due_to_divergent_capacity": 2,
+    "mathematical_identity": "Delta (21) = Trades in A only (23) - Trades in B only (2) = 23 - 2 = 21"
+  },
+  "directly_prevented_trades_detail": [
+    {
+      "signal_id": "27da079d-bcc2-4a85-98d7-a54624204494",
+      "candidate_id": "cand_97",
+      "timestamp": "2024-01-12T04:30:00.000Z",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "group_a_trade_pnl": -7.03
+    },
+    {
+      "signal_id": "2a849e6b-1149-4ec1-a389-56d6c441983e",
+      "candidate_id": "cand_105",
+      "timestamp": "2024-01-12T15:00:00.000Z",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "group_a_trade_pnl": 12.73
+    },
+    {
+      "signal_id": "760ad5dc-f76e-4376-86d6-192b3d31ca8a",
+      "candidate_id": "cand_106",
+      "timestamp": "2024-01-12T15:15:00.000Z",
+      "symbol": "ETHUSDT",
+      "direction": "LONG",
+      "group_a_trade_pnl": -6.05
+    },
+    {
+      "signal_id": "76d7a0bd-2153-4623-8672-7a0d1fcb687c",
+      "candidate_id": "cand_8",
+      "timestamp": "2024-01-03T07:30:00.000Z",
+      "symbol": "BNBUSDT",
+      "direction": "LONG",
+      "group_a_trade_pnl": -6.89
+    },
+    {
+      "signal_id": "c845b478-a020-4665-9e5c-6ded41658a9b",
+      "candidate_id": "cand_99",
+      "timestamp": "2024-01-12T08:45:00.000Z",
+      "symbol": "BTCUSDT",
+      "direction": "SHORT",
+      "group_a_trade_pnl": -7.21
+    }
+  ]
+}

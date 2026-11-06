@@ -1,0 +1,54 @@
+{
+  "GROUP_A": {
+    "configured_max_drawdown_breaker_pct": 5.0,
+    "configured_daily_loss_limit_pct": 2.0,
+    "flawed_reported_max_drawdown_pct": 5.19,
+    "true_realized_max_drawdown_pct": 24.87,
+    "drawdown_5pct_first_breach_timestamp": "2024-01-05T09:00:00.000Z",
+    "trades_executed_before_5pct_breach": 11,
+    "trades_executed_after_5pct_breach": 57,
+    "investigation_findings": {
+      "reported_overshoot_explanation": "The reported drawdown overshoot (5.19% vs 5.0% limit) in flawed equity occurred because the Risk Manager only rejects NEW orders upon evaluation; open positions continue until stop-loss/take-profit, leading to expected closed-candle/intrabar overshoot.",
+      "critical_accounting_failure": "Under TRUE realized equity, Group GROUP_A suffered a catastrophic 24.87% maximum drawdown, breaching the 5.0% circuit breaker permanently on 2024-01-05T09:00:00.000Z. The simulation only continued executing 57 subsequent trades because the cash-equity inverted sign bug injected phantom cash, falsely resetting total equity above $950."
+    }
+  },
+  "GROUP_B": {
+    "configured_max_drawdown_breaker_pct": 5.0,
+    "configured_daily_loss_limit_pct": 2.0,
+    "flawed_reported_max_drawdown_pct": 5.38,
+    "true_realized_max_drawdown_pct": 13.95,
+    "drawdown_5pct_first_breach_timestamp": "2024-01-05T20:45:00.000Z",
+    "trades_executed_before_5pct_breach": 12,
+    "trades_executed_after_5pct_breach": 35,
+    "investigation_findings": {
+      "reported_overshoot_explanation": "The reported drawdown overshoot (5.38% vs 5.0% limit) in flawed equity occurred because the Risk Manager only rejects NEW orders upon evaluation; open positions continue until stop-loss/take-profit, leading to expected closed-candle/intrabar overshoot.",
+      "critical_accounting_failure": "Under TRUE realized equity, Group GROUP_B suffered a catastrophic 13.95% maximum drawdown, breaching the 5.0% circuit breaker permanently on 2024-01-05T20:45:00.000Z. The simulation only continued executing 35 subsequent trades because the cash-equity inverted sign bug injected phantom cash, falsely resetting total equity above $950."
+    }
+  },
+  "GROUP_C": {
+    "configured_max_drawdown_breaker_pct": 5.0,
+    "configured_daily_loss_limit_pct": 2.0,
+    "flawed_reported_max_drawdown_pct": 5.92,
+    "true_realized_max_drawdown_pct": 22.13,
+    "drawdown_5pct_first_breach_timestamp": "2024-01-05T20:45:00.000Z",
+    "trades_executed_before_5pct_breach": 11,
+    "trades_executed_after_5pct_breach": 51,
+    "investigation_findings": {
+      "reported_overshoot_explanation": "The reported drawdown overshoot (5.92% vs 5.0% limit) in flawed equity occurred because the Risk Manager only rejects NEW orders upon evaluation; open positions continue until stop-loss/take-profit, leading to expected closed-candle/intrabar overshoot.",
+      "critical_accounting_failure": "Under TRUE realized equity, Group GROUP_C suffered a catastrophic 22.13% maximum drawdown, breaching the 5.0% circuit breaker permanently on 2024-01-05T20:45:00.000Z. The simulation only continued executing 51 subsequent trades because the cash-equity inverted sign bug injected phantom cash, falsely resetting total equity above $950."
+    }
+  },
+  "GROUP_D": {
+    "configured_max_drawdown_breaker_pct": 5.0,
+    "configured_daily_loss_limit_pct": 2.0,
+    "flawed_reported_max_drawdown_pct": 5.79,
+    "true_realized_max_drawdown_pct": 20.04,
+    "drawdown_5pct_first_breach_timestamp": "2024-01-05T20:45:00.000Z",
+    "trades_executed_before_5pct_breach": 12,
+    "trades_executed_after_5pct_breach": 48,
+    "investigation_findings": {
+      "reported_overshoot_explanation": "The reported drawdown overshoot (5.79% vs 5.0% limit) in flawed equity occurred because the Risk Manager only rejects NEW orders upon evaluation; open positions continue until stop-loss/take-profit, leading to expected closed-candle/intrabar overshoot.",
+      "critical_accounting_failure": "Under TRUE realized equity, Group GROUP_D suffered a catastrophic 20.04% maximum drawdown, breaching the 5.0% circuit breaker permanently on 2024-01-05T20:45:00.000Z. The simulation only continued executing 48 subsequent trades because the cash-equity inverted sign bug injected phantom cash, falsely resetting total equity above $950."
+    }
+  }
+}
