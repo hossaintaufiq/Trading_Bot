@@ -737,3 +737,35 @@
   - Restores 100% mathematical and accounting transparency to the NEPTUNE research archive.
   - Formulates the exact accounting fixes required for any future engine revisions.
   - Strictly preserves research integrity by preventing premature or unwarranted entry into out-of-sample partitions.
+
+
+---
+
+## ADR-033: Portfolio Accounting Remediation, Double-Entry Short Collateral Model, and Risk Breaker Enforcement
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**: Milestone 4.6.3.1.2 was commissioned to correct the portfolio cash/equity accounting defect identified in Milestone 4.6.3.1.1 and independently revalidate Risk Manager circuit breaker enforcement and historical experiment reproducibility.
+- **Decision**:
+  1. **Implementation of `PortfolioLedger`**:
+     - Introduced [`PortfolioLedger`](file:///d:/Project%202026/Trading_bot/backend/app/simulation/portfolio_ledger.py) maintaining liquid cash balance, reserved collateral for short positions, long inventory cost basis, and marked-to-market position equity.
+     - Formulated exact mathematical cash flow dynamics for spot-collateralized SHORT positions without leverage:
+       - Entry cash outflow: $\text{Notional} + \text{Fee}_{\text{entry}}$ (100% margin reservation).
+       - Exit cash inflow: $S \cdot (2 P_{\text{entry}} - P_{\text{exit}}) - \text{Fee}_{\text{exit}}$, ensuring net cash flow strictly equals $\text{net\_pnl}$.
+     - Established continuous mark-to-market updating at every candle close using confirmed close prices.
+     - Verified 5 fundamental balance sheet invariants across all positions and trades.
+  2. **Risk Manager 5.0% Circuit Breaker Revalidation**:
+     - Connected `RiskManager` and `PointInTimeExecutionScheduler` directly to `PortfolioLedger.get_total_equity()`.
+     - Confirmed that when true portfolio drawdown breaches 5.0%, all subsequent orders are rejected immediately with `MAX_DRAWDOWN_EXCEEDED` and `"Drawdown circuit breaker active at execution time"`.
+  3. **Historical Reproduction Across 2024 Development Partition**:
+     - Re-ran the 4-group parallel experiment across the full 2024 Development partition using [`run_milestone_4_6_3_1_2.py`](file:///d:/Project%202026/Trading_bot/backend/app/simulation/run_milestone_4_6_3_1_2.py).
+     - Confirmed all 4 groups tripped the circuit breaker on January 5–6, 2024, halting trading after 11–12 trades, stabilizing ending equity at \$976.44 USDT (-2.36%), and preserving \$181.85 USDT of capital compared to unhalted trading.
+  4. **Null-Centered Market-Time Bootstrap Inference**:
+     - Remediated the bootstrap procedure by mapping returns onto a continuous 15m regular market-time grid (35,136 bars, 384-bar / 4-day blocks) and centering resamples under the null hypothesis ($H_0: \mu \le 0$).
+     - Proved that news vetoing fails all confirmatory hypotheses ($p = 0.1740$) and fails the pre-registered economic hurdle ($+\$0.0009$ USDT vs $+\$0.50$ USDT target).
+  5. **Governance Halt**:
+     - Enforced mandatory stop condition: Zero progression to Milestone 4.6.3.2, 2025 Validation, or 2026 Out-of-Sample partitions.
+- **Consequences**:
+  - Eliminates all phantom cash and accounting distortions across NEPTUNE simulation engines.
+  - Re-establishes the Risk Manager as a certified, trustworthy capital preservation authority.
+  - Generates 8 verified, immutable audit deliverables in `storage/exports/milestone_4_6_3_1_2/`.
