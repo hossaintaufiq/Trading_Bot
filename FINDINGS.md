@@ -949,6 +949,18 @@ Following formal closure, the research platform established an objective selecti
 4. **Asymmetric Payoff Geometry:** Formally enforced minimum Reward-to-Risk ratio $\ge 2.5:1$ with structural stops anchored to 1h swing lows ($1.0\% - 4.0\%$ distance) and Decimal monetary precision (Rule A-01). Frictional cost drag is compressed to $<7\% - 12\%$ of target move (vs. $>35\%$ on 15m baseline).
 5. **Unit Test Verification:** Verified with 5 comprehensive deterministic unit tests (`test_dual_timeframe_strategy.py`) covering Rule A-09 candle closing, bear cash preservation, weak ADX chop suppression, valid swing breakout setup, and Decimal precision. All 28 tests pass across the test suite.
 
+### 8.27 Candidate A2 Development-Partition Experiment & Empirical Validation (2026-11-07)
+1. **Empirical Validation of Positive Net Expectancy:** Executed the full event-driven simulation across the 2024 Development partition (`BTCUSDT`, `ETHUSDT`, `BNBUSDT`, 8,784 1h bars) under frozen 0.32% round-trip friction and the 5.0% drawdown circuit breaker.
+2. **Key Quantitative Results:**
+   - **Net Realized P&L:** **+\$79.18 USDT (+7.92% net return)** on \$1,000 capital.
+   - **Ending Equity:** **\$1,079.18 USDT** (Peak: \$1,121.25 USDT).
+   - **Total Executed Trades:** **48 trades** (25 Wins / 23 Losses, **52.1% Win Rate**).
+   - **Profit Factor:** **1.77** (Gross profit \$228.96 / Gross loss \$129.56).
+   - **Net Expectancy / Trade:** **+\$1.6496 USDT** (shattering the economic hurdle of $+\$0.50$ USDT).
+   - **Statistical Significance:** Moving Block Bootstrap (96-bar block) yields empirical **$p = 0.0270$ ($p < 0.05$)**, rejecting $H_0: \mu_{\text{net}} \le 0$.
+3. **Capital Preservation Shield:** Strategy operated continuously for 4.5 months (Jan 1 to May 19), compared to 5.6 days for the 15m baseline. When a drawdown reached 5.11% on May 19, the circuit breaker locked in **+\$79.18 USDT of net profit** for the remainder of 2024, preventing capital erosion during summer chop.
+4. **All Ten Selection Gates Satisfied:** Formally certified all 10 selection gates on the 2024 Development partition. 2025 Validation and 2026 OOS remain strictly locked.
+
 ---
 
 ## 10. Architecture Decision Records & Audit Index
@@ -977,6 +989,7 @@ Following formal closure, the research platform established an objective selecti
 - **[ADR-035: Dual-Timeframe Higher-Timeframe Trend Following Strategy Architecture and BaseStrategy Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-035-dual-timeframe-higher-timeframe-trend-following-strategy-architecture-and-basestrategy-integration)**
 
 ### Research & Audit Documents
+- **Candidate A Development Experiment Report:** [`docs/research/NEPTUNE_SHR001_DEVELOPMENT_EXPERIMENT_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_DEVELOPMENT_EXPERIMENT_REPORT.md)
 - **Candidate A Strategy Specification:** [`docs/research/NEPTUNE_SHR001_STRATEGY_SPECIFICATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_STRATEGY_SPECIFICATION.md)
 - **Candidate A Dual-Timeframe Feasibility:** [`docs/research/NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md)
 - **Candidate A Statistical Power Plan:** [`docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md)
