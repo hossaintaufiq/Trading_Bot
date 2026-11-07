@@ -935,6 +935,13 @@ Following formal closure, the research platform established an objective selecti
    - *Candidate A (HTF Trend Following):* Strongest conceptual design, but blocked on Gate 5 due to sample size feasibility ($N < 25$ on 4h).
 5. **Authoritative Governance Determination:** **Zero candidates authorized for immediate execution.** NEPTUNE exercises its governance prerogative to reject immediate experimentation until Candidate A resolves sample size feasibility and Candidate B models breakout slippage.
 
+### 8.25 Candidate A Dual-Timeframe Feasibility & Statistical Power Review (2026-11-07)
+1. **Feasibility Review Verdict:** **`FEASIBLE WITH UNRESOLVED REQUIREMENTS`**.
+2. **Architectural Resolution:** Transitioning `SHR-001` to a Dual-Timeframe Architecture (4h regime conditioning + 1h swing-structure entry, Design A2) successfully resolves the execution coarseness of pure 4h trend following (compressing structural stops from $4.5\%$ to $1.8\%$, and friction drag from $>35\%$ to $<7\%$ of target move), while outperforming pure 4h (A1, sample starvation) and 1h limit pullbacks (A3, adverse selection).
+3. **Statistical Power Reality:** Cross-asset correlation ($\rho \approx 0.75\text{--}0.85$) between BTC, ETH, and BNB means nominal trade counts suffer from pseudo-replication. Under Kish design effect calculations, $N = 60$ trades yield an effective sample size $N_{\text{eff}} \approx 24\text{--}37$. Furthermore, true empirical power cannot be calculated without historical returns.
+4. **Long-Only Spot Enforcement:** Formally eliminated synthetic shorting in favor of strict Long-Only spot execution, holding 100% USDT cash during non-trending regimes.
+5. **Remaining Blockers:** Deterministic mathematical specification (Gate 2), empirical effective sample size confirmation (Gate 5), and risk-breaker headroom modeling (Gate 8) must be satisfied prior to any experiment submission. Zero backtests or simulations are authorized.
+
 ---
 
 ## 10. Architecture Decision Records & Audit Index
@@ -962,6 +969,9 @@ Following formal closure, the research platform established an objective selecti
 - **[ADR-034: Synthetic Short Collateralization Classification, Risk-Breaker Embargo Semantics, and Statistical Active-Window Partitioning](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-034-synthetic-short-collateralization-classification-risk-breaker-embargo-semantics-and-statistical-active-window-partitioning)**
 
 ### Research & Audit Documents
+- **Candidate A Dual-Timeframe Feasibility:** [`docs/research/NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md)
+- **Candidate A Statistical Power Plan:** [`docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md)
+- **Candidate A Execution & Risk Requirements:** [`docs/research/NEPTUNE_SHR001_EXECUTION_AND_RISK_REQUIREMENTS.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_EXECUTION_AND_RISK_REQUIREMENTS.md)
 - **Strategy Research Reset:** [`docs/research/NEPTUNE_STRATEGY_RESEARCH_RESET.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_STRATEGY_RESEARCH_RESET.md)
 - **Strategy Hypothesis Register:** [`docs/research/NEPTUNE_STRATEGY_HYPOTHESIS_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_STRATEGY_HYPOTHESIS_REGISTER.md)
 - **Experiment Selection Gates:** [`docs/research/NEPTUNE_EXPERIMENT_SELECTION_GATES.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_EXPERIMENT_SELECTION_GATES.md)

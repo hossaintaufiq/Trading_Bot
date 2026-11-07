@@ -134,3 +134,4 @@ $$\mathbf{GOVERNANCE\ STATUS:}\quad\mathbf{ZERO\ CANDIDATES\ AUTHORIZED\ FOR\ EX
   - Candidate A must solve Gate 5 by formulating a dual-timeframe specification (1h execution conditioned on 4h trend) that guarantees $N \ge 30$ independent opportunities.
   - Candidate B must solve Gate 4 by integrating dynamic breakout slippage stress-testing.
 - **All simulation execution, parameter tuning, and partition progression remain strictly prohibited.**
+

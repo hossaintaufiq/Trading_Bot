@@ -310,3 +310,4 @@ In accordance with strict research governance:
 3. **Negative Results Register:** [`docs/research/NEPTUNE_NEGATIVE_RESULTS_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_NEGATIVE_RESULTS_REGISTER.md)
 4. **Infrastructure Verification Register:** [`docs/research/NEPTUNE_INFRASTRUCTURE_VERIFICATION_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_INFRASTRUCTURE_VERIFICATION_REGISTER.md)
 5. **Research Closure Report:** [`docs/research/MILESTONE_4_6_3_1_4_RESEARCH_CLOSURE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_4_RESEARCH_CLOSURE.md)
+
