@@ -95,3 +95,4 @@ With the 2025 Validation partition proving that:
 The two logical paths for achieving immediate, sustainable profitability are:
 1. **Bitcoin-Dominant Allocation Filter:** Allocate 70% capital weight to `BTCUSDT` (or trade `BTCUSDT` exclusively / dynamically based on BTC Dominance `BTC.D`). Under a BTC-only configuration, 2024 yields +$15.65 Gross and 2025 yields +$27.24 Gross (+$18.47 Net), producing positive returns in both years.
 2. **Proceed to Final 2026 Out-of-Sample Verification:** Authorize the ultimate evaluation on the strictly locked 2026 OOS dataset to verify full system readiness.
+

@@ -989,6 +989,19 @@ Following formal closure, the research platform established an objective selecti
    - `ETHUSDT` (-$11.55 USDT net) and `BNBUSDT` (-$9.50 USDT net) experienced degraded win rates (35.3% and 40.9%) due to prolonged consolidation ranges. The Symbol Quarantine feature prevented catastrophic drawdowns, keeping portfolio equity safely intact.
 5. **Ledger Balance Sheet Integrity:** 100% verified across all [`PortfolioLedger`](file:///d:/Project%202026/Trading_bot/backend/app/simulation/portfolio_ledger.py) double-entry conservation invariants. Full report: [`docs/research/NEPTUNE_SHR001_V2_VALIDATION_2025_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_V2_VALIDATION_2025_REPORT.md).
 
+### 8.30 Final Out-of-Sample Evaluation on 2026 Partition & Multi-Year Synthesis (`htf_trend_following_v2` / ADR-036) (2026-11-07)
+1. **Unseen Bear Market Evaluation:** Evaluated `DualTimeframeTrendStrategyV2` on the 2026 Out-of-Sample Partition (`2026-01-01` to `2026-11-01`, 7,320 hourly bars across `BTCUSDT`, `ETHUSDT`, `BNBUSDT`). 2026 presented a severe bear market where Buy & Hold dropped -10.8% (BTC), -23.6% (ETH), -17.7% (BNB), and -17.4% (equal-weighted basket).
+2. **Capital Defense & Drawdown Control:**
+   - Standard 3-symbol ADR-036 portfolio lost only **-4.07% (-$40.70 USDT)** with a **4.70% Maximum Drawdown**, safely avoiding the 5.0% circuit breaker.
+   - Bitcoin-Only configuration lost only **-0.69% (-$6.91 USDT)** with a **2.15% Maximum Drawdown**, outperforming BTC Buy & Hold by **+10.08%**.
+   - With BTC Macro Regime Gating, maximum drawdown was held to **2.94%**, outperforming the 3-asset Buy & Hold basket by **+16.07%**.
+3. **Multi-Year Cumulative Profitability (3-Year Total: 2024 - 2026):**
+   - Full 3-Year Net P&L (ADR-036 Standard): **+$23.34 USDT (+2.33% net return)** across 214 trades.
+   - Full 3-Year Net P&L (BTC Macro Gating): **+$58.01 USDT (+5.80% net return)**.
+   - Full 3-Year Bitcoin Net P&L: **+$17.73 USDT net profit**.
+   - Circuit Breaker Status: **ZERO CIRCUIT BREAKER TRIPS ACROSS ALL 34 MONTHS / 24,864 HOURS OF CONTINUOUS TRADING**.
+4. **Ledger Balance Sheet Integrity:** 100% verified across all [`PortfolioLedger`](file:///d:/Project%202026/Trading_bot/backend/app/simulation/portfolio_ledger.py) double-entry conservation invariants. Full report: [`docs/research/NEPTUNE_SHR001_V2_OOS_2026_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_V2_OOS_2026_REPORT.md).
+
 ---
 
 ## 10. Architecture Decision Records & Audit Index
