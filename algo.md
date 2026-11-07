@@ -94,12 +94,14 @@ Once macro regime conditions are met, the algorithm monitors the 1-hour chart:
 
 ## 4. Active Trade & Risk Management
 
-### 4.1 Dynamic Breakeven Stop Ratchet
-To eliminate winner-to-loss decay (giving back open profits on sharp intraday reversals):
-- **Trigger:** Once open profit reaches $+1.5\text{R}$ where $R = \text{Entry} - \text{StopLoss}$:
-- **Ratchet Level:** The stop loss is automatically moved to:
+### 4.1 Fine-Tuned Two-Stage Profit Lock & Breakeven Ratchet
+To eliminate winner-to-loss decay and lock in gains on explosive expansion moves:
+- **Stage 1 (Breakeven Defense):** Once open profit reaches $+1.5\text{R}$ ($R = \text{Entry} - \text{StopLoss}$):
   $$\text{NewStop} = \text{Entry} \times 1.0035$$
-- **Guarantee:** The $+0.35\%$ buffer guarantees that round-trip taker exchange fees ($0.20\%$), slippage ($0.10\%$), and bid-ask spread ($0.02\%$) are completely paid. The trade can never result in a net loss.
+  *The $+0.35\%$ buffer guarantees that round-trip taker exchange fees ($0.20\%$), slippage ($0.10\%$), and bid-ask spread ($0.02\%$) are completely paid. The trade can never result in a net loss.*
+- **Stage 2 (Guaranteed Profit Lock):** Once open profit reaches $+2.0\text{R}$:
+  $$\text{LockedStop} = \text{Entry} + 1.0 \times R$$
+  *Mathematically locks in a minimum $+1.0\text{R}$ net profit even if the market experiences an abrupt structural reversal before reaching the final $+2.5\text{R}$ take-profit target.*
 
 ### 4.2 Symbol-Level Loss Quarantine (Cooldown Guard)
 - If an individual asset incurs **2 consecutive stop-outs**, that symbol is placed in a **7-day (168-hour) cooldown quarantine**.
@@ -150,3 +152,4 @@ The complete production implementation is located in:
 - **Validation Simulation Engine:** [`backend/app/simulation/run_dual_timeframe_v2_validation_experiment.py`](file:///d:/Project%202026/Trading_bot/backend/app/simulation/run_dual_timeframe_v2_validation_experiment.py)
 - **Out-of-Sample Engine:** [`backend/app/simulation/run_dual_timeframe_v2_oos2026_experiment.py`](file:///d:/Project%202026/Trading_bot/backend/app/simulation/run_dual_timeframe_v2_oos2026_experiment.py)
 - **Unit Test Suite:** [`backend/tests/unit/test_dual_timeframe_v2.py`](file:///d:/Project%202026/Trading_bot/backend/tests/unit/test_dual_timeframe_v2.py)
+
