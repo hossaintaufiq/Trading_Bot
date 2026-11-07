@@ -106,6 +106,19 @@ Counterparties on the losing side of these trades are typically short-term intra
     - `BNBUSDT`: -$9.50 USDT (22 trades, 40.9% win rate).
   - **PortfolioLedger Balance Sheet:** Reconciled `True` across all double-entry conservation checks.
 
+#### 11. Empirical Out-of-Sample Findings (2026 Partition & 3-Year Cycle Synthesis)
+- **Report Document:** [`docs/research/NEPTUNE_SHR001_V2_OOS_2026_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_V2_OOS_2026_REPORT.md)
+- **OOS Dataset:** 2026 Out-of-Sample Partition (`2026-01-01T00:00:00Z` to `2026-11-01T23:00:00Z`, 7,320 hourly candles per symbol, 100% unseen bear market environment).
+- **Market Context:** Severe crypto bear market (BTC -10.8%, ETH -23.6%, BNB -17.7%, Benchmark -17.4%).
+- **Key Findings:**
+  - **Capital Defense:** Strategy preserved capital with Max DD of 4.70% (Standard 3-symbol) and 2.15% (BTC-Only), completely preventing the 5.0% circuit breaker from tripping.
+  - **Benchmark Outperformance:** Outperformed the Buy & Hold benchmark by +13.3% (ADR-036) and +16.1% (BTC Gating).
+  - **Multi-Year Profitability (2024-2026):**
+    - Full 3-Year Net P&L (ADR-036 Standard): **+$23.34 USDT (+2.33% net return)** across 214 trades.
+    - Full 3-Year Net P&L (BTC Macro Gating): **+$58.01 USDT (+5.80% net return)**.
+    - Full 3-Year BTC-Only Net P&L: **+$17.73 USDT**.
+    - Circuit Breaker Status: **ZERO BREAKER TRIPS ACROSS ALL 34 MONTHS / 24,864 HOURS**.
+
 
 ---
 
