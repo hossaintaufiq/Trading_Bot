@@ -923,6 +923,20 @@ Milestone 4.6.3.1.4 formally concluded and closed the 2024 Development partition
 
 ---
 
+### 8.24 Strategy Research Reset: Hypothesis Design & Selection Framework
+
+Following formal closure, the research platform established an objective selection and hypothesis evaluation framework:
+1. **Epistemic Lessons Deconstruction:** Formally distinguished verified empirical facts (56% fee drag on 15m, failure to reject H0, breaker trip on Day 5) from speculative claims. Established that moving to higher timeframes does not guarantee profitability and requires rigorous validation.
+2. **Standardized Comparison Framework:** Formulated a 12-dimension evaluation matrix across three candidate families (Candidate A: HTF Trend Following, Candidate B: Volatility Breakout, Candidate C: Regime Mean Reversion) preventing favorable assumption bias.
+3. **Ten Objective Selection Gates:** Codified mandatory gates (GATE-01 through GATE-10) in [`NEPTUNE_EXPERIMENT_SELECTION_GATES.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_EXPERIMENT_SELECTION_GATES.md) spanning economic hypothesis, cost realism, sample adequacy ($N \ge 30$), and risk-breaker compatibility.
+4. **Adversarial Review & Blocker Identification:**
+   - *Candidate C (Mean Reversion):* Decisively rejected/shelved due to severe fee drag on narrow targets and runaway breakout tail risk.
+   - *Candidate B (Volatility Breakout):* Held in reserve; blocked on Gate 4 due to lack of dynamic breakout slippage modeling.
+   - *Candidate A (HTF Trend Following):* Strongest conceptual design, but blocked on Gate 5 due to sample size feasibility ($N < 25$ on 4h).
+5. **Authoritative Governance Determination:** **Zero candidates authorized for immediate execution.** NEPTUNE exercises its governance prerogative to reject immediate experimentation until Candidate A resolves sample size feasibility and Candidate B models breakout slippage.
+
+---
+
 ## 10. Architecture Decision Records & Audit Index
 
 ### Architectural Records
@@ -948,6 +962,9 @@ Milestone 4.6.3.1.4 formally concluded and closed the 2024 Development partition
 - **[ADR-034: Synthetic Short Collateralization Classification, Risk-Breaker Embargo Semantics, and Statistical Active-Window Partitioning](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-034-synthetic-short-collateralization-classification-risk-breaker-embargo-semantics-and-statistical-active-window-partitioning)**
 
 ### Research & Audit Documents
+- **Strategy Research Reset:** [`docs/research/NEPTUNE_STRATEGY_RESEARCH_RESET.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_STRATEGY_RESEARCH_RESET.md)
+- **Strategy Hypothesis Register:** [`docs/research/NEPTUNE_STRATEGY_HYPOTHESIS_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_STRATEGY_HYPOTHESIS_REGISTER.md)
+- **Experiment Selection Gates:** [`docs/research/NEPTUNE_EXPERIMENT_SELECTION_GATES.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_EXPERIMENT_SELECTION_GATES.md)
 - **Milestone 4.6.3.1.4 Research Closure:** [`docs/research/MILESTONE_4_6_3_1_4_RESEARCH_CLOSURE.md`](file:///d:/Project%202026/Trading_bot/docs/research/MILESTONE_4_6_3_1_4_RESEARCH_CLOSURE.md)
 - **Negative Results Register:** [`docs/research/NEPTUNE_NEGATIVE_RESULTS_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_NEGATIVE_RESULTS_REGISTER.md)
 - **Infrastructure Verification Register:** [`docs/research/NEPTUNE_INFRASTRUCTURE_VERIFICATION_REGISTER.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_INFRASTRUCTURE_VERIFICATION_REGISTER.md)
