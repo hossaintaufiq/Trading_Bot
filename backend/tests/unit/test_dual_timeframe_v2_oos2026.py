@@ -56,3 +56,4 @@ def test_2026_trade_ledger_invariants():
         assert float(t["exit_price"]) > 0
         assert float(t["position_size"]) > 0
         assert t["direction"] in ["LONG", "SHORT"]
+
