@@ -1,7 +1,6 @@
-import { redirect } from "next/navigation";
+import CommandCenterPage from "./(dashboard)/command-center/page";
 
-/** Root — redirect to Command Center by default. */
+/** Root — Render Command Center directly */
 export default function RootPage() {
-  redirect("/command-center");
+  return <CommandCenterPage />;
 }
-
