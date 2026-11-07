@@ -75,6 +75,20 @@ Counterparties on the losing side of these trades are typically short-term intra
 - **Statistical Significance:** Moving Block Bootstrap yields empirical **$p = 0.0270 < 0.05$**, rejecting the null hypothesis of zero/negative edge.
 - **All Ten Gates Satisfied:** Formally certified on 2024 Development partition. 2025 Validation and 2026 OOS partitions remain strictly locked.
 
+#### 9. Dual-Timeframe V2 Profit Optimization & Full-Year Continuous Trading (2026-11-07)
+- **Strategy Code & ADR:** `htf_trend_following_v2` / [ADR-036](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-036-dual-timeframe-strategy-v2-breakeven-stop-ratchet-symbol-quarantine-and-cppi-adaptive-risk-sizing)
+- **Report Document:** [`docs/research/NEPTUNE_SHR001_V2_PROFIT_OPTIMIZATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_V2_PROFIT_OPTIMIZATION_REPORT.md)
+- **Falsifiable Hypothesis:** Extending Candidate A2 with an embedded Breakeven Stop Ratchet (+1.5R to Entry + 0.35%), Symbol-Level Loss Quarantine (7-day timeout after 2 consecutive stopouts), and CPPI Drawdown-Adaptive Risk Sizing mathematically prevents the 5.0% maximum portfolio drawdown circuit breaker from tripping, allowing continuous full-year trading and compounding without sacrificing net positive expectancy.
+- **Empirical Validation Results (2024 Development):**
+  - **Net Realized P&L:** **+$66.62 USDT (+6.66% portfolio return)**.
+  - **Executed Trades:** **98 trades** (51 Wins / 47 Losses, **52.0% Win Rate**).
+  - **Profit Factor:** **1.72** (Gross profit \$214.98 / Gross loss \$124.83).
+  - **Maximum Drawdown:** **4.74%** (< 5.0% circuit breaker threshold).
+  - **Circuit Breaker Status:** **NEVER TRIPPED** (Active trading maintained all 365 days / 8,784 hourly bars).
+  - **Per-Symbol Profitability:** All three symbols net positive (`BTCUSDT` +$6.17, `ETHUSDT` +$30.58, `BNBUSDT` +$29.87).
+  - **Balance Sheet Reconciliation:** 100% verified in `PortfolioLedger`.
+
+
 ---
 
 ### Entry SHR-002: Volatility Compression & Expansion Breakout (`vol_compression_breakout_v1`)

@@ -176,3 +176,4 @@ Per Rule S-05, Rule S-06, and Rule S-07:
 1. **Development Success Only:** This result establishes that `htf_trend_following_v1` is viable on the 2024 Development partition. **It does not prove out-of-sample profitability.**
 2. **Partitions Remain Locked:** The **2025 Validation partition** and the **2026 Out-of-Sample partition** remain strictly locked and untouched.
 3. **No Code Tweaking:** Because the strategy achieved positive expectancy without parameter optimization, parameters must remain strictly frozen to avoid data snooping.
+
