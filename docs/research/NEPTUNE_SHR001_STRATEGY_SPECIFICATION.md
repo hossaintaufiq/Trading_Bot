@@ -148,3 +148,4 @@ In accordance with quantitative research governance (Rule S-06, Rule S-07):
 1. **Consecutive Pullback Failures:** If $> 4$ consecutive 1h swing entries fail within the same 4h trend regime, the trend filter is considered broken, and the strategy is placed on immediate cooldown.
 2. **Economic Hurdle Failure:** If net trade expectancy in Development testing falls below $+\$0.50$ USDT per trade after $0.32\%$ round-trip friction, the hypothesis is falsified.
 3. **Risk Breaker Invariant:** If maximum portfolio drawdown ever approaches $4.0\%$, trading must be self-throttled to preserve the $5.0\%$ absolute circuit breaker.
+

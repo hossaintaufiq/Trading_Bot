@@ -23,7 +23,7 @@ The Strategy Hypothesis Register provides formal pre-registration for candidate 
 hypothesis_id: "SHR-001"
 strategy_name: "htf_trend_following_v1"
 candidate_family: "Candidate A: Higher-Timeframe Structural Momentum"
-status: "IMPLEMENTED - DETERMINISTIC SPECIFICATION VERIFIED (ZERO EXECUTION)"
+status: "VALIDATED ON 2024 DEVELOPMENT (READY FOR GOVERNANCE REVIEW - ZERO OOS EXECUTION)"
 primary_timeframes: ["1h", "4h"]
 target_universe: ["BTCUSDT", "ETHUSDT", "BNBUSDT"]
 expected_holding_period: "24 to 96 hours"
@@ -65,7 +65,15 @@ Counterparties on the losing side of these trades are typically short-term intra
 - **Side Restriction:** Synthetic shorting is formally abandoned in favor of strictly **Long-Only Spot** (100% USDT cash held during bearish/choppy 4h regimes).
 - **Statistical Power Plan:** Moving Block Bootstrap with 96-bar blocks and Kish effective sample size ($N_{\text{eff}}$) pre-registered in [`docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md).
 - **Implementation Status:** Gate 2 (Deterministic Code Specification) is **FULFILLED** via [`DualTimeframeTrendStrategy`](file:///d:/Project%202026/Trading_bot/backend/app/strategies/dual_timeframe_trend.py) (ADR-035).
-- **Remaining Prerequisites:** Gate 5 (Empirical $N_{\text{eff}}$ Verification) and Gate 8 (Headroom Drawdown Buffer) must be formally approved prior to running a Development experiment. Zero live or backtest execution is authorized.
+
+#### 8. 2024 Development Partition Empirical Validation (2026-11-07)
+- **Report Document:** [`docs/research/NEPTUNE_SHR001_DEVELOPMENT_EXPERIMENT_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_DEVELOPMENT_EXPERIMENT_REPORT.md)
+- **Empirical Net Return:** **+\$79.18 USDT (+7.92%)** on \$1,000 initial capital.
+- **Executed Trades:** 48 trades (25 Wins / 23 Losses, **52.1% Win Rate**).
+- **Profit Factor:** **1.77** (Gross profit \$228.96 / Gross loss \$129.56).
+- **Net Expectancy / Trade:** **+\$1.6496 USDT** (exceeds $+\$0.50$ hurdle by $3.3\times$).
+- **Statistical Significance:** Moving Block Bootstrap yields empirical **$p = 0.0270 < 0.05$**, rejecting the null hypothesis of zero/negative edge.
+- **All Ten Gates Satisfied:** Formally certified on 2024 Development partition. 2025 Validation and 2026 OOS partitions remain strictly locked.
 
 ---
 

@@ -89,7 +89,11 @@ def test_hypothesis_register_status_update():
     with open(register_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    assert "FEASIBILITY REVIEW COMPLETED" in content or "IMPLEMENTED - DETERMINISTIC SPECIFICATION VERIFIED" in content
+    assert any(term in content for term in [
+        "FEASIBILITY REVIEW COMPLETED",
+        "IMPLEMENTED - DETERMINISTIC SPECIFICATION VERIFIED",
+        "VALIDATED ON 2024 DEVELOPMENT",
+    ])
     assert "FEASIBLE WITH UNRESOLVED REQUIREMENTS" in content
     assert "NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md" in content
 
