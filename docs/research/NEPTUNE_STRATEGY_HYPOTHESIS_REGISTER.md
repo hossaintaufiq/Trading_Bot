@@ -23,7 +23,7 @@ The Strategy Hypothesis Register provides formal pre-registration for candidate 
 hypothesis_id: "SHR-001"
 strategy_name: "htf_trend_following_v1"
 candidate_family: "Candidate A: Higher-Timeframe Structural Momentum"
-status: "FEASIBILITY REVIEW COMPLETED (FEASIBLE WITH UNRESOLVED REQUIREMENTS - ZERO EXECUTION)"
+status: "IMPLEMENTED - DETERMINISTIC SPECIFICATION VERIFIED (ZERO EXECUTION)"
 primary_timeframes: ["1h", "4h"]
 target_universe: ["BTCUSDT", "ETHUSDT", "BNBUSDT"]
 expected_holding_period: "24 to 96 hours"
@@ -64,7 +64,8 @@ Counterparties on the losing side of these trades are typically short-term intra
 - **Architecture Selection:** Design A2 (4h regime conditioning + 1h swing-structure entry) is favored over A1 (pure 4h, sample starvation) and A3 (1h limit pullbacks, adverse selection).
 - **Side Restriction:** Synthetic shorting is formally abandoned in favor of strictly **Long-Only Spot** (100% USDT cash held during bearish/choppy 4h regimes).
 - **Statistical Power Plan:** Moving Block Bootstrap with 96-bar blocks and Kish effective sample size ($N_{\text{eff}}$) pre-registered in [`docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md).
-- **Unresolved Requirements:** Gate 2 (Deterministic Code Specification), Gate 5 (Empirical $N_{\text{eff}}$ Verification), and Gate 8 (Headroom Drawdown Buffer) remain unfulfilled. Zero backtests or simulations are authorized.
+- **Implementation Status:** Gate 2 (Deterministic Code Specification) is **FULFILLED** via [`DualTimeframeTrendStrategy`](file:///d:/Project%202026/Trading_bot/backend/app/strategies/dual_timeframe_trend.py) (ADR-035).
+- **Remaining Prerequisites:** Gate 5 (Empirical $N_{\text{eff}}$ Verification) and Gate 8 (Headroom Drawdown Buffer) must be formally approved prior to running a Development experiment. Zero live or backtest execution is authorized.
 
 ---
 

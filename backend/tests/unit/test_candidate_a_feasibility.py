@@ -89,7 +89,7 @@ def test_hypothesis_register_status_update():
     with open(register_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    assert "FEASIBILITY REVIEW COMPLETED" in content
+    assert "FEASIBILITY REVIEW COMPLETED" in content or "IMPLEMENTED - DETERMINISTIC SPECIFICATION VERIFIED" in content
     assert "FEASIBLE WITH UNRESOLVED REQUIREMENTS" in content
     assert "NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md" in content
 
@@ -101,3 +101,4 @@ def test_governance_stop_condition_and_zero_simulation_invariant():
         content = f.read()
 
     assert "No historical simulation or backtest is authorized" in content or "ZERO EXECUTION" in content
+

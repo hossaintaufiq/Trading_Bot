@@ -942,6 +942,13 @@ Following formal closure, the research platform established an objective selecti
 4. **Long-Only Spot Enforcement:** Formally eliminated synthetic shorting in favor of strict Long-Only spot execution, holding 100% USDT cash during non-trending regimes.
 5. **Remaining Blockers:** Deterministic mathematical specification (Gate 2), empirical effective sample size confirmation (Gate 5), and risk-breaker headroom modeling (Gate 8) must be satisfied prior to any experiment submission. Zero backtests or simulations are authorized.
 
+### 8.26 Dual-Timeframe Strategy Implementation (`htf_trend_following_v1` / ADR-035) (2026-11-07)
+1. **Deterministic Implementation:** Implemented [`DualTimeframeTrendStrategy`](file:///d:/Project%202026/Trading_bot/backend/app/strategies/dual_timeframe_trend.py) adhering to the standard [`BaseStrategy`](file:///d:/Project%202026/Trading_bot/backend/app/strategies/base_strategy.py) contract.
+2. **Multi-Timeframe Regime Gating:** Formally codified the 4h cash-preservation filter (EMA 50 > EMA 200, ADX $\ge 22.0$). In non-trending or bear regimes, the strategy strictly emits `None`, keeping 100% USDT cash to prevent circuit-breaker trips during chop.
+3. **Market Structure Shift Timing:** Implemented 1h dynamic pullback verification (retracement into EMA 21/50 zone) followed by a confirmed 1h close breaking above the local 5-bar swing high.
+4. **Asymmetric Payoff Geometry:** Formally enforced minimum Reward-to-Risk ratio $\ge 2.5:1$ with structural stops anchored to 1h swing lows ($1.0\% - 4.0\%$ distance) and Decimal monetary precision (Rule A-01). Frictional cost drag is compressed to $<7\% - 12\%$ of target move (vs. $>35\%$ on 15m baseline).
+5. **Unit Test Verification:** Verified with 5 comprehensive deterministic unit tests (`test_dual_timeframe_strategy.py`) covering Rule A-09 candle closing, bear cash preservation, weak ADX chop suppression, valid swing breakout setup, and Decimal precision. All 28 tests pass across the test suite.
+
 ---
 
 ## 10. Architecture Decision Records & Audit Index
@@ -967,8 +974,10 @@ Following formal closure, the research platform established an objective selecti
 - **[ADR-032: Independent Forensic Accounting Reconciliation, Cash-Equity Inversion Remediation, and Point-Mass Bootstrap Diagnosis](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-032-independent-forensic-accounting-reconciliation-cash-equity-inversion-remediation-and-point-mass-bootstrap-diagnosis)**
 - **[ADR-033: Portfolio Accounting Remediation, Double-Entry Short Collateral Model, and Risk Breaker Enforcement](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-033-portfolio-accounting-remediation-double-entry-short-collateral-model-and-risk-breaker-enforcement)**
 - **[ADR-034: Synthetic Short Collateralization Classification, Risk-Breaker Embargo Semantics, and Statistical Active-Window Partitioning](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-034-synthetic-short-collateralization-classification-risk-breaker-embargo-semantics-and-statistical-active-window-partitioning)**
+- **[ADR-035: Dual-Timeframe Higher-Timeframe Trend Following Strategy Architecture and BaseStrategy Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-035-dual-timeframe-higher-timeframe-trend-following-strategy-architecture-and-basestrategy-integration)**
 
 ### Research & Audit Documents
+- **Candidate A Strategy Specification:** [`docs/research/NEPTUNE_SHR001_STRATEGY_SPECIFICATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_STRATEGY_SPECIFICATION.md)
 - **Candidate A Dual-Timeframe Feasibility:** [`docs/research/NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md)
 - **Candidate A Statistical Power Plan:** [`docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_STATISTICAL_POWER_PLAN.md)
 - **Candidate A Execution & Risk Requirements:** [`docs/research/NEPTUNE_SHR001_EXECUTION_AND_RISK_REQUIREMENTS.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_EXECUTION_AND_RISK_REQUIREMENTS.md)

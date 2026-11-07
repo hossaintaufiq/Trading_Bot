@@ -169,3 +169,4 @@ NEPTUNE strictly enforces the **Order Embargo Resolution Policy**:
    Because an open position could still lose up to its stop distance ($0.50\%$), the strategy must maintain a **1.00% Risk Headroom Buffer**:
    $$\text{Operational Drawdown Target } MDD_{\text{target}} \le 4.00\%$$
    If strategy drawdown reaches $4.00\%$, new position entry should be self-throttled to preserve the $5.00\%$ absolute breaker.
+

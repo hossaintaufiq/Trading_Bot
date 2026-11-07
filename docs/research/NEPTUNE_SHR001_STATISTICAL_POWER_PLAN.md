@@ -166,3 +166,4 @@ If a Development experiment for Candidate A2 is eventually authorized by the Gov
 4. **$N_{\text{eff}}$ Computation:** Calculate Kish effective sample size $N_{\text{eff}}$. If $N_{\text{eff}} < 25$, immediately flag `SAMPLE_ADEQUACY_BREACH`.
 5. **Continuous Time-Grid MBB:** Map trade returns onto the regular continuous 1h market-time grid and run 10,000 block bootstrap iterations with block length $L = 96$.
 6. **Hypothesis Testing:** Evaluate null-centered empirical $p$-value and $95\%$ BCa confidence intervals against the pre-registered hurdles ($\hat{\mu} \ge +\$0.50$ USDT, $p < 0.05$).
+

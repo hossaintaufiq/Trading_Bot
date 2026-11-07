@@ -43,6 +43,9 @@
 - [ADR-030: Online Control Matching, Executable News Veto Engine, Timeframe Bootstrap Calibration, and OOS Access Guard](#adr-030-online-control-matching-executable-news-veto-engine-timeframe-bootstrap-calibration-and-oos-access-guard)
 - [ADR-031: Development-Partition Experimental Execution, 4-Group Synchronized Simulation Engine, and Candidate Stream Caching](#adr-031-development-partition-experimental-execution-4-group-synchronized-simulation-engine-and-candidate-stream-caching)
 - [ADR-032: Independent Forensic Accounting Reconciliation, Cash-Equity Inversion Remediation, and Point-Mass Bootstrap Diagnosis](#adr-032-independent-forensic-accounting-reconciliation-cash-equity-inversion-remediation-and-point-mass-bootstrap-diagnosis)
+- [ADR-033: Portfolio Accounting Remediation, Double-Entry Short Collateral Model, and Risk Breaker Enforcement](#adr-033-portfolio-accounting-remediation-double-entry-short-collateral-model-and-risk-breaker-enforcement)
+- [ADR-034: Synthetic Short Collateralization Classification, Risk-Breaker Embargo Semantics, and Statistical Active-Window Partitioning](#adr-034-synthetic-short-collateralization-classification-risk-breaker-embargo-semantics-and-statistical-active-window-partitioning)
+- [ADR-035: Dual-Timeframe Higher-Timeframe Trend Following Strategy Architecture and BaseStrategy Integration](#adr-035-dual-timeframe-higher-timeframe-trend-following-strategy-architecture-and-basestrategy-integration)
 
 ---
 
@@ -796,3 +799,34 @@
   - Eliminates ambiguity regarding short selling realism and circuit breaker behavior.
   - Certifies the mathematical and execution soundness of Milestone 4.6.3.1.2 under `PASS WITH LIMITATIONS`.
   - Preserves 100% research integrity under NEPTUNE governance rules.
+
+
+---
+
+## ADR-035: Dual-Timeframe Higher-Timeframe Trend Following Strategy Architecture and BaseStrategy Integration
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**: 
+  - Following the closure of Milestone 4.6.3.1.4 and Candidate A feasibility review, a flexible, profit-capable strategy architecture was designed to overcome the friction trap of 15m trading.
+  - The previous baseline `trend_continuation_v1` on 15m suffered from an adverse friction ratio: the fixed $0.32\%$ round-trip exchange friction consumed $>35\%$ of stop distances and $>25\%$ of price targets, leading to structural negative expectancy ($-1.964\text{ USDT}$/trade) and circuit breaker activation within 12 trades.
+  - Candidate A2 (Dual-Timeframe: 4h Regime Conditioning + 1h Swing-Structure Entry) was selected to compress friction to $<7\%$ of target moves, provide asymmetric payoff geometry ($R:R \ge 2.5:1$), and preserve cash during non-trending regimes.
+- **Decision**:
+  1. **Implementation of `DualTimeframeTrendStrategy`**:
+     - Created [`backend/app/strategies/dual_timeframe_trend.py`](file:///d:/Project%202026/Trading_bot/backend/app/strategies/dual_timeframe_trend.py) implementing the standard [`BaseStrategy`](file:///d:/Project%202026/Trading_bot/backend/app/strategies/base_strategy.py) contract.
+     - Registered under `strategy_id = "htf_trend_following_v1"`, matching hypothesis `SHR-001`.
+  2. **Multi-Timeframe Gating & Cash Preservation**:
+     - *4h Macro Regime Gate:* Trend is BULLISH if 4h EMA 50 > EMA 200, 4h Close > EMA 50, and 4h ADX(14) $\ge 22.0$. In non-bullish or choppy regimes, the strategy strictly returns `None`, preserving 100% USDT cash (cash as an active position).
+     - *1h Micro Swing Timing:* Pullback into the dynamic support band (between 1h EMA 21 and EMA 50), followed by a confirmed Market Structure Shift (confirmed 1h close above the local 5-bar swing high).
+  3. **Asymmetric Payoff & Execution Invariants**:
+     - Structural stop loss placed below the pullback swing low ($1.0\% - 4.0\%$ distance) buffered by ATR.
+     - Target set at minimum $2.5:1$ to $3.5:1$ Reward-to-Risk ratio, capturing multi-day macro moves while keeping risk tight.
+     - Strictly Long-Only Spot (zero short selling, Rule S-01).
+     - Decimal monetary calculations (Rule A-01).
+     - Incomplete candle rejection (Rule A-09).
+  4. **Resampling Flexibility**:
+     - Strategy can consume an explicit pre-aggregated 4h DataFrame or resample from 1h OHLCV on-the-fly without look-ahead bias (excluding in-progress 4h candles).
+- **Consequences**:
+  - Provides a modular, testable, deterministic strategy ready for controlled evaluation on the 2024 Development partition.
+  - Fully verified with 5 deterministic unit tests covering incomplete candle rejection, cash preservation in bear/chop regimes, structural swing breakout, and Decimal precision.
+
