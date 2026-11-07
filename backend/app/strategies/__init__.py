@@ -9,6 +9,10 @@ from app.strategies.dual_timeframe_trend import (
     DualTimeframeConfig,
     DualTimeframeTrendStrategy,
 )
+from app.strategies.dual_timeframe_trend_v2 import (
+    DualTimeframeConfigV2,
+    DualTimeframeTrendStrategyV2,
+)
 
 __all__ = [
     "BaseStrategy",
@@ -17,5 +21,7 @@ __all__ = [
     "TimeFrame",
     "DualTimeframeConfig",
     "DualTimeframeTrendStrategy",
+    "DualTimeframeConfigV2",
+    "DualTimeframeTrendStrategyV2",
 ]
 

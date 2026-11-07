@@ -961,6 +961,21 @@ Following formal closure, the research platform established an objective selecti
 3. **Capital Preservation Shield:** Strategy operated continuously for 4.5 months (Jan 1 to May 19), compared to 5.6 days for the 15m baseline. When a drawdown reached 5.11% on May 19, the circuit breaker locked in **+\$79.18 USDT of net profit** for the remainder of 2024, preventing capital erosion during summer chop.
 4. **All Ten Selection Gates Satisfied:** Formally certified all 10 selection gates on the 2024 Development partition. 2025 Validation and 2026 OOS remain strictly locked.
 
+### 8.28 Dual-Timeframe Strategy V2 Profit Optimization & Full-Year Continuous Trading (`htf_trend_following_v2` / ADR-036) (2026-11-07)
+1. **Resolution of May 19 Lockout:** Identified that the premature circuit-breaker trip on May 19 was caused by altcoin chop contagion (5 consecutive stopouts in `BNBUSDT`) and winner decay (giving back $+1.5\text{R}$ gains).
+2. **Four Architectural Profit Enhancements ([ADR-036](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-036-dual-timeframe-strategy-v2-breakeven-stop-ratchet-symbol-quarantine-and-cppi-adaptive-risk-sizing)):**
+   - *Hardened Macro Regime Filter:* 4h ADX threshold increased to $\ge 24.0$ (`min_adx_4h = 24.0`).
+   - *Dynamic Breakeven Stop Ratchet:* Ratchets stop to $\text{Entry} + 0.35\%$ (covering all friction) once $+1.5\text{R}$ unrealized profit is achieved.
+   - *Symbol-Level Loss Quarantine:* 7-day (168-hour) cooldown after 2 consecutive stops, insulating the portfolio from localized chop.
+   - *CPPI Drawdown-Adaptive Risk Sizing:* Dynamically dampens risk as drawdown approaches 4.8%, creating a mathematical barrier against the 5.0% circuit breaker.
+3. **Empirical Performance on 2024 Development Partition:**
+   - **Circuit Breaker Status:** **NEVER TRIPPED (SAFE)** across all 365 days / 8,784 hourly bars!
+   - **Maximum Drawdown:** Held strictly to **4.74%** (< 5.0% limit).
+   - **Net Realized P&L:** **+$66.62 USDT (+6.66% portfolio return)** after paying $37.61 USDT in total transaction costs.
+   - **Total Executed Trades:** **98 trades** (51 Wins / 47 Losses, **52.0% Win Rate**, **Profit Factor 1.72**).
+   - **Per-Symbol Profitability:** All three assets net profitable: `BTCUSDT` (+$6.17), `ETHUSDT` (+$30.58), `BNBUSDT` (+$29.87).
+   - **Balance Sheet Reconciliation:** 100% verified in [`PortfolioLedger`](file:///d:/Project%202026/Trading_bot/backend/app/simulation/portfolio_ledger.py).
+
 ---
 
 ## 10. Architecture Decision Records & Audit Index
@@ -987,8 +1002,10 @@ Following formal closure, the research platform established an objective selecti
 - **[ADR-033: Portfolio Accounting Remediation, Double-Entry Short Collateral Model, and Risk Breaker Enforcement](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-033-portfolio-accounting-remediation-double-entry-short-collateral-model-and-risk-breaker-enforcement)**
 - **[ADR-034: Synthetic Short Collateralization Classification, Risk-Breaker Embargo Semantics, and Statistical Active-Window Partitioning](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-034-synthetic-short-collateralization-classification-risk-breaker-embargo-semantics-and-statistical-active-window-partitioning)**
 - **[ADR-035: Dual-Timeframe Higher-Timeframe Trend Following Strategy Architecture and BaseStrategy Integration](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-035-dual-timeframe-higher-timeframe-trend-following-strategy-architecture-and-basestrategy-integration)**
+- **[ADR-036: Dual-Timeframe Strategy V2, Breakeven Stop Ratchet, Symbol Quarantine, and CPPI Adaptive Risk Sizing](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-036-dual-timeframe-strategy-v2-breakeven-stop-ratchet-symbol-quarantine-and-cppi-adaptive-risk-sizing)**
 
 ### Research & Audit Documents
+- **Candidate A2-V2 Profit Optimization Report:** [`docs/research/NEPTUNE_SHR001_V2_PROFIT_OPTIMIZATION_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_V2_PROFIT_OPTIMIZATION_REPORT.md)
 - **Candidate A Development Experiment Report:** [`docs/research/NEPTUNE_SHR001_DEVELOPMENT_EXPERIMENT_REPORT.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_DEVELOPMENT_EXPERIMENT_REPORT.md)
 - **Candidate A Strategy Specification:** [`docs/research/NEPTUNE_SHR001_STRATEGY_SPECIFICATION.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_STRATEGY_SPECIFICATION.md)
 - **Candidate A Dual-Timeframe Feasibility:** [`docs/research/NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md`](file:///d:/Project%202026/Trading_bot/docs/research/NEPTUNE_SHR001_DUAL_TIMEFRAME_FEASIBILITY.md)

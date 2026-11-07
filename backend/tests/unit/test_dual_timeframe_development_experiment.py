@@ -75,3 +75,4 @@ def test_dual_timeframe_trade_ledger_integrity():
         assert t["stop_loss"] < t["entry_price"]
         assert t["fees"] > 0
         assert t["exit_reason"] in ("TAKE_PROFIT", "STOP_LOSS", "TIME_STOP")
+

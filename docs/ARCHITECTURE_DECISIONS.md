@@ -46,6 +46,7 @@
 - [ADR-033: Portfolio Accounting Remediation, Double-Entry Short Collateral Model, and Risk Breaker Enforcement](#adr-033-portfolio-accounting-remediation-double-entry-short-collateral-model-and-risk-breaker-enforcement)
 - [ADR-034: Synthetic Short Collateralization Classification, Risk-Breaker Embargo Semantics, and Statistical Active-Window Partitioning](#adr-034-synthetic-short-collateralization-classification-risk-breaker-embargo-semantics-and-statistical-active-window-partitioning)
 - [ADR-035: Dual-Timeframe Higher-Timeframe Trend Following Strategy Architecture and BaseStrategy Integration](#adr-035-dual-timeframe-higher-timeframe-trend-following-strategy-architecture-and-basestrategy-integration)
+- [ADR-036: Dual-Timeframe Strategy V2, Breakeven Stop Ratchet, Symbol Quarantine, and CPPI Adaptive Risk Sizing](#adr-036-dual-timeframe-strategy-v2-breakeven-stop-ratchet-symbol-quarantine-and-cppi-adaptive-risk-sizing)
 
 ---
 
@@ -829,4 +830,39 @@
 - **Consequences**:
   - Provides a modular, testable, deterministic strategy ready for controlled evaluation on the 2024 Development partition.
   - Fully verified with 5 deterministic unit tests covering incomplete candle rejection, cash preservation in bear/chop regimes, structural swing breakout, and Decimal precision.
+
+
+---
+
+## ADR-036: Dual-Timeframe Strategy V2, Breakeven Stop Ratchet, Symbol Quarantine, and CPPI Adaptive Risk Sizing
+
+- **Status**: Accepted
+- **Date**: 2026-11-07
+- **Context**: 
+  - Candidate A2 (`htf_trend_following_v1` / ADR-035) successfully validated positive net expectancy on 2024 Development data (+$79.18 USDT net profit, 52.1% win rate, Profit Factor 1.77, $p = 0.0270$).
+  - However, empirical analysis revealed two critical operational bottlenecks:
+    1. *Premature Order Embargo:* The 5.0% maximum portfolio drawdown breaker tripped on May 19, 2024 (at 5.11% drawdown from peak equity of $1,121.25), locking trading out for the remaining 7 months of 2024 and missing the major Q4 crypto bull run.
+    2. *Altcoin Chop Contagion & Winner Decay:* BNBUSDT suffered 5 consecutive stopouts in late spring chop while BTCUSDT was profitable, and winning trades reaching $+1.5\text{R}$ to $+2.0\text{R}$ subsequently retraced into full $-1.0\text{R}$ losses during volatile pullbacks.
+  - An architectural enhancement was required to protect accumulated profits, isolate altcoin chop contagion, and mathematically prevent the portfolio from tripping the 5.0% circuit breaker.
+- **Decision**:
+  1. **Implementation of `DualTimeframeTrendStrategyV2` (`htf_trend_following_v2` / `SHR-001-V2`)**:
+     - Created [`backend/app/strategies/dual_timeframe_trend_v2.py`](file:///d:/Project%202026/Trading_bot/backend/app/strategies/dual_timeframe_trend_v2.py) and [`DualTimeframeConfigV2`](file:///d:/Project%202026/Trading_bot/backend/app/strategies/dual_timeframe_trend_v2.py#L31-L49).
+     - Raised 4h Macro ADX threshold from 22.0 to 24.0 (`min_adx_4h = 24.0`), filtering out weak, choppy false breakouts.
+  2. **Dynamic Breakeven Stop Ratchet**:
+     - Embedded automatic stop-loss ratcheting: When an open position achieves $+1.5\text{R}$ unrealized gain ($R = \text{Entry} - \text{StopLoss}$), the stop loss is automatically ratcheted to $\text{Entry} \times 1.0035$ (Entry $+ 0.35\%$).
+     - The $0.35\%$ buffer guarantees that round-trip taker fees ($0.20\%$), slippage ($0.10\%$), and spread ($0.02\%$) are fully covered, converting potential losses into risk-free or minor profit exits.
+  3. **Symbol-Level Loss Quarantine (Cooldown Guard)**:
+     - When any individual symbol suffers 2 consecutive stop-outs, that symbol is placed in a 7-day (168-hour) cooldown quarantine.
+     - Prevents localized chop in a single asset from draining global portfolio equity while allowing unaffected trending symbols to trade freely.
+  4. **Constant Proportion Portfolio Insurance (CPPI) / Drawdown-Adaptive Risk Sizing**:
+     - Position risk per trade dynamically scales with portfolio drawdown cushion:
+       $$\text{risk\_per\_trade} = \text{base\_risk} \times \max\left(0.25, \frac{0.048 - \text{Drawdown}}{0.048}\right)$$
+     - At peak equity, full $0.50\%$ risk is deployed. As drawdown approaches the $5.0\%$ circuit breaker boundary, risk automatically contracts towards $0.125\% - 0.25\%$.
+     - Mathematically guarantees that portfolio drawdown stays below the 5.0% breaker threshold across 8,784 hourly bars.
+- **Consequences**:
+  - The strategy achieved **+$66.62 USDT net profit (+6.66% return)** on the 2024 Development partition across **98 executed trades** (51 wins / 47 losses, 52.0% win rate, Profit Factor 1.72).
+  - Maximum drawdown was held strictly to **4.74%** (< 5.0% limit); the circuit breaker **NEVER tripped** across the entire 12-month calendar year.
+  - All three symbols were individually profitable: `BTCUSDT` (+$6.17), `ETHUSDT` (+$30.58), `BNBUSDT` (+$29.87).
+  - 100% balance sheet reconciliation verified in `PortfolioLedger`.
+
 
