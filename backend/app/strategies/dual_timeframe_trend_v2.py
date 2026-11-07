@@ -53,6 +53,9 @@ class DualTimeframeConfigV2(BaseModel):
     # Trade Management & Risk Protection Parameters
     breakeven_trigger_r: float = 1.5
     breakeven_buffer_pct: float = 0.0035  # 0.35% covers round-trip taker fees and slippage
+    profit_lock_trigger_r: float = 2.0    # Fine-Tuned Stage 2 profit lock trigger (+2.0R)
+    profit_lock_r: float = 1.0            # Fine-Tuned Stage 2 profit lock level (+1.0R locked)
+    btc_macro_gating: bool = True         # Fine-Tuned Altcoin Shield (BTC 4h macro trend gate)
     symbol_cooldown_stops: int = 2
     symbol_cooldown_hours: int = 168  # 7 days (168 hours)
     cppi_dd_threshold: float = 0.048
