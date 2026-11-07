@@ -254,3 +254,4 @@ $$\mathbf{FEASIBILITY\ VERDICT:}\quad\mathbf{FEASIBLE\ WITH\ UNRESOLVED\ REQUIRE
    - **Gate 5 (Empirical Sample Adequacy):** While the dual-timeframe structure plausibly increases trade count to $45 - 75$ trades, the true cross-asset correlation and effective sample size ($N_{\text{eff}}$) cannot be verified without historical execution.
    - **Gate 8 (Risk Breaker Headroom):** The strategy must demonstrate that a 2-asset correlated stopout during a market-wide reversal will not breach the $5.0\%$ circuit breaker.
 3. **Governance Stance:** This feasibility study does **NOT** authorize a backtest or simulation. It establishes the quantitative prerequisites that must be met before an experimental proposal can be submitted to the Governance Committee.
+
