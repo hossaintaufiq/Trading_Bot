@@ -56,3 +56,25 @@ def test_fill_at_next_open_with_costs_and_pnl_reconciles():
 def test_flat_market_no_trades_no_cost():
     res = run_sleeve("X", _df([10.0] * 30), Decimal("1000"), DailyTrendConfig())
     assert res.trades == [] and res.equity["2024-01-30"] == Decimal("1000")
+
+
+def test_account_opened_mid_trend_skips_running_trend_until_fresh_signal():
+    closes = [10.0] * 5 + [11.0, 12.0, 13.0, 14.0, 9.0, 9.0, 9.0, 10.0, 11.0, 12.0, 13.0]
+    df = _df(closes)
+    cfg = DailyTrendConfig(entry_lookback=3, exit_lookback=3)
+    full = run_sleeve("X", df, Decimal("1000"), cfg)
+    late = run_sleeve("X", df, Decimal("1000"), cfg, active_from=7)      # account opens while trend #1 is running
+    assert len(full.trades) >= 1
+    assert all(e.date >= "2024-01-12" for e in late.events if e.side == "BUY")  # first buy is the NEW trend, not trend #1
+
+
+def test_account_ledger_replay_matches_sleeve_totals():
+    import os
+    import pytest
+    from app.simulation.daily_trend_backtest import DATA_DIR, run_account
+    if not all(os.path.exists(DATA_DIR / f"{s}.parquet") for s in ("BTCUSDT", "ETHUSDT", "BNBUSDT")):
+        pytest.skip("daily research data not downloaded")
+    r = run_account(["BTCUSDT", "ETHUSDT", "BNBUSDT"], "2025-01-01")
+    assert r["ledger"], "expected trades"
+    assert abs(r["ledger"][-1]["total_after"] - r["total_now"]) < 1e-6          # fill-by-fill replay == sleeve equity
+    assert abs(r["cash_now"] + r["coins_now"] - r["total_now"]) < 1e-9

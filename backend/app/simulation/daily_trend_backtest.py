@@ -32,18 +32,45 @@ class Trade:
 
 
 @dataclass
+class Event:
+    """One paper fill (A-10: price includes slippage + half spread; fee recorded)."""
+    date: str
+    symbol: str
+    side: str            # BUY | SELL
+    price: Decimal
+    qty: Decimal
+    fee: Decimal
+    net_pnl: Optional[Decimal] = None   # SELL only: profit after all costs
+
+
+@dataclass
 class SleeveResult:
     equity: Dict[str, Decimal] = field(default_factory=dict)   # date -> sleeve equity at close
+    cash: Dict[str, Decimal] = field(default_factory=dict)     # date -> sleeve cash at close
     trades: List[Trade] = field(default_factory=list)
+    events: List[Event] = field(default_factory=list)
+    qty: Decimal = Decimal(0)                                  # coins held at the end
+    entry_price: Decimal = Decimal(0)
 
 
 def load_daily(symbol: str) -> pd.DataFrame:
     return pd.read_parquet(DATA_DIR / f"{symbol}.parquet").sort_values("timestamp").reset_index(drop=True)
 
 
-def run_sleeve(symbol: str, df: pd.DataFrame, capital: Decimal, cfg: DailyTrendConfig) -> SleeveResult:
+def run_sleeve(symbol: str, df: pd.DataFrame, capital: Decimal, cfg: DailyTrendConfig, active_from: int = 0) -> SleeveResult:
+    """`active_from`: bar index before which the account is flat; a trend already running then is NOT entered."""
     closes = [float(x) for x in df["close"]]
     desired = compute_positions(closes, cfg.entry_lookback, cfg.exit_lookback)
+    if active_from > 0 and desired[active_from - 1] == 1:
+        # a trend was already running when the account opened: skip it, wait for the next fresh buy signal
+        j = active_from
+        while j < len(desired) and desired[j] == 1:
+            j += 1
+        for k in range(j):
+            desired[k] = 0
+    elif active_from > 0:
+        for k in range(active_from):
+            desired[k] = 0
     cash, qty, entry_cost, entry_px, entry_t, fees_in = capital, Decimal(0), Decimal(0), Decimal(0), "", Decimal(0)
     res = SleeveResult()
     for i in range(len(df)):
@@ -56,14 +83,18 @@ def run_sleeve(symbol: str, df: pd.DataFrame, capital: Decimal, cfg: DailyTrendC
             fee = q * px * FEE
             cash -= q * px + fee
             qty, entry_px, entry_t, fees_in, entry_cost = q, px, ts, fee, q * px + fee
+            res.events.append(Event(ts, symbol, "BUY", px, q, fee))
         elif prev == 0 and qty > 0:
             px = open_i * (1 - SLIP - HALF_SPREAD)
             fee = qty * px * FEE
             proceeds = qty * px - fee
             cash += proceeds
             res.trades.append(Trade(symbol, entry_t, ts, entry_px, px, proceeds - entry_cost, fees_in + fee))
+            res.events.append(Event(ts, symbol, "SELL", px, qty, fee, proceeds - entry_cost))
             qty = Decimal(0)
         res.equity[ts] = cash + qty * Decimal(str(df["close"].iloc[i]))
+        res.cash[ts] = cash
+    res.qty, res.entry_price = qty, entry_px
     return res
 
 
@@ -116,3 +147,55 @@ if __name__ == "__main__":
         wins = sum(1 for t in r["trades"] if t.net_pnl > 0)
         print(f"{label}: final ${r['final']:.2f}  net {r['net_return_pct']:+.1f}%  maxDD {r['max_drawdown_pct']:.1f}%  "
               f"trades {len(r['trades'])} wins {wins}  fees ${r['total_fees']:.2f}  B&H {buy_and_hold(syms, a, b):+.1f}%")
+
+
+def run_account(symbols: List[str], start: str, initial: Decimal = Decimal("1000"),
+                cfg: Optional[DailyTrendConfig] = None) -> dict:
+    """Paper account opened flat on `start` with `initial` USDT split equally across symbols.
+    Returns every fill with the account's cash / coins / total value right after it."""
+    cfg = cfg or DailyTrendConfig()
+    per = initial / len(symbols)
+    sleeves, frames = {}, {}
+    for s in symbols:
+        df = load_daily(s)
+        idx = int((df["timestamp"] < pd.Timestamp(start, tz="UTC")).sum())      # first bar of the account
+        frames[s] = df
+        sleeves[s] = run_sleeve(s, df.iloc[max(0, idx - 120):].reset_index(drop=True), per, cfg,
+                                active_from=min(idx, 120))
+    dates = sorted(d for d in set.intersection(*[set(r.equity) for r in sleeves.values()]) if d >= start)
+    total = {d: sum(r.equity[d] for r in sleeves.values()) for d in dates}
+    cash = {d: sum(r.cash[d] for r in sleeves.values()) for d in dates}
+    events = sorted((e for r in sleeves.values() for e in r.events if e.date >= start), key=lambda e: (e.date, e.symbol))
+    close_px = {s: {d.strftime("%Y-%m-%d"): Decimal(str(c)) for d, c in zip(f["timestamp"], f["close"])} for s, f in frames.items()}
+    ledger, prev, cash_run, held = [], initial, initial, {s: Decimal(0) for s in symbols}
+    for e in events:                      # replay fill by fill so same-day trades each show their own effect
+        amount = e.price * e.qty
+        if e.side == "BUY":
+            cash_run -= amount + e.fee
+            held[e.symbol] += e.qty
+        else:
+            cash_run += amount - e.fee
+            held[e.symbol] -= e.qty
+        coins = sum((held[s] * close_px[s][e.date] for s in symbols), Decimal(0))
+        t = cash_run + coins
+        ledger.append({
+            "date": e.date, "symbol": e.symbol, "side": e.side, "price": float(e.price), "qty": float(e.qty),
+            "amount": float(amount), "fee": float(e.fee),
+            "profit": float(e.net_pnl) if e.net_pnl is not None else None,
+            "cash_after": float(cash_run), "coins_after": float(coins), "total_after": float(t),
+            "total_change": float(t - prev),
+        })
+        prev = t
+    holdings = []
+    for s, r in sleeves.items():
+        if r.qty > 0:
+            last = Decimal(str(frames[s]["close"].iloc[-1]))
+            holdings.append({"symbol": s, "qty": float(r.qty), "bought_at": float(r.entry_price),
+                             "value": float(r.qty * last), "unrealized_pct": float((last / r.entry_price - 1) * 100)})
+    now = total[dates[-1]]
+    return {
+        "start": start, "initial": float(initial), "total_now": float(now), "cash_now": float(cash[dates[-1]]),
+        "coins_now": float(now - cash[dates[-1]]), "return_pct": float((now / initial - 1) * 100),
+        "fees_paid": float(sum(e.fee for e in events)), "holdings": holdings, "ledger": ledger,
+        "curve": [{"date": d, "total": float(total[d])} for d in dates[:: max(1, len(dates) // 500)]] + [{"date": dates[-1], "total": float(now)}],
+    }

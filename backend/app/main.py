@@ -146,3 +146,15 @@ async def daily_trend_agent(symbol: str) -> dict:
             "markers": markers,
         }
     return _AGENT_CACHE[key]
+
+
+@app.get("/api/v1/daily-trend/account", tags=["Simulation"])
+async def daily_trend_account(start: str = "2024-01-01") -> dict:
+    """Paper-money account: cash, coins and total value after every agent trade, opened flat on `start`."""
+    from decimal import Decimal
+
+    from app.simulation.daily_trend_backtest import run_account
+
+    if start not in ("2024-01-01", "2025-01-01", "2026-01-01"):
+        return {"error": "start must be 2024-01-01, 2025-01-01 or 2026-01-01"}
+    return run_account(["BTCUSDT", "ETHUSDT", "BNBUSDT"], start, Decimal("1000"))
