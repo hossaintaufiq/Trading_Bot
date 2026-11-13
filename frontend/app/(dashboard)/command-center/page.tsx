@@ -210,6 +210,10 @@ export default function CommandCenterPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans selection:bg-cyan-500/30">
+      <div className="mb-4 rounded-lg border border-amber-600/60 bg-amber-950/40 p-3 text-sm text-amber-200">
+        <b>Superseded figures:</b> the intraday V2 performance numbers on this page came from a backtest with a look-ahead bug and are not valid
+        (corrected V2 result: net −$12 over 2024–26). See ADR-037 and the <a href="/live-markets" className="underline">Live Market &amp; Agent</a> page for the current strategy.
+      </div>
       {/* Top Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
         <div>

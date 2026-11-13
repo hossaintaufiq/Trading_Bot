@@ -1,4 +1,7 @@
 # NEPTUNE Strategy Research Report — `SHR-001-V2`
+
+> **⚠ SUPERSEDED (2026-11-13, ADR-037):** the backtest runners fed the in-progress 4h candle to this strategy (look-ahead, violates A-09/S-05). After the fix, V2 net P&L is 2024 +$47.94 (5% breaker trips 2024-11-24), 2025 -$13.56, 2026 -$46.39 (total -$12.01); gross P&L over 189 trades +$35.70 (t = 0.66). The figures below are the pre-fix, biased results and must not be cited as evidence of profitability (S-07).
+
 ## Dual-Timeframe Trend Following V2: Profit Optimization & Drawdown Protection
 
 ### Document Information

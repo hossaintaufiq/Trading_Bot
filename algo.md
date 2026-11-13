@@ -1,4 +1,9 @@
 # NEPTUNE Dual-Timeframe Trend Following Algorithm (V2)
+
+> **⚠ SUPERSEDED (2026-11-13, ADR-037):** the backtest runners fed the in-progress 4h candle to this strategy (look-ahead, violates A-09/S-05). After the fix, V2 net P&L is 2024 +$47.94 (5% breaker trips 2024-11-24), 2025 -$13.56, 2026 -$46.39 (total -$12.01); gross P&L over 189 trades +$35.70 (t = 0.66). The figures below are the pre-fix, biased results and must not be cited as evidence of profitability (S-07).
+
+> **Current research candidate:** `daily_trend_v1` (ADR-037, `backend/app/strategies/daily_trend.py`): long-only daily Donchian 20/10 trend rule, +25.6% net on BTC/ETH/BNB 2024-26 (max DD 38%), +52% on a 36-coin universe incl. delisted coins; see ADR-037 for caveats.
+
 **Strategy ID:** `htf_trend_following_v2` | **Hypothesis:** `SHR-001-V2` | **Architecture Decision:** [ADR-036](file:///d:/Project%202026/Trading_bot/docs/ARCHITECTURE_DECISIONS.md#adr-036-dual-timeframe-strategy-v2-breakeven-stop-ratchet-symbol-quarantine-and-cppi-adaptive-risk-sizing)
 
 ---

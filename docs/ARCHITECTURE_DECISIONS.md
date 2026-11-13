@@ -865,4 +865,27 @@
   - All three symbols were individually profitable: `BTCUSDT` (+$6.17), `ETHUSDT` (+$30.58), `BNBUSDT` (+$29.87).
   - 100% balance sheet reconciliation verified in `PortfolioLedger`.
 
+---
+
+## ADR-037: Daily Donchian Trend Strategy (`daily_trend_v1`), Look-Ahead Fix, and V2 Correction
+
+- **Status**: Accepted (research candidate; no profitability claim)
+- **Date**: 2026-11-13
+- **Context**:
+  - ADR-036 (V2 intraday) backtest runners passed the in-progress 4h candle to the strategy (4h bars are open-time stamped; `timestamp <= ts` included the bar that closes up to 3h later), violating A-09/S-05.
+  - After restricting to fully closed 4h bars, V2 net P&L is 2024 +$47.94 (breaker trips 2024-11-24), 2025 -$13.56, 2026 -$46.39 (total -$12.01). Gross P&L over 189 trades was +$35.70 (t = 0.66): no demonstrable gross edge. ADR-036 claims ("zero breaker trips", +$58) are superseded.
+  - Intraday strategies pay 0.32% round-trip too often. A low-turnover daily trend rule was tested on 2018-2023 (selection) and 2024-2026 (single evaluation).
+- **Decision**:
+  1. Fix the 4h alignment in the three V2 runners (only bars with open+4h <= end of current 1h bar).
+  2. Add `DailyTrendStrategy` (`backend/app/strategies/daily_trend.py`): long-only, enter on close > prior 20-day highest close, exit on close < prior 10-day lowest close, fills at next open. Add `TimeFrame.D1`.
+  3. Add `backend/app/simulation/daily_trend_backtest.py`: Decimal accounting, independent equal-capital sleeves per symbol (BTC/ETH/BNB), fee 0.10%, slippage 0.05%, half-spread 0.01% per side.
+  4. Daily-history research data lives in `storage/research/daily/` (gitignored Parquet), fetched from public Binance data by `scripts/fetch_daily_history.py`.
+  5. Risk deviation: this strategy has a historical max drawdown of ~38-55% and is incompatible with the 5% breaker. It is paper-only and reported separately; the 5% breaker is NOT applied to it, and no capital is at risk (S-01).
+- **Consequences / Evidence** (all net of costs, $1,000 start, Decimal ledger):
+  - Train 2018-2023: +3,220.8%, max DD 55.5%, 127 trades (selection period; inflated by 2021).
+  - Test 2024-2026 (evaluated once): +25.6%, max DD 38.1%, 73 trades, 26 wins; equal-weight buy & hold +55.6% (max DD 58% in prototype).
+  - Limits: survivorship bias (only coins that survived), few independent trends, large drawdowns, test window contains one bull year. Not evidence of future profitability (S-07).
+  - Broad-universe check (`scripts/universe_test.py`, frozen 20/10 rule, 36 coins incl. delisted EOS/XMR/OMG/WAVES/NANO/XEM/BTS; LUNA excluded for a spliced price series; daily equal-weight of active coins, cash earns 0, net of costs): train 2018-23 +1,269% (DD 45%, Sharpe 1.28) vs buy & hold +133% (DD 91%); **test 2024-26 +52% (DD 37%, Sharpe 0.63) vs buy & hold -44% (DD 75%)**. Per year: 2024 +71%, 2025 -5%, 2026 -7%. Only 17 of 36 coins were individually positive in the test window (median coin 0%): the edge is mostly loss avoidance in downtrends plus a few large winners. Forward paper trading (months) is still required before any confidence claim.
+  - **UI and API (2026-11-13):** default page `/live-markets` (dashboard shell with sidebar; `/` redirects there). Endpoints: `GET /api/v1/daily-trend`, `/daily-trend/agent/{symbol}` (agent BUY/SELL markers and trigger levels; auto-refreshes closed daily candles via `app/data/market/daily_history.py`), `/daily-trend/account?start=` (paper wallet: $1,000 split equally across BTC/ETH/BNB, opened flat, cash/coins/total after every fill; replay is checked against sleeve equity by `test_account_ledger_replay_matches_sleeve_totals`), `/simulation/{2024|2025|2026}` (corrected V2 exports). Opened-flat accounts: Jan 2024 +24.7%, Jan 2025 -3.1%, Jan 2026 -9.1%.
+  - Only the strategy agent is implemented; no activity is displayed for the other nine specified agents (S-06). The legacy Command Center page still contains superseded V2 figures and carries a notice.
 

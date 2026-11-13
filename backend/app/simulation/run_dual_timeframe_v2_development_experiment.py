@@ -400,7 +400,9 @@ async def run_dual_timeframe_v2_experiment():
                     symbol_cooldown_until[sym] = None  # Quarantine expired
 
             df1_slice = data_1h[sym].iloc[: idx + 1]
-            df4_slice = data_4h[sym][data_4h[sym]["timestamp"] <= ts]
+            # A-09 fix: a 4h bar (open-time stamped) is only known once fully closed, i.e. open+4h <= end of current 1h bar
+            _cutoff = (pd.Timestamp(ts) - pd.Timedelta(hours=3)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            df4_slice = data_4h[sym][data_4h[sym]["timestamp"] <= _cutoff]
 
             raw_signal = strategy.evaluate(df1_slice, sym, df_4h=df4_slice)
             if raw_signal is not None:
