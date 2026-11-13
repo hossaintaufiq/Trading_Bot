@@ -96,3 +96,48 @@ async def daily_trend_status() -> dict:
                                "last_close": float(df["close"].iloc[-1]),
                                "position": "LONG" if strat.position_state(df) == 1 else "FLAT"})
     return out
+
+
+# ---- Agent trade markers + trigger levels for the chart (ADR-037) ----
+_AGENT_CACHE: dict = {}
+
+
+@app.get("/api/v1/daily-trend/agent/{symbol}", tags=["Simulation"])
+async def daily_trend_agent(symbol: str) -> dict:
+    """Every BUY/SELL the daily_trend_v1 paper agent made on `symbol`, plus its next trigger levels."""
+    from decimal import Decimal
+
+    from app.simulation.daily_trend_backtest import load_daily, run_sleeve
+    from app.strategies.daily_trend import DailyTrendConfig, compute_positions
+
+    symbol = symbol.upper()
+    if symbol not in ("BTCUSDT", "ETHUSDT", "BNBUSDT"):
+        return {"error": "unsupported symbol"}
+    df = load_daily(symbol)
+    key = (symbol, str(df["timestamp"].iloc[-1]))
+    if key not in _AGENT_CACHE:
+        cfg = DailyTrendConfig()
+        res = run_sleeve(symbol, df, Decimal("1000"), cfg)
+        closes = [float(x) for x in df["close"]]
+        pos = compute_positions(closes, cfg.entry_lookback, cfg.exit_lookback)
+        markers = []
+        for t in res.trades:
+            markers.append({"time": t.entry_time, "side": "BUY", "price": float(t.entry_price)})
+            markers.append({"time": t.exit_time, "side": "SELL", "price": float(t.exit_price),
+                            "pct": float((t.exit_price / t.entry_price - 1) * 100)})
+        # open position (bought, not yet sold): last flat->long flip, filled at the following open
+        if pos[-1] == 1:
+            j = len(pos) - 1
+            while j > 0 and pos[j - 1] == 1:
+                j -= 1
+            if j + 1 < len(df):
+                markers.append({"time": df["timestamp"].iloc[j + 1].strftime("%Y-%m-%d"), "side": "BUY",
+                                "price": float(df["open"].iloc[j + 1]), "open": True})
+        _AGENT_CACHE.clear()
+        _AGENT_CACHE[key] = {
+            "symbol": symbol, "as_of": df["timestamp"].iloc[-1].strftime("%Y-%m-%d"),
+            "position": "LONG" if pos[-1] == 1 else "FLAT", "last_close": closes[-1],
+            "buy_above": max(closes[-cfg.entry_lookback:]), "sell_below": min(closes[-cfg.exit_lookback:]),
+            "markers": markers,
+        }
+    return _AGENT_CACHE[key]
