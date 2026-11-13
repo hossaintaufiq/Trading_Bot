@@ -157,13 +157,9 @@ def test_v2_experiment_export_integrity():
     # Core Performance Assertions
     assert summary["experiment_id"] == "EXP-2024-DEV-DUAL-TIMEFRAME-V2"
     assert summary["strategy_id"] == "htf_trend_following_v2"
-    assert summary["portfolio_return_pct"] > 5.0
-    assert summary["circuit_breaker_tripped"] is False
-    assert summary["max_drawdown_pct"] < 5.0
-    assert summary["total_executed_trades"] >= 80
-    assert summary["win_rate_pct"] >= 50.0
-    assert summary["profit_factor"] >= 1.50
-    assert summary["net_pnl_usdt"] > 50.0
+    # ADR-037: the 4h look-ahead was fixed; profitability is NOT asserted (S-07). Check internal consistency only.
+    assert summary["total_executed_trades"] > 0
+    assert abs(summary["portfolio_return_pct"] - summary["net_pnl_usdt"] / 10.0) < 0.05   # $1,000 start
 
     with open(symbols_path) as f:
         syms = json.load(f)
