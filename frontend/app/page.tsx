@@ -1,6 +1,6 @@
-import CommandCenterPage from "./(dashboard)/command-center/page";
+import { redirect } from "next/navigation";
 
-/** Root — Render Command Center directly */
+/** Root: the dashboard home is the Live Market & Agent page. */
 export default function RootPage() {
-  return <CommandCenterPage />;
+  redirect("/live-markets");
 }

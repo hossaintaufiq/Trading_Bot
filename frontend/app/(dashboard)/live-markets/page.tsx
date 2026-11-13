@@ -1,233 +1,163 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ActivityFeed from "@/components/live/ActivityFeed";
+import AgentPanel from "@/components/live/AgentPanel";
+import CandleChart, { INTERVALS, type Interval } from "@/components/live/CandleChart";
+import EquityPanel from "@/components/live/EquityPanel";
+import MarketCards from "@/components/live/MarketCards";
 import {
-  createChart,
-  CandlestickSeries,
-  createSeriesMarkers,
-  LineSeries,
-  type IChartApi,
-  type ISeriesApi,
-  type UTCTimestamp,
-} from "lightweight-charts";
+  type Agent, type FeedEvent, NAMES, SYMBOLS, type Symbol, niceDate, pct, usd,
+} from "@/components/live/types";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
-const INTERVALS = ["1m", "5m", "15m", "1h", "4h", "1d"] as const;
-const SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT"] as const;
-const PERIODS = [
-  ["train_2018_2023", "Train 2018-23"],
-  ["test_2024_2026", "Test 2024-26"],
-] as const;
 
-interface Period {
-  net_return_pct: number; max_drawdown_pct: number; trades: number; wins: number;
-  fees: number; buy_hold_pct: number; equity_curve: { date: string; equity: number }[];
+/** Turn the agent's recorded trades into plain-English history entries. */
+function historyEvents(agents: Partial<Record<Symbol, Agent>>): FeedEvent[] {
+  const out: FeedEvent[] = [];
+  for (const s of SYMBOLS) {
+    for (const m of agents[s]?.markers ?? []) {
+      const name = NAMES[s];
+      if (m.side === "BUY") {
+        out.push({
+          id: `${s}-${m.time}-B`, when: niceDate(m.time), symbol: s, kind: "BUY",
+          title: `Bought ${name} at ${usd(m.price)}`,
+          detail: "The price closed above its highest level of the last 20 days. The agent reads that as the start of an uptrend.",
+        });
+      } else {
+        const win = (m.pct ?? 0) >= 0;
+        out.push({
+          id: `${s}-${m.time}-S`, when: niceDate(m.time), symbol: s, kind: "SELL",
+          title: `Sold ${name} at ${usd(m.price)} — ${win ? "made" : "lost"} ${pct(Math.abs(m.pct ?? 0)).replace("+", "")} after fees`,
+          detail: "The price closed below its lowest level of the last 10 days. The agent reads that as the uptrend ending, so it sold to protect the money.",
+        });
+      }
+    }
+  }
+  const key = (e: FeedEvent) => e.id.split("-")[1];
+  return out.sort((a, b) => (key(a) < key(b) ? 1 : -1));
 }
-interface Agent {
-  symbol: string; as_of: string; position: string; last_close: number;
-  buy_above: number; sell_below: number;
-  markers: { time: string; side: "BUY" | "SELL"; price: number; pct?: number; open?: boolean }[];
-}
-interface DailyTrend {
-  periods: Record<string, Period>;
-  current: { symbol: string; as_of: string; last_close: number; position: string }[];
-}
-
-const chartOpts = {
-  layout: { background: { color: "#0b1020" }, textColor: "#9aa4bf" },
-  grid: { vertLines: { color: "#161d33" }, horzLines: { color: "#161d33" } },
-  timeScale: { timeVisible: true, secondsVisible: false },
-  autoSize: true,
-};
 
 export default function LiveMarketsPage() {
-  const [interval, setIntervalSel] = useState<(typeof INTERVALS)[number]>("1m");
-  const [symbol, setSymbol] = useState<(typeof SYMBOLS)[number]>("BTCUSDT");
-  const [agent, setAgent] = useState<Agent | null>(null);
-  const [price, setPrice] = useState<number | null>(null);
-  const [status, setStatus] = useState("connecting");
-  const [period, setPeriod] = useState<string>("test_2024_2026");
-  const [dt, setDt] = useState<DailyTrend | null>(null);
+  const [symbol, setSymbol] = useState<Symbol>("BTCUSDT");
+  const [interval, setIntervalSel] = useState<Interval>("1d");
+  const [prices, setPrices] = useState<Partial<Record<Symbol, number>>>({});
+  const [agents, setAgents] = useState<Partial<Record<Symbol, Agent>>>({});
+  const [liveEvents, setLiveEvents] = useState<FeedEvent[]>([]);
+  const [flash, setFlash] = useState<FeedEvent | null>(null);
+  const known = useRef<Record<string, number>>({});
+  const above = useRef<Record<string, boolean>>({});
 
-  const candleEl = useRef<HTMLDivElement>(null);
-  const equityEl = useRef<HTMLDivElement>(null);
-  const candleChart = useRef<IChartApi | null>(null);
-  const candleSeries = useRef<ISeriesApi<"Candlestick"> | null>(null);
-  const equityChart = useRef<IChartApi | null>(null);
-  const equitySeries = useRef<ISeriesApi<"Line"> | null>(null);
-
-  // Live BTCUSDT candles: Binance public market data only (no keys, read-only).
+  // Live prices for all three markets (Binance public stream, read-only).
   useEffect(() => {
-    if (!candleEl.current) return;
-    const chart = createChart(candleEl.current, chartOpts);
-    const series = chart.addSeries(CandlestickSeries, {
-      upColor: "#26a69a", downColor: "#ef5350",
-      borderVisible: false, wickUpColor: "#26a69a", wickDownColor: "#ef5350",
-    });
-    candleChart.current = chart;
-    candleSeries.current = series;
-
-    let ws: WebSocket | null = null;
-    let cancelled = false;
-
-    (async () => {
-      try {
-        const r = await fetch(
-          `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=1000`
-        );
-        const rows: (string | number)[][] = await r.json();
-        if (cancelled) return;
-        series.setData(
-          rows.map((k) => ({
-            time: Math.floor(Number(k[0]) / 1000) as UTCTimestamp,
-            open: +k[1], high: +k[2], low: +k[3], close: +k[4],
-          }))
-        );
-        chart.timeScale().fitContent();
-      } catch {
-        setStatus("history fetch failed");
-      }
-      if (cancelled) return;
-      ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_${interval}`);
-      ws.onopen = () => setStatus("live");
-      ws.onclose = () => setStatus("disconnected");
-      ws.onmessage = (m) => {
-        const k = JSON.parse(m.data).k;
-        series.update({
-          time: Math.floor(k.t / 1000) as UTCTimestamp,
-          open: +k.o, high: +k.h, low: +k.l, close: +k.c,
-        });
-        setPrice(+k.c);
-      };
-    })();
-
-    return () => {
-      cancelled = true;
-      ws?.close();
-      chart.remove();
+    const streams = SYMBOLS.map((s) => `${s.toLowerCase()}@miniTicker`).join("/");
+    const ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+    ws.onmessage = (m) => {
+      const d = JSON.parse(m.data).data;
+      setPrices((p) => ({ ...p, [d.s as Symbol]: +d.c }));
     };
-  }, [interval, symbol]);
-
-  useEffect(() => {
-    setAgent(null);
-    fetch(`${API}/daily-trend/agent/${symbol}`).then((r) => r.json()).then(setAgent).catch(() => setAgent(null));
-  }, [symbol]);
-
-  // Agent BUY/SELL markers + trigger levels on the candle chart (daily agent -> shown on 1d view).
-  useEffect(() => {
-    const series = candleSeries.current;
-    if (!series || !agent || interval !== "1d") return;
-    const t = setTimeout(() => {
-      const have = new Set(series.data().map((d) => d.time as number));
-      const ms = agent.markers
-        .map((m) => ({ ...m, ts: Math.floor(Date.parse(m.time) / 1000) }))
-        .filter((m) => have.has(m.ts))
-        .map((m) => ({
-          time: m.ts as UTCTimestamp,
-          position: m.side === "BUY" ? ("belowBar" as const) : ("aboveBar" as const),
-          shape: m.side === "BUY" ? ("arrowUp" as const) : ("arrowDown" as const),
-          color: m.side === "BUY" ? "#22c55e" : "#ef4444",
-          text: m.side === "BUY" ? (m.open ? "BUY (holding)" : "BUY") : `SELL ${m.pct !== undefined ? m.pct.toFixed(0) + "%" : ""}`,
-        }));
-      createSeriesMarkers(series, ms);
-      series.createPriceLine({ price: agent.buy_above, color: "#22c55e", lineStyle: 2, title: "agent BUYS above" });
-      series.createPriceLine({ price: agent.sell_below, color: "#ef4444", lineStyle: 2, title: "agent SELLS below" });
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [agent, interval, symbol]);
-
-  // Simulation engine output (paper backtest of daily_trend_v1 from the backend).
-  useEffect(() => {
-    if (!equityEl.current) return;
-    const chart = createChart(equityEl.current, chartOpts);
-    equityChart.current = chart;
-    equitySeries.current = chart.addSeries(LineSeries, { color: "#4f8cff", lineWidth: 2 });
-    return () => chart.remove();
+    return () => ws.close();
   }, []);
 
-  useEffect(() => {
-    fetch(`${API}/daily-trend`)
-      .then((r) => r.json())
-      .then((d: DailyTrend) => setDt(d))
-      .catch(() => setDt(null));
+  // The agent's state; re-checked every minute so a new buy/sell shows up on its own.
+  const loadAgents = useCallback(async () => {
+    const res = await Promise.all(SYMBOLS.map((s) => fetch(`${API}/daily-trend/agent/${s}`).then((r) => r.json()).catch(() => null)));
+    const next: Partial<Record<Symbol, Agent>> = {};
+    res.forEach((a, i) => { if (a && a.markers) next[SYMBOLS[i]] = a as Agent; });
+    setAgents(next);
+    for (const s of SYMBOLS) {
+      const a = next[s];
+      if (!a) continue;
+      const count = a.markers.length;
+      const prev = known.current[s];
+      if (prev !== undefined && count > prev) {
+        const m = a.markers[a.markers.length - 1];
+        const ev: FeedEvent = {
+          id: `live-${s}-${Date.now()}`, when: "just now", symbol: s, live: true, kind: m.side,
+          title: m.side === "BUY" ? `The agent just BOUGHT ${NAMES[s]} at ${usd(m.price)}` : `The agent just SOLD ${NAMES[s]} at ${usd(m.price)}`,
+          detail: m.side === "BUY" ? "A new daily candle closed above the 20-day high." : "A new daily candle closed below the 10-day low.",
+        };
+        setLiveEvents((e) => [ev, ...e]);
+        setFlash(ev);
+      }
+      known.current[s] = count;
+    }
   }, []);
-
   useEffect(() => {
-    const p = dt?.periods[period];
-    if (!p) return;
-    equitySeries.current?.setData(
-      p.equity_curve.map((e) => ({ time: (Date.parse(e.date) / 1000) as UTCTimestamp, value: e.equity }))
-    );
-    equityChart.current?.timeScale().fitContent();
-  }, [dt, period]);
+    loadAgents();
+    const t = window.setInterval(loadAgents, 60_000);
+    return () => window.clearInterval(t);
+  }, [loadAgents]);
 
-  const p = dt?.periods[period];
+  // "Heads up" when the live price crosses one of the agent's trigger lines.
+  useEffect(() => {
+    for (const s of SYMBOLS) {
+      const a = agents[s]; const p = prices[s];
+      if (!a || !p) continue;
+      const trigger = a.position === "FLAT" ? a.buy_above : a.sell_below;
+      const crossed = a.position === "FLAT" ? p > trigger : p < trigger;
+      const k = `${s}-${a.position}`;
+      if (above.current[k] === undefined) { above.current[k] = crossed; continue; }
+      if (crossed && !above.current[k]) {
+        const buying = a.position === "FLAT";
+        setLiveEvents((e) => [{
+          id: `alert-${s}-${Date.now()}`, when: "just now", symbol: s, live: true, kind: "ALERT",
+          title: `${NAMES[s]} just moved ${buying ? "above the buy line" : "below the sell line"} (${usd(p)})`,
+          detail: `Nothing has been ${buying ? "bought" : "sold"} yet. The agent only acts if today's candle CLOSES ${buying ? "above" : "below"} ${usd(trigger)} (midnight UTC); then it ${buying ? "buys" : "sells"} at the next open.`,
+        }, ...e]);
+      }
+      above.current[k] = crossed;
+    }
+  }, [prices, agents]);
+
+  const events = useMemo(() => [...liveEvents, ...historyEvents(agents)], [liveEvents, agents]);
+  const onPrice = useCallback((p: number) => setPrices((x) => ({ ...x, [symbol]: p })), [symbol]);
+  const selectedAgent = agents[symbol] ?? null;
 
   return (
-    <div className="p-6 space-y-6 text-slate-200">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">
-          {symbol.replace("USDT", "/USDT")} Live · <span className="font-mono">{price ? price.toLocaleString() : "—"}</span>
-          <span className="ml-3 text-xs text-slate-400">({status})</span>
-        </h1>
-        <div className="flex gap-1">
-          {SYMBOLS.map((sy) => (
-            <button key={sy} onClick={() => setSymbol(sy)}
-              className={`px-3 py-1 rounded text-sm ${sy === symbol ? "bg-emerald-700" : "bg-slate-800"}`}>
-              {sy.replace("USDT", "")}
-            </button>
-          ))}
-          <span className="w-3" />
-          {INTERVALS.map((i) => (
-            <button key={i} onClick={() => setIntervalSel(i)}
-              className={`px-3 py-1 rounded text-sm ${i === interval ? "bg-blue-600" : "bg-slate-800"}`}>
-              {i}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div ref={candleEl} className="h-[460px] w-full rounded border border-slate-800" />
-      <div className="text-sm">
-        {interval !== "1d" ? (
-          <span className="text-slate-400">Select <b>1d</b> to see where the agent bought and sold (it trades on daily closes).</span>
-        ) : agent ? (
-          <span>
-            Agent status: <b className={agent.position === "LONG" ? "text-emerald-400" : "text-slate-300"}>{agent.position}</b>
-            {" "}· buys if a daily close &gt; <b className="text-emerald-400">{agent.buy_above.toLocaleString()}</b>
-            {" "}· sells if a daily close &lt; <b className="text-red-400">{agent.sell_below.toLocaleString()}</b>
-            {" "}· green ▲ = BUY, red ▼ = SELL (% = trade result before costs)
-          </span>
-        ) : <span className="text-slate-400">loading agent…</span>}
+    <div className="mx-auto max-w-6xl space-y-5 p-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Live Market &amp; Trading Agent</h1>
+        <p className="text-sm text-slate-400">
+          Watch the real market live and see exactly when the practice-money agent buys and sells. No real money is used.
+        </p>
       </div>
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Simulation engine — daily_trend_v1 paper equity ($1,000 start, net of 0.32% costs)</h2>
+      {flash && (
+        <div className={`flex items-center justify-between rounded-lg p-4 text-white ${flash.kind === "BUY" ? "bg-emerald-700" : "bg-red-700"}`}>
+          <span className="font-semibold">{flash.title}</span>
+          <button onClick={() => setFlash(null)} className="rounded bg-black/30 px-3 py-1 text-sm">OK</button>
+        </div>
+      )}
+
+      <MarketCards selected={symbol} onSelect={setSymbol} prices={prices} agents={agents} />
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-sm text-slate-400">
+          {interval === "1d"
+            ? <>Green <b className="text-emerald-400">▲ BOUGHT</b> and red <b className="text-red-400">▼ SOLD</b> arrows show every move the agent made. Dashed lines show where it would act next.</>
+            : <>Choose <b>Daily</b> to see the agent&apos;s buy and sell arrows (it decides once per day).</>}
+        </div>
         <div className="flex gap-1">
-          {PERIODS.map(([k, label]) => (
-            <button key={k} onClick={() => setPeriod(k)}
-              className={`px-3 py-1 rounded text-sm ${k === period ? "bg-blue-600" : "bg-slate-800"}`}>
-              {label}
-            </button>
+          {INTERVALS.map(([k, label]) => (
+            <button key={k} onClick={() => setIntervalSel(k)}
+              className={`rounded px-3 py-1 text-sm ${k === interval ? "bg-blue-600" : "bg-slate-800 hover:bg-slate-700"}`}>{label}</button>
           ))}
         </div>
       </div>
-      <div ref={equityEl} className="h-[280px] w-full rounded border border-slate-800" />
-      {p ? (
-        <div className="grid grid-cols-5 gap-4 text-sm">
-          <div>Net return: <b className={p.net_return_pct >= 0 ? "text-emerald-400" : "text-red-400"}>{p.net_return_pct.toFixed(1)}%</b></div>
-          <div>Buy &amp; hold: <b>{p.buy_hold_pct.toFixed(1)}%</b></div>
-          <div>Max drawdown: <b>{p.max_drawdown_pct.toFixed(1)}%</b></div>
-          <div>Trades: <b>{p.trades}</b> ({p.wins} wins)</div>
-          <div>Fees paid: <b>${p.fees.toFixed(0)}</b></div>
-        </div>
-      ) : <div className="text-sm text-slate-400">loading simulation…</div>}
-      <div className="flex gap-6 text-sm">
-        {dt?.current.map((c) => (
-          <div key={c.symbol}>{c.symbol}: <b className={c.position === "LONG" ? "text-emerald-400" : "text-slate-400"}>{c.position}</b>
-            <span className="text-slate-500"> @ {c.last_close.toLocaleString()} ({c.as_of})</span></div>
-        ))}
+
+      <CandleChart symbol={symbol} interval={interval} agent={selectedAgent} onPrice={onPrice} />
+
+      <div className="grid gap-5 lg:grid-cols-2">
+        <AgentPanel agent={selectedAgent} livePrice={prices[symbol] ?? null} />
+        <ActivityFeed events={events} />
       </div>
-      <p className="text-xs text-slate-500">Paper trading only · no real funds · historical results are not a promise of future profit · research candidate, see ADR-037.</p>
+
+      <EquityPanel />
+
+      <p className="text-xs text-slate-500">
+        Paper trading only: no real funds, no exchange orders. Results come from past data and do not promise future profit. Strategy: daily trend-following (ADR-037).
+      </p>
     </div>
   );
 }

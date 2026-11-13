@@ -107,12 +107,17 @@ async def daily_trend_agent(symbol: str) -> dict:
     """Every BUY/SELL the daily_trend_v1 paper agent made on `symbol`, plus its next trigger levels."""
     from decimal import Decimal
 
-    from app.simulation.daily_trend_backtest import load_daily, run_sleeve
+    from app.simulation.daily_trend_backtest import FEE, load_daily, run_sleeve
     from app.strategies.daily_trend import DailyTrendConfig, compute_positions
+
+    import asyncio
+
+    from app.data.market.daily_history import refresh_if_stale
 
     symbol = symbol.upper()
     if symbol not in ("BTCUSDT", "ETHUSDT", "BNBUSDT"):
         return {"error": "unsupported symbol"}
+    await asyncio.get_running_loop().run_in_executor(None, refresh_if_stale, symbol)  # pick up new closed candles
     df = load_daily(symbol)
     key = (symbol, str(df["timestamp"].iloc[-1]))
     if key not in _AGENT_CACHE:
@@ -124,7 +129,7 @@ async def daily_trend_agent(symbol: str) -> dict:
         for t in res.trades:
             markers.append({"time": t.entry_time, "side": "BUY", "price": float(t.entry_price)})
             markers.append({"time": t.exit_time, "side": "SELL", "price": float(t.exit_price),
-                            "pct": float((t.exit_price / t.entry_price - 1) * 100)})
+                            "pct": float((t.exit_price / t.entry_price * (1 - FEE) / (1 + FEE) - 1) * 100)})
         # open position (bought, not yet sold): last flat->long flip, filled at the following open
         if pos[-1] == 1:
             j = len(pos) - 1
