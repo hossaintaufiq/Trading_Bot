@@ -6,6 +6,7 @@ import AgentPanel from "@/components/live/AgentPanel";
 import CandleChart, { INTERVALS, type Interval } from "@/components/live/CandleChart";
 import EquityPanel from "@/components/live/EquityPanel";
 import MarketCards from "@/components/live/MarketCards";
+import PaperAccount from "@/components/live/PaperAccount";
 import {
   type Agent, type FeedEvent, NAMES, SYMBOLS, type Symbol, niceDate, pct, usd,
 } from "@/components/live/types";
@@ -152,6 +153,8 @@ export default function LiveMarketsPage() {
         <AgentPanel agent={selectedAgent} livePrice={prices[symbol] ?? null} />
         <ActivityFeed events={events} />
       </div>
+
+      <PaperAccount />
 
       <EquityPanel />
 

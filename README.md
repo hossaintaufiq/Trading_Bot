@@ -17,7 +17,7 @@
 
 ## 🌟 Executive Overview
 
-**NEPTUNE** is an autonomous cryptocurrency quantitative trading platform engineered around **Ten Specialist AI Agents** orchestrated by an asynchronous **Central Brain**. It pairs multi-timeframe regime detection (4-hour macro trend confirmation + 1-hour swing pullback execution) with dynamic capital preservation via Constant Proportion Portfolio Insurance (**CPPI**), a two-stage profit-locking trailing ratchet, and a Bitcoin Macro Shield.
+**NEPTUNE** is an autonomous cryptocurrency quantitative trading platform engineered around **Ten Specialist AI Agents** orchestrated by an asynchronous **Central Brain**. Its current research strategy is a low-turnover **daily trend-following** rule (`daily_trend_v1`); the earlier intraday V2 strategy (4h/1h with CPPI sizing and a profit-lock ratchet) is retained for research but was found unprofitable.
 
 Every paper trade is subjected to rigorous Monte Carlo simulation and must be unconditionally approved by an independent **Risk Manager** before execution.
 
@@ -45,21 +45,34 @@ Every paper trade is subjected to rigorous Monte Carlo simulation and must be un
 
 ---
 
-## 📊 Proven Multi-Year Empirical Validation (2024 – 2026)
+## 📊 Research Results (corrected 2026-11-13, ADR-037)
 
-The core algorithm (`DualTimeframeTrendV2`, fully specified in [algo.md](algo.md)) was subjected to **24,864 continuous hourly bars** across a 3-symbol portfolio (`BTCUSDT`, `ETHUSDT`, `BNBUSDT`) spanning every major market regime:
+> ⚠️ **Earlier versions of this README claimed the intraday V2 algorithm was profitable (+5.8% over 3 years, zero breaker trips). That was wrong.** The backtest runners leaked the still-forming 4h candle into the 4h trend filter (look-ahead). After the fix, with parameters unchanged, V2 is **not profitable**. The old figures have been removed.
 
-| Metric | 2024 (Bull Market) | 2025 (Chop / Distribution) | 2026 (Severe Bear Market) | 3-Year Lifecycle (2024-2026) |
-|---|:---:|:---:|:---:|:---:|
-| **Hourly Bars Evaluated** | 8,784 | 8,760 | 7,320 | **24,864 bars (34 Months)** |
-| **Market Benchmark Return** | +72.50% | +13.30% | -17.38% | +68.42% |
-| **NEPTUNE Net Return** | **+7.94%** (+$79.40) | **-2.49%** (-$24.93) | **+0.35%** (+$3.54) | **+5.80% (+$58.01 USDT)** |
-| **Max Portfolio Drawdown** | **1.62%** | **3.85%** | **2.94%** | **3.85% Peak-to-Trough** |
-| **Benchmark Alpha** | Capital Protected | Capital Protected | **+17.73% Outperformance** | **Drawdown Slashed by >80%** |
-| **Circuit Breaker Trips** | 0 | 0 | 0 | **0 Trips Across 3 Years** |
-| **Execution Assumptions** | 0.1% Taker + Slippage | 0.1% Taker + Slippage | 0.1% Taker + Slippage | Full Real-World Friction |
+### Intraday V2 (`DualTimeframeTrendV2`) — failed after look-ahead fix
 
-*Key Takeaway:* In the brutal 2026 bear cycle where standard buy-and-hold crashed **-17.38%**, NEPTUNE's **BTC Macro Shield** and **2-Stage Profit Lock** protected capital and yielded a positive **+0.35% net return**, outperforming the market by **+17.73%**.
+| Year | Trades | Gross P&L (before costs) | Net P&L |
+|---|---:|---:|---:|
+| 2024 | 80 | +$67.45 | +$47.94 (5% breaker tripped 2024-11-24) |
+| 2025 | 58 | +$3.47 | −$13.56 |
+| 2026 | 51 | −$35.22 | −$46.39 |
+| **Total** | **189** | **+$35.70 (t = 0.66, not significant)** | **−$12.01** |
+
+No demonstrable gross edge; costs (0.32% round trip) turn it negative.
+
+### Current research candidate: `daily_trend_v1` (paper only)
+
+Long-only daily Donchian rule: buy when a daily close exceeds the prior 20-day highest close, sell when a close falls below the prior 10-day lowest close, otherwise hold cash. Fills at the next open with fees 0.10%, slippage 0.05%, half-spread 0.01% per side. Rule chosen on 2018–2023 only; 2024–2026 evaluated once.
+
+| Universe | Period | Strategy (net) | Buy & hold | Max drawdown |
+|---|---|---:|---:|---:|
+| BTC/ETH/BNB | 2018–2023 (selection) | +3,221% | +1,318% | 55.5% |
+| BTC/ETH/BNB | **2024–2026 (test)** | **+25.6%** | +55.6% | 38.1% |
+| 36 coins incl. delisted | **2024–2026 (test)** | **+52%** | −44% | 37% |
+
+By calendar year (36 coins): 2024 +71%, **2025 −5%, 2026 −7%**. A $1,000 paper account opened Jan 2024 is at +24.7%, Jan 2025 at −3.1%, Jan 2026 at −9.1%.
+
+**Limits:** survivorship bias (coins that never listed are absent), only a handful of independent trends, drawdowns of 25–45%, only 17 of 36 coins were individually profitable in the test window, and it loses money in sideways/falling markets. This is research evidence, **not** a profitability claim (Rule S-07). Forward paper trading is still required.
 
 ---
 
@@ -114,7 +127,7 @@ NEPTUNE strictly prohibits peer-to-peer agent chatter. All agent inputs, telemet
 
 ---
 
-## ⚡ The Algorithm: Dual-Timeframe Trend V2 with Macro Gating
+## ⚡ The Algorithm: Dual-Timeframe Trend V2 with Macro Gating (unprofitable after look-ahead fix — kept for reference)
 
 Full quantitative formulations and pseudocode are maintained in [`algo.md`](algo.md).
 
@@ -140,7 +153,24 @@ Entries occur strictly on healthy pullbacks into dynamic value:
 
 ---
 
-## 🖥️ Interactive Command Center
+## 🖥️ Live Market & Agent Dashboard (default page)
+
+Open `http://localhost:3000`; it goes to **Live Market & Agent**, built to be understood without finance knowledge:
+
+- **Market switcher:** Bitcoin / Ethereum / BNB cards with live price and a badge (*Holding* or *In cash*).
+- **Live candlestick chart** (Binance public stream, read-only) with Daily / 4h / 1h / 15m / 1m views.
+- **Agent arrows:** on the Daily view, green ▲ BOUGHT and red ▼ SOLD (with result after fees) mark every move, plus dashed lines where the agent would act next.
+- **Agent panel:** plain-English status ("keeping its money in cash… will buy if a day closes above $X").
+- **Activity feed:** every buy/sell with a one-line reason; live banner when a new trade happens, and "heads up" notes when price crosses a trigger line.
+- **Practice wallet:** a $1,000 paper account (start Jan 2024/2025/2026) showing cash, coins held and total value after **every** trade, with fees.
+
+Only the strategy agent is implemented and shown; the other nine specialist agents are specified but not active, and no activity is invented for them.
+
+API: `GET /api/v1/daily-trend`, `/api/v1/daily-trend/agent/{symbol}`, `/api/v1/daily-trend/account?start=`, `/api/v1/simulation/{2024|2025|2026}`.
+
+---
+
+## 🖥️ Interactive Command Center (legacy explainer — contains superseded V2 figures)
 
 The Next.js 14 frontend includes a dedicated **Command Center** dashboard designed for complete transparency into the algorithmic engine:
 
@@ -165,6 +195,7 @@ Trading_bot/
 │   └── research/           # Empirical Research Papers & OOS Ledgers
 │       ├── NEPTUNE_SHR001_V2_OOS_2026_REPORT.md
 │       └── NEPTUNE_STRATEGY_HYPOTHESIS_REGISTER.md
+├── scripts/                # fetch_daily_history.py, universe_test.py
 ├── backend/                # FastAPI Modular Monolith
 │   ├── app/
 │   │   ├── api/            # REST & WebSocket Endpoints
@@ -172,12 +203,13 @@ Trading_bot/
 │   │   ├── domain/         # Clean Architecture Entities & Models
 │   │   ├── risk/           # CPPI Engine, Risk Limits, Circuit Breakers
 │   │   ├── simulation/     # Historical & Monte Carlo Simulation Runners
-│   │   └── strategies/     # Quant Strategies (DualTimeframeTrendV2)
+│   │   └── strategies/     # daily_trend_v1 (current), DualTimeframeTrendV2 (superseded)
 │   └── tests/              # Pytest Test Suites (Unit, Integration, Simulation)
 ├── frontend/               # Next.js 14 / TypeScript Web Application
 │   ├── app/                # App Router Layouts & Pages
 │   │   └── (dashboard)/
-│   │       └── command-center/ # Interactive Explanatory UI Dashboard
+│   │       ├── live-markets/   # Live Market & Agent dashboard (home)
+│   │       └── command-center/ # Legacy explainer (superseded V2 figures)
 │   ├── components/         # Modular Atomic UI Components
 │   └── lib/                # API Clients, Zustand Stores, Type Definitions
 └── storage/                # Persistent Local Parquet & SQLite Data (Git-ignored)
@@ -222,15 +254,21 @@ cd frontend
 npm install
 npm run dev
 ```
-*Open your browser at:* `http://localhost:3000` or `http://localhost:3000/command-center`
+*Open your browser at:* `http://localhost:3000` (Live Market & Agent) — also `/command-center`
 
-### 4. Run Multi-Year Out-Of-Sample Simulations
+### 4. Download data and run the research
 ```bash
-# Execute the 2026 Out-Of-Sample Bear Market stress test
-python backend/app/simulation/run_dual_timeframe_v2_oos2026_experiment.py
+# Daily history (public Binance market data, no keys) -> storage/research/daily/
+python scripts/fetch_daily_history.py
 
-# Run all unit and quantitative regression tests
-pytest backend/tests/unit/test_dual_timeframe_v2_oos2026.py -v
+# Decimal-accounted backtest of daily_trend_v1 (train 2018-23, test 2024-26)
+cd backend && python -m app.simulation.daily_trend_backtest && cd ..
+
+# 36-coin robustness check
+python scripts/universe_test.py
+
+# Full test suite (run from the repo root)
+python -m pytest backend/tests/unit -c backend/pytest.ini --rootdir=.
 ```
 
 ---
