@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createChart, LineSeries, type ISeriesApi, type UTCTimestamp } from "lightweight-charts";
 import type { DailyTrend } from "./types";
+import { chartOptions, curvedLine } from "./chartTheme";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 const PERIODS = [["test_2024_2026", "Recent test (2024–26)"], ["train_2018_2023", "Older (2018–23)"]] as const;
@@ -16,11 +17,8 @@ export default function EquityPanel() {
 
   useEffect(() => {
     if (!el.current) return;
-    const chart = createChart(el.current, {
-      layout: { background: { color: "#0b1020" }, textColor: "#9aa4bf" },
-      grid: { vertLines: { color: "#161d33" }, horzLines: { color: "#161d33" } }, autoSize: true,
-    });
-    line.current = chart.addSeries(LineSeries, { color: "#4f8cff", lineWidth: 2 });
+    const chart = createChart(el.current, chartOptions);
+    line.current = chart.addSeries(LineSeries, curvedLine);
     return () => chart.remove();
   }, []);
   useEffect(() => { fetch(`${API}/daily-trend`).then((r) => r.json()).then(setDt).catch(() => setDt(null)); }, []);
@@ -33,19 +31,19 @@ export default function EquityPanel() {
 
   const p = dt?.periods[period];
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900/40 p-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="font-semibold">Practice account: how $1,000 would have grown</h3>
-        <div className="flex gap-1">
+    <div className="surface p-4 sm:p-6">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h3 className="text-lg font-semibold"><span className="curve-underline">How $1,000 would have grown</span></h3>
+        <div className="seg">
           {PERIODS.map(([k, l]) => (
-            <button key={k} onClick={() => setPeriod(k)} className={`rounded px-2 py-1 text-xs ${k === period ? "bg-blue-600" : "bg-slate-800"}`}>{l}</button>
+            <button key={k} data-active={k === period} onClick={() => setPeriod(k)} className="seg-btn">{l}</button>
           ))}
         </div>
       </div>
-      <div ref={el} className="h-[220px] w-full" />
+      <div ref={el} className="h-[200px] w-full sm:h-[240px]" />
       {p && (
-        <p className="mt-2 text-sm text-slate-300">
-          Following the agent: <b className={p.net_return_pct >= 0 ? "text-emerald-400" : "text-red-400"}>{p.net_return_pct.toFixed(0)}%</b>
+        <p className="mt-3 text-sm leading-relaxed text-slate-300">
+          Following the agent: <b className={p.net_return_pct >= 0 ? "text-bull" : "text-bear"}>{p.net_return_pct.toFixed(0)}%</b>
           {" "}· simply holding the coins: <b>{p.buy_hold_pct.toFixed(0)}%</b>
           {" "}· biggest drop along the way: <b>{p.max_drawdown_pct.toFixed(0)}%</b>
           {" "}· {p.trades} trades, all fees included. <span className="text-slate-500">Past results do not promise future profit.</span>

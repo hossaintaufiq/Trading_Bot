@@ -116,40 +116,39 @@ export default function LiveMarketsPage() {
   const selectedAgent = agents[symbol] ?? null;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-5 p-6">
+    <div className="mx-auto max-w-6xl space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
       <div>
-        <h1 className="text-2xl font-semibold">Live Market &amp; Trading Agent</h1>
-        <p className="text-sm text-slate-400">
+        <h1 className="text-2xl font-semibold sm:text-3xl"><span className="curve-underline">Live Market &amp; Trading Agent</span></h1>
+        <p className="mt-2 max-w-2xl text-sm text-slate-400">
           Watch the real market live and see exactly when the practice-money agent buys and sells. No real money is used.
         </p>
       </div>
 
       {flash && (
-        <div className={`flex items-center justify-between rounded-lg p-4 text-white ${flash.kind === "BUY" ? "bg-emerald-700" : "bg-red-700"}`}>
+        <div className={`flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between ${flash.kind === "BUY" ? "border-bull/30 bg-bull/10 text-bull" : "border-bear/30 bg-bear/10 text-bear"}`}>
           <span className="font-semibold">{flash.title}</span>
-          <button onClick={() => setFlash(null)} className="rounded bg-black/30 px-3 py-1 text-sm">OK</button>
+          <button onClick={() => setFlash(null)} className="self-start rounded-full bg-white/10 px-4 py-1 text-sm text-white sm:self-auto">OK</button>
         </div>
       )}
 
       <MarketCards selected={symbol} onSelect={setSymbol} prices={prices} agents={agents} />
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="text-sm text-slate-400">
           {interval === "1d"
-            ? <>Green <b className="text-emerald-400">▲ BOUGHT</b> and red <b className="text-red-400">▼ SOLD</b> arrows show every move the agent made. Dashed lines show where it would act next.</>
+            ? <>Green <b className="text-bull">▲ BOUGHT</b> and red <b className="text-bear">▼ SOLD</b> arrows show every move the agent made. Dashed lines show where it would act next.</>
             : <>Choose <b>Daily</b> to see the agent&apos;s buy and sell arrows (it decides once per day).</>}
         </div>
-        <div className="flex gap-1">
+        <div className="seg self-start">
           {INTERVALS.map(([k, label]) => (
-            <button key={k} onClick={() => setIntervalSel(k)}
-              className={`rounded px-3 py-1 text-sm ${k === interval ? "bg-blue-600" : "bg-slate-800 hover:bg-slate-700"}`}>{label}</button>
+            <button key={k} data-active={k === interval} onClick={() => setIntervalSel(k)} className="seg-btn">{label}</button>
           ))}
         </div>
       </div>
 
       <CandleChart symbol={symbol} interval={interval} agent={selectedAgent} onPrice={onPrice} />
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
         <AgentPanel agent={selectedAgent} livePrice={prices[symbol] ?? null} />
         <ActivityFeed events={events} />
       </div>
@@ -158,7 +157,7 @@ export default function LiveMarketsPage() {
 
       <EquityPanel />
 
-      <p className="text-xs text-slate-500">
+      <p className="pb-6 text-xs leading-relaxed text-slate-500">
         Paper trading only: no real funds, no exchange orders. Results come from past data and do not promise future profit. Strategy: daily trend-following (ADR-037).
       </p>
     </div>
