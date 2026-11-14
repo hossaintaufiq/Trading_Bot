@@ -209,13 +209,13 @@ export default function CommandCenterPage() {
   const profitAtLock = dollarRisk * 1.0;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans selection:bg-cyan-500/30">
-      <div className="mb-4 rounded-lg border border-amber-600/60 bg-amber-950/40 p-3 text-sm text-amber-200">
+    <div className="mx-auto max-w-7xl text-slate-100 p-4 sm:p-6 lg:p-8 font-sans">
+      <div className="mb-4 rounded-2xl border border-gold/25 bg-gold/[0.06] p-4 text-sm leading-relaxed text-gold/90">
         <b>Superseded figures:</b> the intraday V2 performance numbers on this page came from a backtest with a look-ahead bug and are not valid
-        (corrected V2 result: net −$12 over 2024–26). See ADR-037 and the <a href="/live-markets" className="underline">Live Market &amp; Agent</a> page for the current strategy.
+        (corrected V2 result: net −$12 over 2024–26). See ADR-037 and the <a href="/live-markets" className="underline text-white">Live Market &amp; Agent</a> page for the current strategy.
       </div>
       {/* Top Header */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+      <header className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-white/[0.06] gap-4">
         <div>
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
@@ -223,7 +223,7 @@ export default function CommandCenterPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-white">NEPTUNE</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-white"><span className="curve-underline">NEPTUNE</span></h1>
                 <span className="text-xs px-2.5 py-0.5 rounded-full bg-cyan-950/80 text-cyan-400 border border-cyan-800 font-mono font-medium">
                   v0.1.0-alpha
                 </span>
@@ -238,7 +238,7 @@ export default function CommandCenterPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-xl text-xs font-mono shadow-inner">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="text-slate-400">Backend API:</span>
@@ -252,12 +252,12 @@ export default function CommandCenterPage() {
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="flex items-center gap-2 my-6 border-b border-slate-800/80 pb-3 overflow-x-auto">
+      <nav className="seg !flex w-full !rounded-2xl my-6 !p-1.5">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium font-mono transition-all ${
+          className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-medium font-mono transition-all ${
             activeTab === "overview"
-              ? "bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20"
+              ? "bg-gradient-to-b from-iris-500 to-iris-600 text-white font-bold shadow-glow"
               : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
           }`}
         >
@@ -267,9 +267,9 @@ export default function CommandCenterPage() {
 
         <button
           onClick={() => setActiveTab("how-it-works")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium font-mono transition-all ${
+          className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-medium font-mono transition-all ${
             activeTab === "how-it-works"
-              ? "bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20"
+              ? "bg-gradient-to-b from-iris-500 to-iris-600 text-white font-bold shadow-glow"
               : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
           }`}
         >
@@ -279,9 +279,9 @@ export default function CommandCenterPage() {
 
         <button
           onClick={() => setActiveTab("agents")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium font-mono transition-all ${
+          className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-medium font-mono transition-all ${
             activeTab === "agents"
-              ? "bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20"
+              ? "bg-gradient-to-b from-iris-500 to-iris-600 text-white font-bold shadow-glow"
               : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
           }`}
         >
@@ -291,9 +291,9 @@ export default function CommandCenterPage() {
 
         <button
           onClick={() => setActiveTab("calculator")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium font-mono transition-all ${
+          className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-medium font-mono transition-all ${
             activeTab === "calculator"
-              ? "bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20"
+              ? "bg-gradient-to-b from-iris-500 to-iris-600 text-white font-bold shadow-glow"
               : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
           }`}
         >
@@ -303,9 +303,9 @@ export default function CommandCenterPage() {
 
         <button
           onClick={() => setActiveTab("backtests")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium font-mono transition-all ${
+          className={`flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2 rounded-xl text-xs font-medium font-mono transition-all ${
             activeTab === "backtests"
-              ? "bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/20"
+              ? "bg-gradient-to-b from-iris-500 to-iris-600 text-white font-bold shadow-glow"
               : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
           }`}
         >
@@ -315,7 +315,7 @@ export default function CommandCenterPage() {
       </nav>
 
       {/* Safety Banner */}
-      <div className="mb-6 bg-blue-950/30 border border-blue-900/50 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between text-xs text-blue-200 gap-3">
+      <div className="mb-6 bg-iris-500/[0.07] border border-iris-500/20 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between text-xs text-blue-200 gap-3">
         <div className="flex items-center gap-3">
           <Shield className="w-5 h-5 text-blue-400 flex-shrink-0" />
           <div>
@@ -335,7 +335,7 @@ export default function CommandCenterPage() {
         <div className="space-y-6">
           {/* Key Metric Highlights */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+            <div className="surface p-4 sm:p-5 hover:border-slate-700 transition-colors">
               <div className="flex items-center justify-between text-slate-400 text-xs mb-1 font-mono">
                 <span>SIMULATED CAPITAL</span>
                 <DollarSign className="w-4 h-4 text-cyan-400" />
@@ -347,7 +347,7 @@ export default function CommandCenterPage() {
               </div>
             </div>
 
-            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+            <div className="surface p-4 sm:p-5 hover:border-slate-700 transition-colors">
               <div className="flex items-center justify-between text-slate-400 text-xs mb-1 font-mono">
                 <span>RISK PER TRADE (0.5%)</span>
                 <Shield className="w-4 h-4 text-emerald-400" />
@@ -359,7 +359,7 @@ export default function CommandCenterPage() {
               </div>
             </div>
 
-            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+            <div className="surface p-4 sm:p-5 hover:border-slate-700 transition-colors">
               <div className="flex items-center justify-between text-slate-400 text-xs mb-1 font-mono">
                 <span>CIRCUIT BREAKER LIMIT</span>
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
@@ -371,7 +371,7 @@ export default function CommandCenterPage() {
               </div>
             </div>
 
-            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 shadow-sm hover:border-slate-700 transition-colors">
+            <div className="surface p-4 sm:p-5 hover:border-slate-700 transition-colors">
               <div className="flex items-center justify-between text-slate-400 text-xs mb-1 font-mono">
                 <span>FULL 3-YR CYCLE NET</span>
                 <TrendingUp className="w-4 h-4 text-cyan-400" />
@@ -386,7 +386,7 @@ export default function CommandCenterPage() {
           {/* Strategy Architecture & Real-Time Matrix */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Active Strategy Telemetry */}
-            <section className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-sm">
+            <section className="surface p-5 sm:p-6">
               <div className="flex items-center gap-2.5 pb-4 mb-4 border-b border-slate-800">
                 <Layers className="w-5 h-5 text-emerald-400" />
                 <h2 className="text-base font-semibold text-white">Fine-Tuned Strategy Specs</h2>
@@ -445,7 +445,7 @@ export default function CommandCenterPage() {
             </section>
 
             {/* Quick Agent Matrix */}
-            <section className="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-sm">
+            <section className="lg:col-span-2 surface p-5 sm:p-6">
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
                 <div className="flex items-center gap-2.5">
                   <Cpu className="w-5 h-5 text-cyan-400" />
@@ -498,7 +498,7 @@ export default function CommandCenterPage() {
           </div>
 
           {/* Tracked Market Assets */}
-          <section className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 shadow-sm">
+          <section className="surface p-5 sm:p-6">
             <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-5 h-5 text-cyan-400" />
@@ -508,7 +508,7 @@ export default function CommandCenterPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition-all">
+              <div className="bg-black/20 p-4 rounded-2xl border border-white/[0.06] hover:border-slate-700 transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-slate-400 font-mono">BITCOIN SPOT</span>
                   <span className="px-2 py-0.5 rounded bg-blue-950 border border-blue-800 text-[10px] text-blue-300 font-mono">
@@ -528,7 +528,7 @@ export default function CommandCenterPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition-all">
+              <div className="bg-black/20 p-4 rounded-2xl border border-white/[0.06] hover:border-slate-700 transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-slate-400 font-mono">ETHEREUM SPOT</span>
                   <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-[10px] text-emerald-300 font-mono">
@@ -548,7 +548,7 @@ export default function CommandCenterPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition-all">
+              <div className="bg-black/20 p-4 rounded-2xl border border-white/[0.06] hover:border-slate-700 transition-all">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-slate-400 font-mono">BINANCE COIN SPOT</span>
                   <span className="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-[10px] text-emerald-300 font-mono">

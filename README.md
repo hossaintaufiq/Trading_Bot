@@ -164,6 +164,8 @@ Open `http://localhost:3000`; it goes to **Live Market & Agent**, built to be un
 - **Activity feed:** every buy/sell with a one-line reason; live banner when a new trade happens, and "heads up" notes when price crosses a trigger line.
 - **Practice wallet:** a $1,000 paper account (start Jan 2024/2025/2026) showing cash, coins held and total value after **every** trade, with fees.
 
+**UI design (2026-11-14):** premium dark theme with a single iris accent, glass-style surfaces, smooth curved chart lines and curved (wavy) underlines instead of straight ones. Fully responsive: sidebar on desktop (≥1024px), sticky top bar with slide-in menu on tablet/phone, stacked market cards, horizontally scrollable switchers and wallet table. Shared chart styling lives in `frontend/components/live/chartTheme.ts`; design tokens in `frontend/tailwind.config.js` and `frontend/app/globals.css`.
+
 Only the strategy agent is implemented and shown; the other nine specialist agents are specified but not active, and no activity is invented for them.
 
 API: `GET /api/v1/daily-trend`, `/api/v1/daily-trend/agent/{symbol}`, `/api/v1/daily-trend/account?start=`, `/api/v1/simulation/{2024|2025|2026}`.

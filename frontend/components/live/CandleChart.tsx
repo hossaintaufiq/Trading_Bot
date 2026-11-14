@@ -6,6 +6,7 @@ import {
   type IChartApi, type ISeriesApi, type UTCTimestamp,
 } from "lightweight-charts";
 import type { Agent, Symbol } from "./types";
+import { chartOptions } from "./chartTheme";
 
 export const INTERVALS = [
   ["1d", "Daily"], ["4h", "4 hours"], ["1h", "1 hour"], ["15m", "15 min"], ["1m", "1 min"],
@@ -24,14 +25,12 @@ export default function CandleChart({ symbol, interval, agent, onPrice }: Props)
   useEffect(() => {
     if (!el.current) return;
     const chart: IChartApi = createChart(el.current, {
-      layout: { background: { color: "#0b1020" }, textColor: "#9aa4bf" },
-      grid: { vertLines: { color: "#161d33" }, horzLines: { color: "#161d33" } },
-      timeScale: { timeVisible: true, secondsVisible: false },
-      autoSize: true,
+      ...chartOptions,
+      timeScale: { ...chartOptions.timeScale, timeVisible: true, secondsVisible: false },
     });
     const s = chart.addSeries(CandlestickSeries, {
-      upColor: "#26a69a", downColor: "#ef5350", borderVisible: false,
-      wickUpColor: "#26a69a", wickDownColor: "#ef5350",
+      upColor: "#34d399", downColor: "#fb7185", borderVisible: false,
+      wickUpColor: "#34d399", wickDownColor: "#fb7185",
     });
     series.current = s;
     let ws: WebSocket | null = null;
@@ -90,8 +89,8 @@ export default function CandleChart({ symbol, interval, agent, onPrice }: Props)
 
   return (
     <div className="relative">
-      <div ref={el} className="h-[440px] w-full rounded-lg border border-slate-800" />
-      <span className={`absolute right-3 top-3 z-10 rounded-full px-2 py-0.5 text-xs ${live ? "bg-emerald-900/80 text-emerald-300" : "bg-slate-800 text-slate-400"}`}>
+      <div ref={el} className="surface h-[300px] w-full overflow-hidden p-1 sm:h-[400px] lg:h-[460px]" />
+      <span className={`pill absolute right-4 top-4 z-10 ${live ? "bg-bull/15 text-bull" : "bg-white/5 text-slate-400"}`}>
         {live ? "● LIVE" : "connecting…"}
       </span>
     </div>
