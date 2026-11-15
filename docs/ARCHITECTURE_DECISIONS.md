@@ -889,3 +889,20 @@
   - **UI and API (2026-11-13):** default page `/live-markets` (dashboard shell with sidebar; `/` redirects there). Endpoints: `GET /api/v1/daily-trend`, `/daily-trend/agent/{symbol}` (agent BUY/SELL markers and trigger levels; auto-refreshes closed daily candles via `app/data/market/daily_history.py`), `/daily-trend/account?start=` (paper wallet: $1,000 split equally across BTC/ETH/BNB, opened flat, cash/coins/total after every fill; replay is checked against sleeve equity by `test_account_ledger_replay_matches_sleeve_totals`), `/simulation/{2024|2025|2026}` (corrected V2 exports). Opened-flat accounts: Jan 2024 +24.7%, Jan 2025 -3.1%, Jan 2026 -9.1%.
   - Only the strategy agent is implemented; no activity is displayed for the other nine specified agents (S-06). The legacy Command Center page still contains superseded V2 figures and carries a notice.
 
+
+---
+
+## ADR-038: Opening-Range Breakout (ORB) Day-Trading Research — Negative Result
+
+- **Status**: Accepted (research infrastructure only; strategy rejected)
+- **Date**: 2026-11-15
+- **Context**:
+  - Intraday strategies pay 0.32% round-trip cost too often (ADR-037). An intraday opening-range breakout on 15m bars was tested with frozen defaults and no tuning (`scripts/orb_research.py`).
+- **Decision**:
+  1. Add `strategies/orb_breakout.py`, `simulation/orb_backtest.py`, `simulation/time_machine.py` (session-path Monte Carlo using only history before the signal day) and `risk/trade_limits.py`, with unit tests (`test_orb_day_trading.py`).
+  2. ORB is NOT wired into the dashboard, API, or paper trading.
+- **Consequences / Evidence** (15m, 2024-01-01..2026-11-01, $1,000 start, fee 0.1% + slippage per side):
+  - BTCUSDT: 760 trades, gross -310, fees 568, net -878, max DD 87.8%.
+  - ETHUSDT: 755 trades, gross -268, fees 559, net -826, max DD 82.8%.
+  - BNBUSDT: 759 trades, gross -279, fees 585, net -864, max DD 86.4%.
+  - Gross P&L is negative before fees: no edge. Time Machine on 2026-11-01 gave target 36-40% vs stop 60-64% against a 1.5R target. ORB is rejected; no profitability claim (S-07).
